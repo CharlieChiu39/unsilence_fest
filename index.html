@@ -44,7 +44,6 @@
         /* =========================================
            2. 背景畫布與網格 (Canvas & Grid)
            ========================================= */
-        /* ✨ 新增：Canvas 動態桌布 ✨ */
         #matrix-bg {
             position: fixed; top: 0; left: 0;
             width: 100vw; height: 100vh;
@@ -121,7 +120,30 @@
         .blink { animation: blinker 1s linear infinite; }
         @keyframes blinker { 50% { opacity: 0; } }
 
-        /* 手機版設定 */
+        /* =========================================
+           ✨ 正確放置：CRT 開機動畫特效 (確保在 @media 外)
+           ========================================= */
+        #crt-boot {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: #000; z-index: 10000; pointer-events: none;
+            display: flex; justify-content: center; align-items: center;
+        }
+        .crt-line {
+            width: 0; height: 2px; background: #fff;
+            box-shadow: 0 0 10px #fff, 0 0 20px #fff;
+            animation: crt-turn-on 1.8s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+        }
+        @keyframes crt-turn-on {
+            0% { width: 0; height: 2px; opacity: 1; }
+            30% { width: 100%; height: 2px; opacity: 1; }
+            40% { height: 100vh; background: #fff; opacity: 1; }
+            70% { height: 100vh; background: transparent; opacity: 1; }
+            100% { height: 100vh; background: transparent; opacity: 0; }
+        }
+
+        /* =========================================
+           📱 手機版專屬設定
+           ========================================= */
         @media (max-width: 800px) {
             .layout-container { flex-direction: column; }
             .sidebar { width: 100%; height: auto; border-right: none; border-bottom: 2px solid var(--win-border); padding: 15px; box-sizing: border-box;}
@@ -132,10 +154,26 @@
             #win-4 { top: 130px; left: 25px; } #win-5 { top: 170px; left: 120px; } #win-6 { top: 100px; left: 190px; } #win-7 { top: 210px; left: 60px; }
             #main-app-window { width: 95vw; height: 60vh; } 
             .desktop-icon { bottom: 80px; right: 20px; } 
+        
+            /* ✨ 修正：手機版火雞遊戲防跑版 (利用 auto 撐開高度) ✨ */
+            #game-window {
+                width: 95vw !important;
+                height: auto !important; /* 解除高度限制 */
+                min-height: 50vh; /* 給予基本高度 */
+                top: 5vh !important;
+            }
+            #game-window .window-content {
+                aspect-ratio: auto !important; /* 取消固定的寬高比 */
+                min-height: 300px; /* 確保結算文字有空間顯示 */
+            }
+            #game-score {
+                top: 5px !important; right: 10px !important; font-size: 16px !important;
+            }
         }
     </style>
 </head>
 <body class="crt noise-mode">
+    <div id="crt-boot"><div class="crt-line"></div></div>
 
     <div id="bios-screen"><div id="bios-text"></div></div>
     
@@ -158,7 +196,7 @@
             <button class="mode-toggle" id="mode-toggle">模式切換: 雜訊</button>
         </nav>
 
-<main class="main-content">
+        <main class="main-content">
             <div class="window teaser-win" id="win-1"><div class="window-header"><span class="title">💾 NEWS.exe</span><span class="close-btn">X</span></div><div class="window-content"><p>官網系統啟動</p><button class="sys-btn yes" onclick="openApp('NEWS_ARCHIVE.exe', 'news.html')">讀取(Y)</button></div></div>
             <div class="window teaser-win" id="win-2"><div class="window-header"><span class="title">🎵 LIVE.txt</span><span class="close-btn">X</span></div><div class="window-content"><p>演出陣容解禁</p><button class="sys-btn yes" onclick="openApp('LIVE_DATA.sys', 'lineup.html')">查看(Y)</button></div></div>
             <div class="window teaser-win" id="win-3"><div class="window-header"><span class="title">⏳ TIME.exe</span><span class="close-btn">X</span></div><div class="window-content"><p>讀取時間軸</p><button class="sys-btn yes" onclick="openApp('TIMETABLE.exe', 'timetable.html')">展開(Y)</button></div></div>
@@ -206,12 +244,25 @@
     <div class="marquee-container"><div class="marquee-content">/// 2026.05.20 寧靜音樂節 /// 嘉義文化園區 /// 主辦單位：中正大學 /// 全程免費入場 /// 🍍 游標異常干擾中 ///</div></div>
 
     <script>
-        // --- 1. BIOS 開機畫面 ---
+        // --- 1. BIOS 開機畫面 (加入延遲配合開機白線) ---
         const biosLines = ["BOOTING TRANQUIL_OS...", "MOUNTING PINEAPPLE_DRIVE...", "LOADING FETCH_MODULE... OK", "SYSTEM READY."];
         const biosText = document.getElementById('bios-text'); let lineIdx = 0;
-        function showBios() { if (lineIdx < biosLines.length) { biosText.innerHTML += biosLines[lineIdx] + "<br>"; lineIdx++; setTimeout(showBios, 150); } else { setTimeout(() => { document.getElementById('bios-screen').style.display = 'none'; }, 500); } }
-        window.onload = showBios;
-
+        function showBios() { 
+            if (lineIdx < biosLines.length) { 
+                biosText.innerHTML += biosLines[lineIdx] + "<br>"; 
+                lineIdx++; 
+                setTimeout(showBios, 150); 
+            } else { 
+                setTimeout(() => { document.getElementById('bios-screen').style.display = 'none'; }, 500); 
+            } 
+        }
+        
+        // 延遲 800 毫秒才開始印字，讓白光閃爍先震撼一下視覺
+        window.onload = () => {
+            setTimeout(showBios, 800);
+            // 動畫結束後移除 DOM 以防阻擋點擊
+            setTimeout(() => { document.getElementById('crt-boot').remove(); }, 2000); 
+        };
         // --- 2. 視窗拖曳邏輯 ---
         const windows = document.querySelectorAll('.window:not(.alert-modal)'); let topZ = 100;
         windows.forEach(win => {
@@ -228,12 +279,12 @@
             const appWin = document.getElementById('main-app-window'); const contentArea = document.getElementById('app-dynamic-content'); const titleArea = document.getElementById('app-window-title');
             appWin.style.display = 'flex'; appWin.style.zIndex = ++topZ;
             
-            // 👇 關鍵修改：將手機版 (else) 的 top 改為 20px
+            // 手機版的 top 改為 20px 往上提
             if(window.innerWidth > 800) { 
                 appWin.style.top = `${80 + Math.floor(Math.random() * 20)}px`; 
                 appWin.style.left = `${150 + Math.floor(Math.random() * 20)}px`; 
             } else { 
-                appWin.style.top = `20px`;  // ✨ 修改這裡！讓視窗往上提
+                appWin.style.top = `20px`;  
                 appWin.style.left = `2.5vw`; 
             }
             
@@ -241,11 +292,10 @@
             try { const response = await fetch(fileUrl); if (!response.ok) throw new Error('File not found'); const htmlContent = await response.text(); contentArea.innerHTML = htmlContent; } catch (error) { contentArea.innerHTML = `<h3 style='color:red;'>[ 系統錯誤 ] 無法連接到信號源 (${fileUrl})</h3><p>請確認您是否使用 Live Server 開啟網頁？</p>`; }
         }
         function closeApp() { document.getElementById('main-app-window').style.display = 'none'; document.getElementById('app-dynamic-content').innerHTML = ''; }
-// --- 4. 警告視窗 ---
+        // --- 4. 警告視窗 ---
         function showIgWarning() { 
             document.getElementById('ig-overlay').style.display = 'block'; 
             document.getElementById('ig-modal').style.display = 'block'; 
-            // ✨ 已經把打亂圖層高度的那行刪掉了！
         }
         function closeIgWarning() { 
             document.getElementById('ig-overlay').style.display = 'none'; 
@@ -262,7 +312,7 @@
         document.addEventListener('mousedown', (e) => { if(!e.target.closest('#ig-modal')) createExplosion(e.clientX, e.clientY); }); document.addEventListener('touchstart', (e) => { if(!e.target.closest('#ig-modal')) createExplosion(e.touches[0].clientX, e.touches[0].clientY); }, {passive: true}); document.addEventListener('mousemove', (e) => createTrail(e.clientX, e.clientY)); document.addEventListener('touchmove', (e) => createTrail(e.touches[0].clientX, e.touches[0].clientY), {passive: true});
 
         // ==========================================
-        // 7. ✨ 動態桌布：Canvas Matrix Rain ✨
+        // 7. 動態桌布：Canvas Matrix Rain
         // ==========================================
         const canvas = document.getElementById('matrix-bg');
         const ctx = canvas.getContext('2d');
@@ -273,69 +323,56 @@
 
         // 字符池：混入片假名與「寧靜音樂節」的彩蛋
         const baseChars = 'ｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄﾅﾆﾇﾈﾉﾊﾋﾌﾍﾎﾏﾐﾑﾒﾓﾔﾕﾖﾗﾘﾙﾚﾛﾜﾝ0123456789'.split('');
-        // 刻意重複放入寧靜音樂節，提高掉落出現的機率
         const easterEgg = ['寧','寧','靜','靜','音','樂','節']; 
         const noiseChars = baseChars.concat(easterEgg);
         const pineappleChars = ['🍍'];
 
-        // 初始化與響應式調整 (防模糊處理)
+        // 初始化與響應式調整
         function initCanvas() {
-            const dpr = window.devicePixelRatio || 1; // 獲取設備像素比 (Retina)
+            const dpr = window.devicePixelRatio || 1; 
             cw = window.innerWidth;
             ch = window.innerHeight;
             
-            // 將畫布內部解析度放大，解決手機與高階螢幕的模糊問題
             canvas.width = cw * dpr;
             canvas.height = ch * dpr;
             ctx.scale(dpr, dpr);
             
-            // 計算需要幾列
             const colCount = Math.floor(cw / fontSize) + 1;
             columns = [];
             for (let i = 0; i < colCount; i++) {
-                // 讓它們一開始從畫面上方隨機高度開始掉落
                 columns[i] = Math.random() * -100; 
             }
         }
 
-        // 監聽螢幕旋轉或視窗縮放
         window.addEventListener('resize', initCanvas);
         initCanvas();
 
-        // 動畫繪製邏輯
         function drawMatrix() {
             const isTranquil = document.body.classList.contains('tranquil-mode');
             const isPineapple = document.body.classList.contains('pineapple-mode');
 
-            // 寧靜模式：塗上極暗的透明黑，讓畫面逐漸變全黑且停止掉落
             if (isTranquil) {
                 ctx.fillStyle = 'rgba(17, 17, 17, 0.15)';
                 ctx.fillRect(0, 0, cw, ch);
-                return; // 不畫新的字
+                return; 
             }
 
-            // 雜訊/鳳梨模式：塗上一層半透明的背景色，製造字體的「拖尾殘影」
             ctx.fillStyle = isPineapple ? 'rgba(26, 26, 0, 0.15)' : 'rgba(10, 5, 16, 0.15)';
             ctx.fillRect(0, 0, cw, ch);
 
-            // 設定字體與顏色
             ctx.font = `${fontSize}px 'DotGothic16', monospace`;
-            ctx.textBaseline = 'top'; // 確保 emoji 渲染位置正確
-            ctx.fillStyle = isPineapple ? '#ffcc00' : '#0f0'; // 黃色 vs 駭客綠
+            ctx.textBaseline = 'top'; 
+            ctx.fillStyle = isPineapple ? '#ffcc00' : '#0f0'; 
             
-            // 切換字符池
             const chars = isPineapple ? pineappleChars : noiseChars;
 
-            // 逐列繪製字體
             for (let i = 0; i < columns.length; i++) {
                 const char = chars[Math.floor(Math.random() * chars.length)];
                 const x = i * fontSize;
                 const y = columns[i] * fontSize;
 
-                // 畫出字符
                 ctx.fillText(char, x, y);
 
-                // 如果字掉出螢幕底部，加上隨機機率讓它回到頂部重新掉落
                 if (y > ch && Math.random() > 0.975) {
                     columns[i] = 0;
                 } else {
@@ -344,10 +381,20 @@
             }
         }
 
-        // 啟動動畫迴圈 (每隔 50 毫秒畫一張圖，相當於 20 FPS，節省手機效能)
         setInterval(drawMatrix, 50);
 
+        // ==========================================
+        // ✨ 新增：地圖雷達掃描邏輯 (放在這裡才能被觸發)
+        // ==========================================
+        window.scanNode = function(title, desc) {
+            const infoBox = document.getElementById('radar-info');
+            if (infoBox) {
+                infoBox.classList.remove('blink');
+                infoBox.innerHTML = `<strong style="color:var(--highlight-color);">> ${title}</strong><br>${desc}`;
+            }
+        };
+
     </script>
-    <script src="game.js?v=2.0"></script>
+    <script src="game.js?v=3.0"></script>
 </body>
 </html>

@@ -42,18 +42,15 @@ function closeGame() {
 }
 
 function resetGame() {
-    isPlaying = false;
-    hasWon = false; 
-    score = 0;
-    speed = 6;
-    frames = 0;
-    lastTime = 0; // 重置時間
-    accumulator = 0; // 重置時間累加器
-    turkey.y = 150;
-    turkey.vy = 0;
-    turkey.isJumping = false;
-    obstacles = []; 
+    isPlaying = false; hasWon = false; score = 0; speed = 6; frames = 0; lastTime = 0; accumulator = 0; turkey.y = 150; turkey.vy = 0; turkey.isJumping = false; obstacles = []; 
+    
     scoreBoard.innerText = `SCORE: ${score}`;
+    scoreBoard.style.display = 'block'; 
+    runCanvas.style.display = 'block'; 
+    
+    // ✨ 保持絕對定位，完美覆蓋畫布且不破壞外層比例
+    gameMsg.style.position = 'absolute'; 
+    gameMsg.style.background = 'rgba(0,0,0,0.6)';
     gameMsg.style.display = 'flex'; 
     gameMsg.innerHTML = '<h2 class="blink" style="margin: 0; color: #ff00ff; font-size: clamp(1.5rem, 5vw, 2rem); text-shadow: 2px 2px #000;">SYSTEM BREACH</h2><p style="margin-top: 10px; font-size: clamp(1rem, 3vw, 1.2rem); text-shadow: 1px 1px #000;">> 點擊畫面 或 按空白鍵開始逃亡 &lt;</p>';
 }
@@ -93,6 +90,9 @@ startEvents.forEach(evt => {
 // ==========================================
 // 3. 畫面繪製與動畫迴圈
 // ==========================================
+// ==========================================
+// 3. 畫面繪製與動畫迴圈
+// ==========================================
 function drawTurkey() {
     runCtx.save(); 
     runCtx.scale(-1, 1); 
@@ -101,15 +101,48 @@ function drawTurkey() {
     runCtx.restore(); 
 }
 
-function drawStaticScene() {
+// ✨ 新增全域變數：控制網格滾動的偏移量
+let bgOffset = 0; 
+
+// ✨ 新增：繪製賽博龐克動態網格背景
+// ✨ 繪製賽博龐克動態網格背景
+function drawNeonGrid() {
     runCtx.fillStyle = '#05020a'; 
     runCtx.fillRect(0, 0, runCanvas.width, runCanvas.height);
-    runCtx.strokeStyle = 'rgba(157, 0, 255, 0.5)'; 
-    runCtx.lineWidth = 2;
+    
+    // 🔥 提升亮度與粗細，讓手機上也清晰可見！
+    runCtx.strokeStyle = 'rgba(255, 0, 255, 0.8)'; // 改為明亮的桃紅色
+    runCtx.lineWidth = 2.5; 
+    
+    const horizonY = 180;
+    const vpX = runCanvas.width / 2;
+    const gridSpacing = 40;
+
     runCtx.beginPath(); 
-    runCtx.moveTo(0, 180); 
-    runCtx.lineTo(runCanvas.width, 180); 
+    runCtx.moveTo(0, horizonY); 
+    runCtx.lineTo(runCanvas.width, horizonY); 
     runCtx.stroke();
+
+    if (isPlaying) bgOffset = (bgOffset + speed * 0.4) % gridSpacing;
+
+    runCtx.beginPath();
+    for(let i = 1; i < 10; i++){
+        let y = horizonY + Math.pow(i, 1.8) * 3; 
+        if(y > runCanvas.height) break;
+        runCtx.moveTo(0, y);
+        runCtx.lineTo(runCanvas.width, y);
+    }
+    for(let x = -runCanvas.width; x < runCanvas.width * 2; x += gridSpacing){
+        let movingX = x - bgOffset;
+        runCtx.moveTo(vpX, horizonY);
+        runCtx.lineTo(movingX, runCanvas.height);
+    }
+    runCtx.stroke();
+}
+
+function drawStaticScene() {
+    bgOffset = 0; // 靜態畫面重置偏移
+    drawNeonGrid(); // 取代原本的純色背景
     drawTurkey(); 
 }
 
@@ -119,21 +152,15 @@ function gameLoop(timestamp) {
     
     gameReq = requestAnimationFrame(gameLoop);
 
-    // 計算這一次刷新距離上一次刷新經過了多少時間
     if (!lastTime) lastTime = timestamp;
     let deltaTime = timestamp - lastTime;
     lastTime = timestamp;
 
-    // 防呆機制：如果使用者切換分頁導致 deltaTime 變得超大，限制它避免暴衝
     if (deltaTime > 1000) deltaTime = step; 
-
-    // 將經過的時間存入累加器
     accumulator += deltaTime;
 
     // --- 區塊 A: 邏輯運算 (Update) ---
-    // 只要累加器裡的時間夠一次更新 (16.6ms)，就執行一次遊戲邏輯
     while (accumulator >= step) {
-        // 火雞重力
         turkey.vy += turkey.gravity;
         turkey.y += turkey.vy;
         
@@ -143,7 +170,6 @@ function gameLoop(timestamp) {
             turkey.vy = 0;
         }
 
-        // 障礙物生成 (加入安全距離判斷)
         let canSpawn = true;
         if (obstacles.length > 0) {
             let lastObs = obstacles[obstacles.length - 1];
@@ -157,7 +183,6 @@ function gameLoop(timestamp) {
             obstacles.push({ x: runCanvas.width, y: 155, size: 25, type: type });
         }
 
-        // 障礙物移動與碰撞偵測
         for (let i = 0; i < obstacles.length; i++) {
             let obs = obstacles[i];
             obs.x -= speed;
@@ -171,7 +196,6 @@ function gameLoop(timestamp) {
             }
         }
 
-        // 加分與加速機制
         if (obstacles.length > 0 && obstacles[0].x < -30) {
             obstacles.shift();
             score += 10;
@@ -186,24 +210,15 @@ function gameLoop(timestamp) {
         }
 
         frames++;
-        accumulator -= step; // 扣除消耗掉的時間
+        accumulator -= step; 
     }
 
     // --- 區塊 B: 畫面繪製 (Render) ---
-    // 繪製背景與地板
-    runCtx.fillStyle = '#05020a';
-    runCtx.fillRect(0, 0, runCanvas.width, runCanvas.height);
-    runCtx.strokeStyle = 'rgba(157, 0, 255, 0.5)';
-    runCtx.lineWidth = 2;
-    runCtx.beginPath(); 
-    runCtx.moveTo(0, 180); 
-    runCtx.lineTo(runCanvas.width, 180); 
-    runCtx.stroke();
+    // ✨ 呼叫我們剛剛寫的超酷網格背景
+    drawNeonGrid();
 
-    // 繪製火雞
     drawTurkey();
 
-    // 繪製所有的障礙物
     for (let i = 0; i < obstacles.length; i++) {
         let obs = obstacles[i];
         runCtx.font = "25px Arial";
@@ -217,6 +232,12 @@ function gameLoop(timestamp) {
 function gameOver() {
     isPlaying = false;
     cancelAnimationFrame(gameReq);
+    
+    scoreBoard.style.display = 'none'; // 隱藏分數
+    runCanvas.style.display = 'none';  // ✨ 徹底隱藏畫布，釋放空間
+    
+    gameMsg.style.position = 'absolute'; 
+    gameMsg.style.background = 'rgba(0,0,0,0.9)';
     gameMsg.style.display = 'flex';
     gameMsg.innerHTML = `<h2 style="margin: 0; color: #ff0000; text-shadow: 2px 2px #000; font-size: clamp(1.5rem, 5vw, 2rem);">[ FATAL ERROR ]</h2><p style="margin-top: 10px; font-size: clamp(1rem, 3vw, 1.2rem);">火雞已被攔截。最終分數: ${score}</p><p class="blink" style="font-size: 1rem; margin-top: 15px; color: #ff00ff;">> 點擊重新連線 &lt;</p>`;
 }
@@ -225,6 +246,12 @@ function triggerWin() {
     isPlaying = false;
     hasWon = true;
     cancelAnimationFrame(gameReq); 
+    
+    scoreBoard.style.display = 'none'; // 隱藏分數防重疊
+    runCanvas.style.display = 'none';  // ✨ 徹底隱藏畫布，釋放空間
+    
+    gameMsg.style.position = 'absolute';
+    gameMsg.style.background = 'rgba(0,0,0,0.9)';
     gameMsg.style.display = 'flex';
     gameMsg.innerHTML = `
         <h2 class="blink" style="margin: 0; color: #00ff00; text-shadow: 2px 2px #000; font-size: clamp(1.2rem, 5vw, 2rem);">[ SYSTEM OVERRIDE SUCCESS ]</h2>

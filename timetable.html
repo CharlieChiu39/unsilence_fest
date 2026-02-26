@@ -1,10 +1,17 @@
 <h2 class="blink">> 讀取時間軸: TIMETABLE.exe</h2>
-<table class="retro-table">
+<style>
+    /* ✨ 新增：當前時間的高亮特效 */
+    .current-slot { background: var(--highlight-color); color: #000; font-weight: bold; }
+    .current-slot td { border-color: #000 !important; }
+    .now-tag { animation: blinker 1s linear infinite; display: inline-block; margin-left: 5px; font-size: 12px; }
+</style>
+
+<table class="retro-table" id="timetable">
     <thead><tr><th>TIME</th><th>NOISE_STAGE (雜訊舞台)</th><th>SILENCE_STAGE (寧靜舞台)</th></tr></thead>
     <tbody>
-        <tr><td>14:00</td><td>熱音社 (OPENING)</td><td>---</td></tr>
-        <tr><td>15:30</td><td>雜訊生成器</td><td>氛圍實驗室</td></tr>
-        <tr><td>17:00</td><td>午夜終端</td><td>後搖光景</td></tr>
+        <tr data-start="14:00" data-end="15:30"><td>14:00</td><td class="noise-td">熱音社 (OPENING)</td><td class="silence-td">---</td></tr>
+        <tr data-start="15:30" data-end="17:00"><td>15:30</td><td class="noise-td">雜訊生成器</td><td class="silence-td">氛圍實驗室</td></tr>
+        <tr data-start="17:00" data-end="22:00"><td>17:00</td><td class="noise-td">午夜終端</td><td class="silence-td">後搖光景</td></tr>
     </tbody>
 </table>
 
@@ -13,3 +20,35 @@
     <p style="font-size: 12px; color: #555;">建議將信號源存入行動裝置以防斷訊。</p>
     <a href="timetable_image.jpg" download class="sys-btn yes" style="font-size: 16px; padding: 8px 20px;">💾 下載時刻表圖檔 (Y)</a>
 </div>
+
+<script>
+    // ✨ 新增：自動比對時間邏輯
+    function checkCurrentTime() {
+        const now = new Date();
+        // 將時間轉換為浮點數方便比對 (例如 15:30 -> 15.5)
+        const currentTime = now.getHours() + (now.getMinutes() / 60);
+
+        const rows = document.querySelectorAll('#timetable tbody tr');
+        rows.forEach(row => {
+            // 清除之前的標記
+            row.classList.remove('current-slot');
+            const oldTags = row.querySelectorAll('.now-tag');
+            oldTags.forEach(tag => tag.remove());
+
+            const startArr = row.dataset.start.split(':');
+            const endArr = row.dataset.end.split(':');
+            const start = parseInt(startArr[0]) + (parseInt(startArr[1]) / 60);
+            const end = parseInt(endArr[0]) + (parseInt(endArr[1]) / 60);
+
+            // 如果現在時間介於這場演出的起訖時間內
+            if (currentTime >= start && currentTime < end) {
+                row.classList.add('current-slot');
+                row.querySelector('td').innerHTML += '<span class="now-tag">[NOW]</span>';
+            }
+        });
+    }
+
+    // 載入時執行一次，然後每 60 秒更新一次
+    checkCurrentTime();
+    setInterval(checkCurrentTime, 60000);
+</script>
