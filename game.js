@@ -30,6 +30,7 @@ let obstacles = [];
 // ==========================================
 function openGame() {
     gameWinUI.style.display = 'flex';
+    // index.html 裡的 topZ 變數
     if (typeof topZ !== 'undefined') gameWinUI.style.zIndex = ++topZ;
     resetGame();
     drawStaticScene();
@@ -41,7 +42,7 @@ function closeGame() {
     cancelAnimationFrame(gameReq);
 }
 
-// 動態設定 UI 樣式，確保覆蓋並置中
+// 動態設定文字訊息區樣式 ( SYSTEM BREACH 畫面 )
 function setMsgStyle() {
     gameMsg.style.position = 'absolute';
     gameMsg.style.top = '0';
@@ -73,17 +74,22 @@ function resetGame() {
     `;
 }
 
+// 跳躍指令 (開始/跳躍)
 function jump() {
+    // 如果視窗是關閉的，什麼都不做
     if (gameWinUI.style.display === 'none') return;
+    
+    // 如果沒在玩，就開始遊戲
     if (!isPlaying) {
         resetGame();
         isPlaying = true;
-        gameMsg.style.display = 'none';
-        scoreBoard.style.display = 'block';
+        gameMsg.style.display = 'none'; // 隱藏文字訊息
+        scoreBoard.style.display = 'block'; // 顯示分數
         lastTime = performance.now();
         gameReq = requestAnimationFrame(gameLoop);
         return;
     }
+    // 如果在玩，且在地板上，就跳躍
     if (!turkey.isJumping && !hasWon) {
         turkey.vy = JUMP_POWER;
         turkey.isJumping = true;
@@ -91,8 +97,9 @@ function jump() {
 }
 
 // ==========================================
-// ✨ 註冊所有點擊與按鍵事件 (全視窗觸控支援)
+// ✨ 註冊所有點擊與按鍵事件 (全視窗觸控支援) ✨
 // ==========================================
+// 1. 空白鍵跳躍
 window.addEventListener('keydown', (e) => { 
     if (e.code === 'Space' && gameWinUI.style.display === 'flex') { 
         e.preventDefault(); 
@@ -100,14 +107,17 @@ window.addEventListener('keydown', (e) => {
     }
 });
 
-// 抓取整個遊戲內容區塊 (包含黑邊、畫布與文字)
+// 2. 鎖定整個遊戲內容區塊 (包含黑邊、畫布與文字)
 const gameContentArea = gameWinUI.querySelector('.window-content');
 
-// 使用 'pointerdown' 一次搞定滑鼠與手機觸控，避免 iOS 雙重觸發
+// 使用 'pointerdown' 一次搞定滑鼠與手機觸控，並在 iOS CSS 的 touch-action: none 配合下，不會有延遲
 gameContentArea.addEventListener('pointerdown', (e) => {
-    // 如果點到的是視窗右上角的「X (關閉按鈕)」，就不要跳躍
+    // ✨ 重要：如果點到的是視窗右上角的「X (關閉按鈕)」，就不要跳躍，直接讓 HTML 的 onclick 去處理關閉
     if (e.target.classList.contains('close-btn')) return; 
     
+    // ✨ 重要：如果是在標題列(紫色區塊)按下的，那是 index.html 的拖曳邏輯負責，這裡不要跳躍
+    if (e.target.closest('.window-header')) return;
+
     if (e.cancelable) {
         e.preventDefault(); // 阻止 iOS 預設的焦點轉移或網頁滑動干擾
     }
@@ -117,6 +127,7 @@ gameContentArea.addEventListener('pointerdown', (e) => {
 // ==========================================
 // 2. 核心繪圖 (Render)
 // ==========================================
+// 畫賽博網格地面 (包含視差效果)
 function drawNeonGrid() {
     runCtx.fillStyle = '#05020a';
     runCtx.fillRect(0, 0, runCanvas.width, runCanvas.height);
@@ -132,21 +143,24 @@ function drawNeonGrid() {
     let bgOffset = isPlaying ? (frames * speed * 0.4) % 40 : 0;
     const vpX = runCanvas.width / 2;
 
+    // 水平線 (產生深度感)
     runCtx.beginPath();
     for(let i = 1; i < 10; i++){
         let y = HORIZON_Y + Math.pow(i, 1.8) * 3;
         if(y > runCanvas.height) break;
         runCtx.moveTo(0, y); runCtx.lineTo(runCanvas.width, y);
     }
+    // 透視線 (往中心匯集)
     for(let x = -runCanvas.width; x < runCanvas.width * 2; x += 40){
         runCtx.moveTo(vpX, HORIZON_Y); runCtx.lineTo(x - bgOffset, runCanvas.height);
     }
     runCtx.stroke();
 }
 
+// 畫火雞 (精確貼地)
 function drawTurkey() {
     runCtx.save();
-    runCtx.scale(-1, 1);
+    runCtx.scale(-1, 1); // 火雞面朝左，鏡像翻轉
     runCtx.font = "60px Arial";
     // ✨ 精確對齊法：讓圖案底部完美貼合 turkey.y (也就是 FLOOR_Y)
     runCtx.textBaseline = "bottom"; 
@@ -154,6 +168,7 @@ function drawTurkey() {
     runCtx.restore();
 }
 
+// 畫出靜止的開場畫面
 function drawStaticScene() { drawNeonGrid(); drawTurkey(); }
 
 // ==========================================
@@ -165,53 +180,65 @@ function gameLoop(timestamp) {
 
     let deltaTime = timestamp - lastTime;
     lastTime = timestamp;
-    if (deltaTime > 100) deltaTime = step;
+    if (deltaTime > 100) deltaTime = step; // 防止背景切換後的回溯
     accumulator += deltaTime;
 
     while (accumulator >= step) {
-        // 重力與落地
-        turkey.vy += GRAVITY;
-        turkey.y += turkey.vy;
+        // --- 物理計算 ---
+        turkey.vy += GRAVITY; // 套用重力
+        turkey.y += turkey.vy; // 更新高度
+        
+        // 落地判定
         if (turkey.y >= FLOOR_Y) { turkey.y = FLOOR_Y; turkey.isJumping = false; turkey.vy = 0; }
 
-        // 生成障礙物
+        // --- 生成障礙物 (Cluster 生成 + 安全距離邏輯) ---
         let canSpawn = true;
+        // 如果還在前一個障礙物的安全空白距離內，就不能生成
         if (obstacles.length > 0 && (runCanvas.width - obstacles[obstacles.length - 1].x < (250 + speed * 10))) {
             canSpawn = false;
         }
+        
+        // 基礎機率生成
         if (canSpawn && frames % Math.floor(Math.random() * 40 + 60) === 0) {
+            // 隨機決定產生 📺 還是 🍍
             obstacles.push({ x: runCanvas.width, y: FLOOR_Y, size: 55, type: Math.random() > 0.4 ? "📺" : "🍍" });
         }
 
-        // 移動與碰撞偵測
+        // --- 移動與碰撞偵測 ---
         const m = 15; // 內縮 15px 增加容錯
         for (let i = 0; i < obstacles.length; i++) {
             let obs = obstacles[i];
-            obs.x -= speed;
+            obs.x -= speed; // 障礙物往左移
 
-            // 完美的 AABB 碰撞矩形
+            // 完美的 AABB 碰撞矩形計算
             let tL = turkey.x + m, tR = turkey.x + turkey.size - m;
             let tT = turkey.y - turkey.size + m, tB = turkey.y - m;
             let oL = obs.x + m, oR = obs.x + obs.size - m;
             let oT = obs.y - obs.size + m, oB = obs.y - m;
 
+            // 如果矩形重疊，就是撞到了
             if (tL < oR && tR > oL && tT < oB && tB > oT) {
-                gameOver(); return;
+                gameOver(); return; // 撞到就結束
             }
         }
 
-        // 計分與加速
+        // --- 計分與移除過期障礙物 ---
         if (obstacles.length > 0 && obstacles[0].x < -60) {
-            obstacles.shift(); score += 10;
+            obstacles.shift(); // 移除離開畫面的障礙物
+            score += 10;
             scoreBoard.innerText = `SCORE: ${score}`;
+            
+            // 勝利判定
             if (score >= TARGET_SCORE) { triggerWin(); return; }
+            
+            // 每30分加速一次
             if (score % 30 === 0) speed += 0.5;
         }
 
         frames++; accumulator -= step;
     }
 
-    // 畫面繪製
+    // --- 畫面繪製 (Render) ---
     drawNeonGrid();
     drawTurkey();
     obstacles.forEach(obs => {
@@ -222,7 +249,7 @@ function gameLoop(timestamp) {
 }
 
 // ==========================================
-// 4. 結局 UI
+// 4. 結局 UI (GameOver / Win)
 // ==========================================
 function gameOver() {
     isPlaying = false; cancelAnimationFrame(gameReq);

@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>寧靜音樂節 UNSILENCE FESTIVAL OS</title>
     <link href="https://fonts.googleapis.com/css2?family=DotGothic16&display=swap" rel="stylesheet">
     <style>
@@ -35,7 +35,7 @@
         body, html { 
             margin: 0; padding: 0; 
             height: 100vh; /* 舊版瀏覽器備案 */
-            height: 100dvh; /* ✨修正：使用動態可視高度，避免手機瀏覽器網址列吃掉底部 */
+            height: 100dvh; /* 修正：使用動態可視高度，避免手機瀏覽器網址列吃掉底部 */
             width: 100vw; 
             background-color: var(--bg-color); color: var(--text-color); 
             font-family: 'DotGothic16', sans-serif; overflow: hidden; 
@@ -70,7 +70,7 @@
         }
 
         /* =========================================
-           ✨ BIOS 終端機與開機動畫 (午夜霓虹紫) ✨
+           ✨ BIOS 終端機與開機動畫 ✨
            ========================================= */
         #crt-boot {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
@@ -112,16 +112,21 @@
         .mode-toggle:hover { background: var(--win-border); color: #000; }
 
         .main-content { flex-grow: 1; position: relative; }
-        .window { position: absolute; background-color: var(--win-bg); color: var(--win-text); border: 2px solid #fff; border-right-color: #555; border-bottom-color: #555; box-shadow: var(--win-shadow); z-index: 10; display: flex; flex-direction: column; }
-        .window-header { background-color: var(--win-border); color: #fff; padding: 4px 8px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; touch-action: none; cursor: grab; }
-        .window-header:active { cursor: grabbing; }
+        .window { position: absolute; background-color: var(--win-bg); color: var(--win-text); border: 2px solid #fff; border-right-color: #555; border-bottom-color: #555; box-shadow: var(--win-shadow); z-index: 10; display: flex; flex-direction: column; touch-action: none; /* 重要：讓 JS 處理 pointerdown 拖曳 */ }
+        
+        /* 視窗紫色標題列 - 這是拖曳的抓取區 */
+        .window-header { background-color: var(--win-border); color: #fff; padding: 4px 8px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; cursor: grab; /* 讓游標顯示為手掌，告知可拖曳 */ user-select: none; -webkit-user-select: none; }
+        .window-header:active { cursor: grabbing; /* 拖曳時下游標變為握緊 */ }
+        
         .close-btn { background: var(--win-bg); color: #000; border: 1px solid #fff; border-right-color: #555; border-bottom-color: #555; padding: 0 6px; cursor: inherit; font-size: 12px; font-weight: bold; }
         .close-btn:active { border: 1px solid #555; border-right-color: #fff; border-bottom-color: #fff; }
+        
         .window-content { padding: 12px; font-size: 14px; flex-grow: 1; overflow-y: auto; text-align: center; }
         .sys-btn { background: var(--btn-bg); color: var(--win-text); padding: 4px 12px; display: inline-block; margin-top: 10px; font-size: 14px; border: 2px solid #fff; border-right-color: #555; border-bottom-color: #555; cursor: inherit; }
         .sys-btn:active { border: 2px solid #555; border-right-color: #fff; border-bottom-color: #fff; }
         .sys-btn.yes:hover { color: var(--highlight-color); font-weight: bold; }
 
+        /* 電腦版預設座標 */
         .teaser-win { width: 240px; } 
         #win-1 { top: 50px; left: 50px; } #win-2 { top: 90px; left: 340px; } #win-3 { top: 260px; left: 80px; }
         #win-4 { top: 320px; left: 380px; } #win-5 { top: 480px; left: 140px; } #win-6 { top: 520px; left: 450px; } #win-7 { top: 180px; left: 620px; }
@@ -138,7 +143,13 @@
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.6); z-index: 9000; }
         .alert-modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 300px; z-index: 9001; }
         
-        .marquee-container { position: fixed; bottom: 0; left: 0; width: 100vw; background: var(--win-border); color: #fff; padding: 4px 0; z-index: 100; border-top: 2px solid #fff; }
+        .marquee-container { 
+            position: fixed; bottom: 0; left: 0; width: 100vw; 
+            background: var(--win-border); color: #fff; 
+            padding: 4px 0; z-index: 100; border-top: 2px solid #fff; 
+            /* ✨ 修正 1 (iOS 排版偏矮)：保護 iOS 底部安全區 */
+            padding-bottom: env(safe-area-inset-bottom, 4px); 
+        }
         .marquee-content { display: inline-block; white-space: nowrap; animation: marquee 20s linear infinite; font-size: 16px; }
         @keyframes marquee { 0% { transform: translateX(100vw); } 100% { transform: translateX(-100%); } }
 
@@ -150,43 +161,57 @@
         @keyframes blinker { 50% { opacity: 0; } }
 
         /* =========================================
-           📱 手機版專屬設定
+           📱 手機版專屬設定 (終極修復方案)
            ========================================= */
         @media (max-width: 800px) {
             .layout-container { flex-direction: column; }
             .sidebar { width: 100%; height: auto; border-right: none; border-bottom: 2px solid var(--win-border); padding: 15px; box-sizing: border-box;}
-            .nav-links li { display: inline-block; margin-right: 10px; margin-bottom: 5px; }
-            .teaser-win { width: 150px; }
-            #win-1 { top: 20px; left: 15px; } #win-2 { top: 60px; left: 100px; } #win-3 { top: 30px; left: 180px; }
-            #win-4 { top: 130px; left: 25px; } #win-5 { top: 170px; left: 120px; } #win-6 { top: 100px; left: 190px; } #win-7 { top: 210px; left: 60px; }
+            .logo-area h1 { font-size: 20px; text-align: center; }
+            .nav-links { margin: 10px 0; text-align: center;}
+            .nav-links li { display: inline-block; margin: 0 8px; }
+            .nav-links a { font-size: 16px; }
+            .mode-toggle { width: 100%; margin-top: 5px; }
+
+            /* ✨ 修正 2 (iOS 排版偏矮)：使用 vh/vw 讓視窗階梯式散開，避免疊在一起 */
+            .teaser-win { width: 160px; } 
+            #win-1 { top: 2vh; left: 2vw; } 
+            #win-2 { top: 8vh; left: 15vw; } 
+            #win-3 { top: 14vh; left: 30vw; }
+            #win-4 { top: 20vh; left: 5vw; } 
+            #win-5 { top: 26vh; left: 25vw; } 
+            #win-6 { top: 32vh; left: 45vw; } 
+            #win-7 { top: 38vh; left: 10vw; }
             
-            /* ✨修正：統一使用 dvh 確保比例正確 */
-            #main-app-window { width: 95vw; height: 60dvh; } 
-            .desktop-icon { bottom: 80px; right: 20px; } 
+            #main-app-window { width: 95vw; height: 60dvh; top: 10vh !important; left: 2.5vw !important; } 
+
+            /* ✨ 修正 3 (iOS 排版偏矮)：將 IG 圖示大幅往上提，避免被吃掉 */
+            .desktop-icon { 
+                bottom: calc(40px + env(safe-area-inset-bottom, 20px) + 50px); 
+                right: 5vw; 
+            } 
         
-            /* ✨修正：遊戲視窗向下移動避開頂部 */
+            /* --- 火雞遊戲手機版調整 (保持中央) --- */
             #game-window { 
                 width: 95vw !important; 
                 height: auto !important; 
-                top: 5vh !important; 
+                top: 5vh !important; /* 修正位置偏低 */
             }
-
+            
             #game-window .window-content { 
                 aspect-ratio: auto !important; 
-                min-height: 320px !important;  /* 縮小高度避免大黑邊 */
+                min-height: 320px !important;  
                 height: auto !important;       
                 display: flex !important;
                 flex-direction: column !important;
                 justify-content: center !important;
                 
-                /* ✨ 新增：封印 iOS/手機端 各種煩人的預設手勢與行為 */
+                /* ✨ 修正重點：封印 iOS 各種預設手勢干擾，确保 JS 的 pointerdown 能抓到點擊 */
                 touch-action: none !important; 
                 -webkit-touch-callout: none !important; 
                 -webkit-user-select: none !important; 
                 user-select: none !important; 
             }
             
-            /* ✨修正：將 cover 改為 contain，畫布完整顯示不裁切 */
             #run-canvas { 
                 object-fit: contain !important; 
                 width: 100% !important; 
@@ -269,7 +294,7 @@
 
     <script>
         // ==========================================
-        // 1. ✨ 完美時間軸：BIOS 開機載入動畫
+        // 1. BIOS 開機載入動畫
         // ==========================================
         const biosLines = [
             "[0x0000] INITIATING KERNEL_CORE...",
@@ -290,9 +315,8 @@
             if (lineIdx < biosLines.length) { 
                 biosText.innerHTML += biosLines[lineIdx] + "<br>"; 
                 lineIdx++; 
-                setTimeout(showBios, 150); // 微調印字速度，更有駭客感
+                setTimeout(showBios, 150); 
             } else { 
-                // 印完後多停留 0.5 秒，再優雅淡出
                 setTimeout(() => {
                     const biosScreen = document.getElementById('bios-screen');
                     biosScreen.style.transition = "opacity 0.6s ease";
@@ -302,24 +326,71 @@
             } 
         }
         
-        // 延遲 1200 毫秒才開始印字，讓紫光特效盡情發揮
         window.onload = () => {
             setTimeout(showBios, 1200);
             setTimeout(() => { document.getElementById('crt-boot').remove(); }, 2500); 
         };
 
-        // --- 2. 視窗拖曳邏輯 ---
-        const windows = document.querySelectorAll('.window:not(.alert-modal)'); let topZ = 100;
+        // ==========================================
+        // 2. ✨ 修正重點：使用 Pointer Events 實現全平台穩定拖曳 ✨
+        // ==========================================
+        const windows = document.querySelectorAll('.window:not(.alert-modal)'); 
+        let topZ = 100;
+
         windows.forEach(win => {
-            const header = win.querySelector('.window-header'); let isDragging = false, offsetX, offsetY;
-            const startDrag = (e) => { if(e.target.classList.contains('close-btn')) return; isDragging = true; win.style.zIndex = ++topZ; const clientX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX; const clientY = e.type.includes('mouse') ? e.clientY : e.touches[0].clientY; offsetX = clientX - win.offsetLeft; offsetY = clientY - win.offsetTop; };
-            const moveDrag = (e) => { if (!isDragging) return; if(e.cancelable && e.type.includes('touch')) { e.preventDefault(); } const clientX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX; const clientY = e.type.includes('mouse') ? e.clientY : e.touches[0].clientY; win.style.left = `${clientX - offsetX}px`; win.style.top = `${clientY - offsetY}px`; };
-            const stopDrag = () => isDragging = false;
-            header.addEventListener('mousedown', startDrag); header.addEventListener('touchstart', startDrag, { passive: false }); document.addEventListener('mousemove', moveDrag); document.addEventListener('touchmove', moveDrag, { passive: false }); document.addEventListener('mouseup', stopDrag); document.addEventListener('touchend', stopDrag);
-            if(win.classList.contains('teaser-win')) win.querySelector('.close-btn').onclick = () => win.style.display = 'none';
+            // 抓取紫色的標題列
+            const header = win.querySelector('.window-header'); 
+            let isDragging = false;
+            let offsetX, offsetY;
+
+            // 按下標題列
+            const startDrag = (e) => {
+                // 如果點到的是 X 按鈕，不要觸發拖曳
+                if (e.target.classList.contains('close-btn')) return;
+                
+                isDragging = true;
+                win.style.zIndex = ++topZ; // 將視窗移到最上層
+                
+                // 計算滑鼠/手指在視窗內的相對位置
+                offsetX = e.clientX - win.offsetLeft;
+                offsetY = e.clientY - win.offsetTop;
+                
+                // 封印 iOS 的預設滾動行為，避免拖曳時頁面跟著跑
+                if (e.pointerType === 'touch') win.style.touchAction = 'none';
+            };
+
+            // 移動滑鼠/手指 (綁定在 document 上，避免移出視窗就斷掉)
+            const moveDrag = (e) => {
+                if (!isDragging) return;
+                // 防止拖曳時反白文字
+                e.preventDefault(); 
+                
+                // 更新視窗位置
+                win.style.left = `${e.clientX - offsetX}px`;
+                win.style.top = `${e.clientY - offsetY}px`;
+            };
+
+            // 放開滑鼠/手指
+            const stopDrag = () => {
+                isDragging = false;
+                if (win.style.touchAction === 'none') win.style.touchAction = ''; // 恢復
+            };
+
+            // 監聽 Pointer 事件 (自動相容滑鼠與觸控)
+            header.addEventListener('pointerdown', startDrag);
+            document.addEventListener('pointermove', moveDrag, { passive: false }); // 需要 preventDefault
+            document.addEventListener('pointerup', stopDrag);
+            document.addEventListener('pointercancel', stopDrag); // 防止手指按住時跳出系統選單導致斷掉
+
+            // Teaser 視窗的 X 按鈕功能
+            if (win.classList.contains('teaser-win')) {
+                win.querySelector('.close-btn').onclick = () => win.style.display = 'none';
+            }
         });
 
-        // --- 3. 動態載入 ---
+        // ==========================================
+        // 3. 其他 OS UI 功能 (載入、警告、模式)
+        // ==========================================
         async function openApp(windowTitle, fileUrl) {
             const appWin = document.getElementById('main-app-window'); const contentArea = document.getElementById('app-dynamic-content'); const titleArea = document.getElementById('app-window-title');
             appWin.style.display = 'flex'; appWin.style.zIndex = ++topZ;
@@ -337,87 +408,45 @@
         }
         function closeApp() { document.getElementById('main-app-window').style.display = 'none'; document.getElementById('app-dynamic-content').innerHTML = ''; }
         
-        // --- 4. 警告視窗 ---
         function showIgWarning() { document.getElementById('ig-overlay').style.display = 'block'; document.getElementById('ig-modal').style.display = 'block'; }
         function closeIgWarning() { document.getElementById('ig-overlay').style.display = 'none'; document.getElementById('ig-modal').style.display = 'none'; }
         
-        // --- 5. 模式切換 ---
         const modes = ['noise', 'tranquil', 'pineapple']; const modeLabels = ['模式切換: 雜訊', '模式切換: 寧靜', '模式切換: 🍍鳳梨']; let currentModeIndex = 0;
         document.getElementById('mode-toggle').onclick = (e) => { document.body.classList.remove(`${modes[currentModeIndex]}-mode`); currentModeIndex = (currentModeIndex + 1) % modes.length; document.body.classList.add(`${modes[currentModeIndex]}-mode`); e.target.innerText = modeLabels[currentModeIndex]; };
 
-        // --- 6. 滑鼠點擊爆炸特效 ---
+        // 鳳梨與特效
         const defaultColors = ['#ff00ff', '#00ff00', '#ffffff', '#9d00ff'];
         const createExplosion = (x, y) => { if(document.body.classList.contains('tranquil-mode')) return; const isPineapple = document.body.classList.contains('pineapple-mode'); const particleCount = isPineapple ? 12 : 30; for (let i = 0; i < particleCount; i++) { const p = document.createElement('div'); p.className = 'particle'; p.style.left = `${x}px`; p.style.top = `${y}px`; if (isPineapple) { p.innerText = '🍍'; } else { const size = Math.random() * 6 + 4; p.style.width = `${size}px`; p.style.height = `${size}px`; p.style.backgroundColor = defaultColors[Math.floor(Math.random() * defaultColors.length)]; } const angle = Math.random() * Math.PI * 2; const distance = Math.random() * 150 + 50; p.style.setProperty('--tx', `${Math.cos(angle) * distance}px`); p.style.setProperty('--ty', `${Math.sin(angle) * distance}px`); document.body.appendChild(p); setTimeout(() => p.remove(), 800); } };
         const createTrail = (x, y) => { if(document.body.classList.contains('tranquil-mode') || Math.random() > 0.6) return; const trail = document.createElement('div'); trail.className = 'trail-particle'; trail.style.left = `${x}px`; trail.style.top = `${y}px`; if(document.body.classList.contains('pineapple-mode')){ trail.innerText = '🍍'; trail.style.fontSize = '12px'; } else { trail.style.width = '4px'; trail.style.height = '4px'; trail.style.backgroundColor = defaultColors[Math.floor(Math.random() * defaultColors.length)]; } document.body.appendChild(trail); setTimeout(() => trail.remove(), 400); };
-        document.addEventListener('mousedown', (e) => { if(!e.target.closest('#ig-modal')) createExplosion(e.clientX, e.clientY); }); document.addEventListener('touchstart', (e) => { if(!e.target.closest('#ig-modal')) createExplosion(e.touches[0].clientX, e.touches[0].clientY); }, {passive: true}); document.addEventListener('mousemove', (e) => createTrail(e.clientX, e.clientY)); document.addEventListener('touchmove', (e) => createTrail(e.touches[0].clientX, e.touches[0].clientY), {passive: true});
+        document.addEventListener('mousedown', (e) => { if(!e.target.closest('#ig-modal') && !e.target.closest('.window-header')) createExplosion(e.clientX, e.clientY); }); document.addEventListener('touchstart', (e) => { if(!e.target.closest('#ig-modal') && !e.target.closest('.window-header')) createExplosion(e.touches[0].clientX, e.touches[0].clientY); }, {passive: true}); document.addEventListener('mousemove', (e) => createTrail(e.clientX, e.clientY)); document.addEventListener('touchmove', (e) => createTrail(e.touches[0].clientX, e.touches[0].clientY), {passive: true});
 
         // ==========================================
-        // 7. 動態桌布：Canvas Matrix Rain
+        // 4. 動態桌布：Canvas Matrix Rain
         // ==========================================
         const canvas = document.getElementById('matrix-bg');
         const ctx = canvas.getContext('2d');
-        
-        let cw, ch;
-        const fontSize = 18;
-        let columns = [];
-
+        let cw, ch; const fontSize = 18; let columns = [];
         const baseChars = 'ｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄﾅﾆﾇﾈﾉﾊﾋﾌﾍﾎﾏﾐﾑﾒﾓﾔﾕﾖﾗﾘﾙﾚﾛﾜﾝ0123456789'.split('');
         const easterEgg = ['寧','寧','靜','靜','音','樂','節']; 
         const noiseChars = baseChars.concat(easterEgg);
         const pineappleChars = ['🍍'];
 
         function initCanvas() {
-            const dpr = window.devicePixelRatio || 1; 
-            cw = window.innerWidth;
-            ch = window.innerHeight;
-            
-            canvas.width = cw * dpr;
-            canvas.height = ch * dpr;
-            ctx.scale(dpr, dpr);
-            
+            cw = window.innerWidth; ch = window.innerHeight;
+            canvas.width = cw; canvas.height = ch;
             const colCount = Math.floor(cw / fontSize) + 1;
             columns = [];
             for (let i = 0; i < colCount; i++) { columns[i] = Math.random() * -100; }
         }
-
-        window.addEventListener('resize', initCanvas);
-        initCanvas();
+        window.addEventListener('resize', initCanvas); initCanvas();
 
         function drawMatrix() {
-            const isTranquil = document.body.classList.contains('tranquil-mode');
-            const isPineapple = document.body.classList.contains('pineapple-mode');
-
-            if (isTranquil) { ctx.fillStyle = 'rgba(17, 17, 17, 0.15)'; ctx.fillRect(0, 0, cw, ch); return; }
-
-            ctx.fillStyle = isPineapple ? 'rgba(26, 26, 0, 0.15)' : 'rgba(10, 5, 16, 0.15)';
-            ctx.fillRect(0, 0, cw, ch);
-
-            ctx.font = `${fontSize}px 'DotGothic16', monospace`; ctx.textBaseline = 'top'; 
-            ctx.fillStyle = isPineapple ? '#ffcc00' : '#0f0'; 
-            
-            const chars = isPineapple ? pineappleChars : noiseChars;
-
-            for (let i = 0; i < columns.length; i++) {
-                const char = chars[Math.floor(Math.random() * chars.length)];
-                const x = i * fontSize; const y = columns[i] * fontSize;
-                ctx.fillText(char, x, y);
-                if (y > ch && Math.random() > 0.975) { columns[i] = 0; } else { columns[i]++; }
-            }
+            if (document.body.classList.contains('tranquil-mode')) { ctx.fillStyle = 'rgba(17, 17, 17, 0.15)'; ctx.fillRect(0, 0, cw, ch); return; }
+            ctx.fillStyle = document.body.classList.contains('pineapple-mode') ? 'rgba(26, 26, 0, 0.15)' : 'rgba(10, 5, 16, 0.15)'; ctx.fillRect(0, 0, cw, ch); ctx.font = `${fontSize}px 'DotGothic16', monospace`; ctx.textBaseline = 'top'; ctx.fillStyle = document.body.classList.contains('pineapple-mode') ? '#ffcc00' : '#0f0'; const chars = document.body.classList.contains('pineapple-mode') ? pineappleChars : noiseChars; for (let i = 0; i < columns.length; i++) { const char = chars[Math.floor(Math.random() * chars.length)]; const x = i * fontSize; const y = columns[i] * fontSize; ctx.fillText(char, x, y); if (y > ch && Math.random() > 0.975) { columns[i] = 0; } else { columns[i]++; } }
         }
         setInterval(drawMatrix, 50);
 
-        // ==========================================
-        // ✨ 地圖雷達掃描邏輯
-        // ==========================================
-        window.scanNode = function(title, desc) {
-            const infoBox = document.getElementById('radar-info');
-            if (infoBox) {
-                infoBox.classList.remove('blink');
-                infoBox.innerHTML = `<strong style="color:var(--highlight-color);">> ${title}</strong><br>${desc}`;
-            }
-        };
-
     </script>
-    <script src="game.js?v=4.0"></script>
+    <script src="game.js?v=4.1"></script>
 </body>
 </html>
