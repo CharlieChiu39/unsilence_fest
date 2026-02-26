@@ -321,7 +321,7 @@
         };
 
         // ==========================================
-        // 2. ✨ 完美全視窗拖曳系統 (相容所有相對座標與置中) ✨
+        // 2. ✨ 完美全視窗拖曳系統 (防跳躍精確定位版) ✨
         // ==========================================
         const windows = document.querySelectorAll('.window:not(.alert-modal)'); 
         let topZ = 100;
@@ -329,7 +329,7 @@
         windows.forEach(win => {
             const header = win.querySelector('.window-header'); 
             let isDragging = false;
-            let offsetX, offsetY;
+            let offsetX, offsetY, parentX, parentY;
 
             // 點擊標題列開始拖曳
             const startDrag = (e) => {
@@ -339,18 +339,24 @@
                 isDragging = true;
                 win.style.zIndex = ++topZ; 
 
-                // ✨ 最關鍵魔法：讀取「當前畫面上最真實的像素位置」
+                // 取得「視窗」在整個螢幕上的真實座標
                 const rect = win.getBoundingClientRect();
+                // 取得「父容器 (main-content)」在螢幕上的真實座標
+                const parentRect = win.offsetParent.getBoundingClientRect();
                 
-                // 拔除所有相對定位(vw/vh)和置中魔法(transform)，改成絕對的 px 像素定位
+                // 紀錄父容器的偏差值
+                parentX = parentRect.left;
+                parentY = parentRect.top;
+                
+                // 拔除魔法，並換算成「相對於父容器」的正確內部座標 (✨ 解決往下亂跳的關鍵)
                 win.style.transform = 'none'; 
                 win.style.margin = '0';
-                win.style.bottom = 'auto'; // 清除可能有的 bottom 影響
-                win.style.right = 'auto';  // 清除可能有的 right 影響
-                win.style.left = `${rect.left}px`;
-                win.style.top = `${rect.top}px`;
+                win.style.bottom = 'auto'; 
+                win.style.right = 'auto';  
+                win.style.left = `${rect.left - parentX}px`;
+                win.style.top = `${rect.top - parentY}px`;
                 
-                // 計算手指/游標相對於視窗左上角的偏移量
+                // 計算手指點擊位置與視窗左上角的距離
                 offsetX = e.clientX - rect.left;
                 offsetY = e.clientY - rect.top;
                 
@@ -363,9 +369,9 @@
                 if (!isDragging) return;
                 e.preventDefault(); 
                 
-                // 依照手指/游標位置與剛才的偏移量，實時更新視窗位置
-                win.style.left = `${e.clientX - offsetX}px`;
-                win.style.top = `${e.clientY - offsetY}px`;
+                // ✨ 計算新座標：滑鼠位置 - 手指內部偏移 - 父容器外部偏移
+                win.style.left = `${e.clientX - offsetX - parentX}px`;
+                win.style.top = `${e.clientY - offsetY - parentY}px`;
             };
 
             // 放開拖曳
