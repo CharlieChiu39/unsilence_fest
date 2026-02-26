@@ -34,8 +34,8 @@
 
         body, html { 
             margin: 0; padding: 0; 
-            height: 100vh; /* 舊版瀏覽器備案 */
-            height: 100dvh; /* 修正：使用動態可視高度，避免手機瀏覽器網址列吃掉底部 */
+            height: 100vh; 
+            height: 100dvh; 
             width: 100vw; 
             background-color: var(--bg-color); color: var(--text-color); 
             font-family: 'DotGothic16', sans-serif; overflow: hidden; 
@@ -112,11 +112,11 @@
         .mode-toggle:hover { background: var(--win-border); color: #000; }
 
         .main-content { flex-grow: 1; position: relative; }
-        .window { position: absolute; background-color: var(--win-bg); color: var(--win-text); border: 2px solid #fff; border-right-color: #555; border-bottom-color: #555; box-shadow: var(--win-shadow); z-index: 10; display: flex; flex-direction: column; touch-action: none; /* 重要：讓 JS 處理 pointerdown 拖曳 */ }
+        .window { position: absolute; background-color: var(--win-bg); color: var(--win-text); border: 2px solid #fff; border-right-color: #555; border-bottom-color: #555; box-shadow: var(--win-shadow); z-index: 10; display: flex; flex-direction: column; touch-action: none; /* 讓整個視窗不受 iOS 手勢干擾 */ }
         
-        /* 視窗紫色標題列 - 這是拖曳的抓取區 */
-        .window-header { background-color: var(--win-border); color: #fff; padding: 4px 8px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; cursor: grab; /* 讓游標顯示為手掌，告知可拖曳 */ user-select: none; -webkit-user-select: none; }
-        .window-header:active { cursor: grabbing; /* 拖曳時下游標變為握緊 */ }
+        /* ✨ 視窗紫色標題列 - 拖曳的抓取區，加入 touch-action: none 確保手機完美拖曳 */
+        .window-header { background-color: var(--win-border); color: #fff; padding: 4px 8px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; cursor: grab; user-select: none; -webkit-user-select: none; touch-action: none; }
+        .window-header:active { cursor: grabbing; }
         
         .close-btn { background: var(--win-bg); color: #000; border: 1px solid #fff; border-right-color: #555; border-bottom-color: #555; padding: 0 6px; cursor: inherit; font-size: 12px; font-weight: bold; }
         .close-btn:active { border: 1px solid #555; border-right-color: #fff; border-bottom-color: #fff; }
@@ -147,7 +147,6 @@
             position: fixed; bottom: 0; left: 0; width: 100vw; 
             background: var(--win-border); color: #fff; 
             padding: 4px 0; z-index: 100; border-top: 2px solid #fff; 
-            /* ✨ 修正 1 (iOS 排版偏矮)：保護 iOS 底部安全區 */
             padding-bottom: env(safe-area-inset-bottom, 4px); 
         }
         .marquee-content { display: inline-block; white-space: nowrap; animation: marquee 20s linear infinite; font-size: 16px; }
@@ -172,7 +171,6 @@
             .nav-links a { font-size: 16px; }
             .mode-toggle { width: 100%; margin-top: 5px; }
 
-            /* ✨ 修正 2 (iOS 排版偏矮)：使用 vh/vw 讓視窗階梯式散開，避免疊在一起 */
             .teaser-win { width: 160px; } 
             #win-1 { top: 2vh; left: 2vw; } 
             #win-2 { top: 8vh; left: 15vw; } 
@@ -184,17 +182,12 @@
             
             #main-app-window { width: 95vw; height: 60dvh; top: 10vh !important; left: 2.5vw !important; } 
 
-            /* ✨ 修正 3 (iOS 排版偏矮)：將 IG 圖示大幅往上提，避免被吃掉 */
-            .desktop-icon { 
-                bottom: calc(40px + env(safe-area-inset-bottom, 20px) + 50px); 
-                right: 5vw; 
-            } 
+            .desktop-icon { bottom: calc(40px + env(safe-area-inset-bottom, 20px) + 50px); right: 5vw; } 
         
-            /* --- 火雞遊戲手機版調整 (保持中央) --- */
             #game-window { 
                 width: 95vw !important; 
                 height: auto !important; 
-                top: 5vh !important; /* 修正位置偏低 */
+                top: 5vh !important; 
             }
             
             #game-window .window-content { 
@@ -204,8 +197,6 @@
                 display: flex !important;
                 flex-direction: column !important;
                 justify-content: center !important;
-                
-                /* ✨ 修正重點：封印 iOS 各種預設手勢干擾，确保 JS 的 pointerdown 能抓到點擊 */
                 touch-action: none !important; 
                 -webkit-touch-callout: none !important; 
                 -webkit-user-select: none !important; 
@@ -268,7 +259,6 @@
                         <h2 class="blink" style="margin: 0; color: #ff00ff; font-size: 2rem; text-shadow: 2px 2px #000;">SYSTEM BREACH</h2>
                         <p style="margin-top: 10px; font-size: 1.2rem; text-shadow: 1px 1px #000;">> 點擊畫面 或 按空白鍵開始逃亡 &lt;</p>
                     </div>
-                    
                     <canvas id="run-canvas" width="800" height="300" style="display: block; cursor: pointer;"></canvas>
                 </div>
             </div>
@@ -332,66 +322,66 @@
         };
 
         // ==========================================
-        // 2. ✨ 修正重點：使用 Pointer Events 實現全平台穩定拖曳 ✨
+        // 2. ✨ 完美全視窗拖曳系統 (相容所有相對座標與置中) ✨
         // ==========================================
         const windows = document.querySelectorAll('.window:not(.alert-modal)'); 
         let topZ = 100;
 
         windows.forEach(win => {
-            // 抓取紫色的標題列
             const header = win.querySelector('.window-header'); 
             let isDragging = false;
             let offsetX, offsetY;
 
-            // 按下標題列
-            // 按下標題列
+            // 點擊標題列開始拖曳
             const startDrag = (e) => {
-                // 如果點到的是 X 按鈕，不要觸發拖曳
+                // 如果點擊 X 按鈕，拒絕拖曳
                 if (e.target.classList.contains('close-btn')) return;
                 
                 isDragging = true;
-                win.style.zIndex = ++topZ; // 將視窗移到最上層
+                win.style.zIndex = ++topZ; 
 
-                // ✨ 新增：解除遊戲視窗的置中魔法，防止拖曳瞬間「瞬移」
-                if (win.style.transform) {
-                    const rect = win.getBoundingClientRect(); // 取得當前真實座標
-                    win.style.transform = 'none'; // 拔除魔法
-                    win.style.left = `${rect.left}px`; // 寫入真實 X 座標
-                    win.style.top = `${rect.top}px`;   // 寫入真實 Y 座標
-                }
+                // ✨ 最關鍵魔法：讀取「當前畫面上最真實的像素位置」
+                const rect = win.getBoundingClientRect();
                 
-                // 計算滑鼠/手指在視窗內的相對位置
-                offsetX = e.clientX - win.offsetLeft;
-                offsetY = e.clientY - win.offsetTop;
+                // 拔除所有相對定位(vw/vh)和置中魔法(transform)，改成絕對的 px 像素定位
+                win.style.transform = 'none'; 
+                win.style.margin = '0';
+                win.style.bottom = 'auto'; // 清除可能有的 bottom 影響
+                win.style.right = 'auto';  // 清除可能有的 right 影響
+                win.style.left = `${rect.left}px`;
+                win.style.top = `${rect.top}px`;
                 
-                // 封印 iOS 的預設滾動行為，避免拖曳時頁面跟著跑
+                // 計算手指/游標相對於視窗左上角的偏移量
+                offsetX = e.clientX - rect.left;
+                offsetY = e.clientY - rect.top;
+                
+                // 封印手機滑動行為
                 if (e.pointerType === 'touch') win.style.touchAction = 'none';
             };
 
-            // 移動滑鼠/手指 (綁定在 document 上，避免移出視窗就斷掉)
+            // 滑動過程
             const moveDrag = (e) => {
                 if (!isDragging) return;
-                // 防止拖曳時反白文字
                 e.preventDefault(); 
                 
-                // 更新視窗位置
+                // 依照手指/游標位置與剛才的偏移量，實時更新視窗位置
                 win.style.left = `${e.clientX - offsetX}px`;
                 win.style.top = `${e.clientY - offsetY}px`;
             };
 
-            // 放開滑鼠/手指
+            // 放開拖曳
             const stopDrag = () => {
                 isDragging = false;
-                if (win.style.touchAction === 'none') win.style.touchAction = ''; // 恢復
+                if (win.style.touchAction === 'none') win.style.touchAction = '';
             };
 
-            // 監聽 Pointer 事件 (自動相容滑鼠與觸控)
+            // 綁定事件
             header.addEventListener('pointerdown', startDrag);
-            document.addEventListener('pointermove', moveDrag, { passive: false }); // 需要 preventDefault
+            document.addEventListener('pointermove', moveDrag, { passive: false });
             document.addEventListener('pointerup', stopDrag);
-            document.addEventListener('pointercancel', stopDrag); // 防止手指按住時跳出系統選單導致斷掉
+            document.addEventListener('pointercancel', stopDrag);
 
-            // Teaser 視窗的 X 按鈕功能
+            // X 按鈕關閉邏輯
             if (win.classList.contains('teaser-win')) {
                 win.querySelector('.close-btn').onclick = () => win.style.display = 'none';
             }
@@ -456,6 +446,6 @@
         setInterval(drawMatrix, 50);
 
     </script>
-    <script src="game.js?v=4.1"></script>
+    <script src="game.js?v=4.2"></script>
 </body>
 </html>
