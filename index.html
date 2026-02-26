@@ -224,10 +224,16 @@
             try { const response = await fetch(fileUrl); if (!response.ok) throw new Error('File not found'); const htmlContent = await response.text(); contentArea.innerHTML = htmlContent; } catch (error) { contentArea.innerHTML = `<h3 style='color:red;'>[ 系統錯誤 ] 無法連接到信號源 (${fileUrl})</h3><p>請確認您是否使用 Live Server 開啟網頁？</p>`; }
         }
         function closeApp() { document.getElementById('main-app-window').style.display = 'none'; document.getElementById('app-dynamic-content').innerHTML = ''; }
-        // --- 4. 警告視窗 ---
-        function showIgWarning() { document.getElementById('ig-overlay').style.display = 'block'; document.getElementById('ig-modal').style.display = 'block'; document.getElementById('ig-modal').style.zIndex = ++topZ + 10; }
-        function closeIgWarning() { document.getElementById('ig-overlay').style.display = 'none'; document.getElementById('ig-modal').style.display = 'none'; }
-
+// --- 4. 警告視窗 ---
+        function showIgWarning() { 
+            document.getElementById('ig-overlay').style.display = 'block'; 
+            document.getElementById('ig-modal').style.display = 'block'; 
+            // ✨ 已經把打亂圖層高度的那行刪掉了！
+        }
+        function closeIgWarning() { 
+            document.getElementById('ig-overlay').style.display = 'none'; 
+            document.getElementById('ig-modal').style.display = 'none'; 
+        }
         // --- 5. 模式切換 ---
         const modes = ['noise', 'tranquil', 'pineapple']; const modeLabels = ['模式切換: 雜訊', '模式切換: 寧靜', '模式切換: 🍍鳳梨']; let currentModeIndex = 0;
         document.getElementById('mode-toggle').onclick = (e) => { document.body.classList.remove(`${modes[currentModeIndex]}-mode`); currentModeIndex = (currentModeIndex + 1) % modes.length; document.body.classList.add(`${modes[currentModeIndex]}-mode`); e.target.innerText = modeLabels[currentModeIndex]; };
