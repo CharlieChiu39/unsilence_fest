@@ -165,12 +165,16 @@
             .desktop-icon { bottom: 80px; right: 20px; } 
         
             /* ✨修正：遊戲視窗向下移動避開頂部 */
-            #game-window { width: 95vw !important; height: auto !important; top: 10vh !important; }
-            
+            #game-window { 
+                width: 95vw !important; 
+                height: auto !important; 
+                top: 5vh !important; 
+            }
+
             #game-window .window-content { 
                 aspect-ratio: auto !important; 
-                min-height: 450px !important;  
-                height: 65dvh !important;       
+                min-height: 320px !important;  /* 剛好夠塞破關折扣碼文字即可 */
+                height: auto !important;       /* 讓高度自然適應 */
                 display: flex !important;
                 flex-direction: column !important;
                 justify-content: center !important;

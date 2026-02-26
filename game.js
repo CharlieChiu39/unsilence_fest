@@ -92,9 +92,14 @@ function jump() {
 
 // 註冊所有點擊與按鍵事件
 window.addEventListener('keydown', (e) => { if (e.code === 'Space' && gameWinUI.style.display === 'flex') { e.preventDefault(); jump(); }});
+
+// ✨ 修正：鎖定整個遊戲內容的父容器，點擊視窗內任何地方都能跳躍
+const gameContentArea = gameWinUI.querySelector('.window-content');
 ['mousedown', 'touchstart'].forEach(evt => {
-    runCanvas.addEventListener(evt, (e) => { if(evt === 'touchstart') e.preventDefault(); jump(); }, {passive: false});
-    gameMsg.addEventListener(evt, (e) => { if(evt === 'touchstart') e.preventDefault(); jump(); }, {passive: false});
+    gameContentArea.addEventListener(evt, (e) => { 
+        if(evt === 'touchstart') e.preventDefault(); 
+        jump(); 
+    }, {passive: false});
 });
 
 // ==========================================
