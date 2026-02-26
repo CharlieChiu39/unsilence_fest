@@ -69,7 +69,7 @@ function resetGame() {
     gameMsg.style.background = 'rgba(0,0,0,0.6)';
     gameMsg.innerHTML = `
         <h2 class="blink" style="margin: 0; color: #ff00ff; font-size: clamp(1.8rem, 6vw, 2.5rem); text-shadow: 2px 2px #000;">SYSTEM BREACH</h2>
-        <p style="margin: 10px 0 0 0; font-size: clamp(0.9rem, 3vw, 1.2rem); color: #0f0; text-shadow: 1px 1px #000;">> 點擊畫面 或 按空白鍵開始逃亡 &lt;</p>
+        <p style="margin-top: 10px; font-size: clamp(0.9rem, 3vw, 1.2rem); color: #0f0; text-shadow: 1px 1px #000;">> 點擊畫面 或 按空白鍵開始逃亡 &lt;</p>
     `;
 }
 
@@ -90,16 +90,28 @@ function jump() {
     }
 }
 
-// 註冊所有點擊與按鍵事件
-window.addEventListener('keydown', (e) => { if (e.code === 'Space' && gameWinUI.style.display === 'flex') { e.preventDefault(); jump(); }});
-
-// ✨ 修正：鎖定整個遊戲內容的父容器，點擊視窗內任何地方都能跳躍
-const gameContentArea = gameWinUI.querySelector('.window-content');
-['mousedown', 'touchstart'].forEach(evt => {
-    gameContentArea.addEventListener(evt, (e) => { 
-        if(evt === 'touchstart') e.preventDefault(); 
+// ==========================================
+// ✨ 註冊所有點擊與按鍵事件 (全視窗觸控支援)
+// ==========================================
+window.addEventListener('keydown', (e) => { 
+    if (e.code === 'Space' && gameWinUI.style.display === 'flex') { 
+        e.preventDefault(); 
         jump(); 
-    }, {passive: false});
+    }
+});
+
+// 抓取整個遊戲內容區塊 (包含黑邊、畫布與文字)
+const gameContentArea = gameWinUI.querySelector('.window-content');
+
+// 使用 'pointerdown' 一次搞定滑鼠與手機觸控，避免 iOS 雙重觸發
+gameContentArea.addEventListener('pointerdown', (e) => {
+    // 如果點到的是視窗右上角的「X (關閉按鈕)」，就不要跳躍
+    if (e.target.classList.contains('close-btn')) return; 
+    
+    if (e.cancelable) {
+        e.preventDefault(); // 阻止 iOS 預設的焦點轉移或網頁滑動干擾
+    }
+    jump();
 });
 
 // ==========================================

@@ -173,11 +173,17 @@
 
             #game-window .window-content { 
                 aspect-ratio: auto !important; 
-                min-height: 320px !important;  /* 剛好夠塞破關折扣碼文字即可 */
-                height: auto !important;       /* 讓高度自然適應 */
+                min-height: 320px !important;  /* 縮小高度避免大黑邊 */
+                height: auto !important;       
                 display: flex !important;
                 flex-direction: column !important;
                 justify-content: center !important;
+                
+                /* ✨ 新增：封印 iOS/手機端 各種煩人的預設手勢與行為 */
+                touch-action: none !important; 
+                -webkit-touch-callout: none !important; 
+                -webkit-user-select: none !important; 
+                user-select: none !important; 
             }
             
             /* ✨修正：將 cover 改為 contain，畫布完整顯示不裁切 */
