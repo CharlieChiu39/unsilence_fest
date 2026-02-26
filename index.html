@@ -344,12 +344,21 @@
             let offsetX, offsetY;
 
             // 按下標題列
+            // 按下標題列
             const startDrag = (e) => {
                 // 如果點到的是 X 按鈕，不要觸發拖曳
                 if (e.target.classList.contains('close-btn')) return;
                 
                 isDragging = true;
                 win.style.zIndex = ++topZ; // 將視窗移到最上層
+
+                // ✨ 新增：解除遊戲視窗的置中魔法，防止拖曳瞬間「瞬移」
+                if (win.style.transform) {
+                    const rect = win.getBoundingClientRect(); // 取得當前真實座標
+                    win.style.transform = 'none'; // 拔除魔法
+                    win.style.left = `${rect.left}px`; // 寫入真實 X 座標
+                    win.style.top = `${rect.top}px`;   // 寫入真實 Y 座標
+                }
                 
                 // 計算滑鼠/手指在視窗內的相對位置
                 offsetX = e.clientX - win.offsetLeft;
