@@ -45,7 +45,7 @@ function resetGame() {
     isPlaying = false; hasWon = false; score = 0; speed = 6; frames = 0; lastTime = 0; accumulator = 0; turkey.y = 150; turkey.vy = 0; turkey.isJumping = false; obstacles = []; 
     
     scoreBoard.innerText = `SCORE: ${score}`;
-    scoreBoard.style.display = 'block'; 
+    scoreBoard.style.display = 'none'; // ✨ 修改這裡：遊戲尚未開始前，先隱藏分數板
     runCanvas.style.display = 'block'; 
     
     // ✨ 保持絕對定位，完美覆蓋畫布且不破壞外層比例
@@ -65,6 +65,7 @@ function jump() {
         resetGame(); 
         isPlaying = true;
         gameMsg.style.display = 'none'; 
+        scoreBoard.style.display = 'block'; // ✨ 新增這行：玩家點擊開始逃亡後，才顯示分數板
         gameReq = requestAnimationFrame(gameLoop); 
         return;
     }
