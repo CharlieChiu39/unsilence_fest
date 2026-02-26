@@ -33,7 +33,10 @@
         }
 
         body, html { 
-            margin: 0; padding: 0; height: 100vh; width: 100vw; 
+            margin: 0; padding: 0; 
+            height: 100vh; /* 舊版瀏覽器備案 */
+            height: 100dvh; /* ✨修正：使用動態可視高度，避免手機瀏覽器網址列吃掉底部 */
+            width: 100vw; 
             background-color: var(--bg-color); color: var(--text-color); 
             font-family: 'DotGothic16', sans-serif; overflow: hidden; 
             user-select: none; -webkit-user-select: none; touch-action: none; 
@@ -71,12 +74,12 @@
            ========================================= */
         #crt-boot {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background: transparent; /* 解除黑布遮擋 */
+            background: transparent; 
             z-index: 10000; pointer-events: none;
             display: flex; justify-content: center; align-items: center;
         }
         .crt-line {
-            width: 0; height: 2px; background: #ff00ff; /* 霓虹紫 */
+            width: 0; height: 2px; background: #ff00ff; 
             box-shadow: 0 0 15px #ff00ff, 0 0 30px #ff00ff;
             animation: crt-turn-on 1.8s cubic-bezier(0.23, 1, 0.32, 1) forwards;
         }
@@ -90,7 +93,7 @@
 
         #bios-screen { 
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: #000; color: #ff00ff; /* 文字為紫色 */
+            background: #000; color: #ff00ff; 
             z-index: 9999; padding: 20px; font-size: 16px; box-sizing: border-box; 
             text-shadow: 0 0 5px #ff00ff; 
         }
@@ -156,18 +159,31 @@
             .teaser-win { width: 150px; }
             #win-1 { top: 20px; left: 15px; } #win-2 { top: 60px; left: 100px; } #win-3 { top: 30px; left: 180px; }
             #win-4 { top: 130px; left: 25px; } #win-5 { top: 170px; left: 120px; } #win-6 { top: 100px; left: 190px; } #win-7 { top: 210px; left: 60px; }
-            #main-app-window { width: 95vw; height: 60vh; } 
+            
+            /* ✨修正：統一使用 dvh 確保比例正確 */
+            #main-app-window { width: 95vw; height: 60dvh; } 
             .desktop-icon { bottom: 80px; right: 20px; } 
         
-            #game-window { width: 95vw !important; height: auto !important; top: 5vh !important; }
+            /* ✨修正：遊戲視窗向下移動避開頂部 */
+            #game-window { width: 95vw !important; height: auto !important; top: 10vh !important; }
+            
             #game-window .window-content { 
-                aspect-ratio: auto !important; /* 取消死板的比例限制 */
-                 min-height: 420px !important;  /* 給予足夠的最小高度，確保塞得下折扣碼和長串文字 */
-                height: 60vh !important;       /* 讓視窗在手機上能佔據舒適的比例 */
-                
-}
-#run-canvas { object-fit: cover; } /* 讓畫布能適應變高的視窗，避免變形 */
-#game-score { top: 15px !important; right: 15px !important; font-size: 16px !important; }
+                aspect-ratio: auto !important; 
+                min-height: 450px !important;  
+                height: 65dvh !important;       
+                display: flex !important;
+                flex-direction: column !important;
+                justify-content: center !important;
+            }
+            
+            /* ✨修正：將 cover 改為 contain，畫布完整顯示不裁切 */
+            #run-canvas { 
+                object-fit: contain !important; 
+                width: 100% !important; 
+                height: auto !important;
+                max-height: 100% !important; 
+            } 
+            #game-score { top: 15px !important; right: 15px !important; font-size: 16px !important; }
         }
     </style>
 </head>
@@ -218,7 +234,7 @@
                         <p style="margin-top: 10px; font-size: 1.2rem; text-shadow: 1px 1px #000;">> 點擊畫面 或 按空白鍵開始逃亡 &lt;</p>
                     </div>
                     
-                    <canvas id="run-canvas" width="800" height="300" style="width: 100%; height: 100%; display: block; cursor: pointer;"></canvas>
+                    <canvas id="run-canvas" width="800" height="300" style="display: block; cursor: pointer;"></canvas>
                 </div>
             </div>
             
