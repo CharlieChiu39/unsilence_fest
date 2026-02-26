@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>寧靜音樂節 TRANQUIL FESTIVAL OS</title>
+    <link href="https://fonts.googleapis.com/css2?family=DotGothic16&display=swap" rel="stylesheet">
+    <style>
+        /* =========================================
+           1. 變數設定 (色彩計畫與模式切換)
+           ========================================= */
+        :root {
+            --bg-color: #0a0510; 
+            --text-color: #0f0; 
+            --highlight-color: #ff00ff; 
+            --sidebar-bg: #05020a;
+            --win-bg: #c0c0c0; 
+            --win-border: #9d00ff; 
+            --win-text: #000; 
+            --win-shadow: 4px 4px 0px #000; 
+            --btn-bg: #dfdfdf;
+            --crt-opacity: 1;
+        }
+
+        body.tranquil-mode { 
+            --bg-color: #111; --text-color: #666; --highlight-color: #444; 
+            --win-bg: #222; --win-border: #444; --win-text: #aaa; --btn-bg: #333; --crt-opacity: 0; 
+        }
+
+        body.pineapple-mode { 
+            --bg-color: #1a1a00; --text-color: #00ff00; --highlight-color: #ff6600; 
+            --win-bg: #fffbe6; --win-border: #ffcc00; --win-text: #004d00; --btn-bg: #ffee99; --win-shadow: 4px 4px 0px #331a00; 
+        }
+
+        body, html { 
+            margin: 0; padding: 0; height: 100vh; width: 100vw; 
+            background-color: var(--bg-color); color: var(--text-color); 
+            font-family: 'DotGothic16', sans-serif; overflow: hidden; 
+            user-select: none; -webkit-user-select: none; touch-action: none; 
+            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" style="font-size:24px"><text y="24">🍍</text></svg>'), auto; 
+            transition: background-color 0.5s ease; 
+        }
+
+        /* =========================================
+           2. 背景畫布與網格 (Canvas & Grid)
+           ========================================= */
+        /* ✨ 新增：Canvas 動態桌布 ✨ */
+        #matrix-bg {
+            position: fixed; top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            z-index: 0; /* 放在最底層 */
+            pointer-events: none; /* 確保不會阻擋滑鼠點擊 */
+            opacity: 0.6; /* 稍微透明，才不會搶了視窗的風采 */
+        }
+
+        .bg-grid { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            z-index: 1; pointer-events: none; 
+            background-image: linear-gradient(rgba(157, 0, 255, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(157, 0, 255, 0.1) 1px, transparent 1px); 
+            background-size: 40px 40px; 
+        }
+        body.pineapple-mode .bg-grid { background-image: linear-gradient(rgba(255, 204, 0, 0.15) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 204, 0, 0.15) 1px, transparent 1px); }
+
+        .crt::before { 
+            content: " "; display: block; position: fixed; top: 0; left: 0; bottom: 0; right: 0; 
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06)); 
+            z-index: 9990; background-size: 100% 2px, 3px 100%; pointer-events: none; opacity: var(--crt-opacity); 
+        }
+
+        #bios-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; color: #0f0; z-index: 9999; padding: 20px; font-size: 16px; box-sizing: border-box; }
+        .layout-container { display: flex; height: 100%; width: 100%; position: relative; z-index: 10; }
+
+        /* =========================================
+           3. 側邊欄與視窗 UI
+           ========================================= */
+        .sidebar { width: 250px; background-color: var(--sidebar-bg); border-right: 2px solid var(--win-border); padding: 30px 20px; display: flex; flex-direction: column; position: relative; z-index: 50; }
+        .logo-area h1 { color: #fff; font-size: 26px; margin: 0; line-height: 1.2; text-shadow: 2px 2px 0px var(--win-border); }
+        .nav-links { list-style: none; padding: 0; margin: 20px 0 0 0; flex-grow: 1; overflow-y: auto;}
+        .nav-links li { margin-bottom: 12px; }
+        .nav-links a { color: var(--text-color); text-decoration: none; font-size: 18px; display: block; cursor: inherit; transition: 0.2s;}
+        .nav-links a:hover { color: var(--highlight-color); transform: translateX(5px); }
+        .mode-toggle { background: #000; border: 2px solid var(--win-border); color: var(--text-color); padding: 10px; font-family: 'DotGothic16'; cursor: inherit; margin-top: 20px; font-size: 16px; }
+        .mode-toggle:hover { background: var(--win-border); color: #000; }
+
+        .main-content { flex-grow: 1; position: relative; }
+        .window { position: absolute; background-color: var(--win-bg); color: var(--win-text); border: 2px solid #fff; border-right-color: #555; border-bottom-color: #555; box-shadow: var(--win-shadow); z-index: 10; display: flex; flex-direction: column; }
+        .window-header { background-color: var(--win-border); color: #fff; padding: 4px 8px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; touch-action: none; cursor: grab; }
+        .window-header:active { cursor: grabbing; }
+        .close-btn { background: var(--win-bg); color: #000; border: 1px solid #fff; border-right-color: #555; border-bottom-color: #555; padding: 0 6px; cursor: inherit; font-size: 12px; font-weight: bold; }
+        .close-btn:active { border: 1px solid #555; border-right-color: #fff; border-bottom-color: #fff; }
+        .window-content { padding: 12px; font-size: 14px; flex-grow: 1; overflow-y: auto; text-align: center; }
+        .sys-btn { background: var(--btn-bg); color: var(--win-text); padding: 4px 12px; display: inline-block; margin-top: 10px; font-size: 14px; border: 2px solid #fff; border-right-color: #555; border-bottom-color: #555; cursor: inherit; }
+        .sys-btn:active { border: 2px solid #555; border-right-color: #fff; border-bottom-color: #fff; }
+        .sys-btn.yes:hover { color: var(--highlight-color); font-weight: bold; }
+
+        /* 電腦版小視窗 */
+        .teaser-win { width: 240px; } 
+        #win-1 { top: 50px; left: 50px; } #win-2 { top: 90px; left: 340px; } #win-3 { top: 260px; left: 80px; }
+        #win-4 { top: 320px; left: 380px; } #win-5 { top: 480px; left: 140px; } #win-6 { top: 520px; left: 450px; } #win-7 { top: 180px; left: 620px; }
+
+        #main-app-window { width: 600px; height: 400px; display: none; max-width: 90vw; max-height: 80vh; }
+        #main-app-window .window-content { background: #fff; border: inset 2px #555; margin: 10px; padding: 15px; text-align: left; }
+        body.tranquil-mode #main-app-window .window-content { background: #333; }
+        body.pineapple-mode #main-app-window .window-content { background: #ffffe6; }
+
+        .desktop-icon { position: absolute; bottom: 60px; right: 40px; text-align: center; color: var(--text-color); cursor: pointer; z-index: 5; text-shadow: 2px 2px 0px #000; }
+        .desktop-icon .icon-img { font-size: 40px; margin-bottom: 5px; }
+        .desktop-icon:hover { transform: scale(1.1); color: var(--highlight-color); }
+        
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.6); z-index: 9000; }
+        .alert-modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 300px; z-index: 9001; }
+        
+        .marquee-container { position: fixed; bottom: 0; left: 0; width: 100vw; background: var(--win-border); color: #fff; padding: 4px 0; z-index: 100; border-top: 2px solid #fff; }
+        .marquee-content { display: inline-block; white-space: nowrap; animation: marquee 20s linear infinite; font-size: 16px; }
+        @keyframes marquee { 0% { transform: translateX(100vw); } 100% { transform: translateX(-100%); } }
+
+        .particle { position: fixed; pointer-events: none; z-index: 9999; animation: explode 0.8s cubic-bezier(0.1, 0.8, 0.3, 1) forwards; font-size: 16px;}
+        @keyframes explode { 0% { transform: translate(0, 0) scale(1) rotate(0deg); opacity: 1; } 100% { transform: translate(var(--tx), var(--ty)) scale(0) rotate(720deg); opacity: 0; } }
+        .trail-particle { position: fixed; pointer-events: none; z-index: 9998; animation: fadeTrail 0.4s linear forwards; }
+        @keyframes fadeTrail { 0% { opacity: 0.8; transform: scale(1); } 100% { opacity: 0; transform: scale(0.2) translateY(15px); } }
+        .blink { animation: blinker 1s linear infinite; }
+        @keyframes blinker { 50% { opacity: 0; } }
+
+        /* 手機版設定 */
+        @media (max-width: 800px) {
+            .layout-container { flex-direction: column; }
+            .sidebar { width: 100%; height: auto; border-right: none; border-bottom: 2px solid var(--win-border); padding: 15px; box-sizing: border-box;}
+            .nav-links li { display: inline-block; margin-right: 10px; margin-bottom: 5px; }
+            .teaser-win { width: 150px; }
+            /* 亂序交疊 */
+            #win-1 { top: 20px; left: 15px; } #win-2 { top: 60px; left: 100px; } #win-3 { top: 30px; left: 180px; }
+            #win-4 { top: 130px; left: 25px; } #win-5 { top: 170px; left: 120px; } #win-6 { top: 100px; left: 190px; } #win-7 { top: 210px; left: 60px; }
+            #main-app-window { width: 95vw; height: 60vh; } 
+            .desktop-icon { bottom: 80px; right: 20px; } 
+        }
+    </style>
+</head>
+<body class="crt noise-mode">
+
+    <div id="bios-screen"><div id="bios-text"></div></div>
+    
+    <canvas id="matrix-bg"></canvas>
+    
+    <div class="bg-grid"></div>
+
+    <div class="layout-container">
+        <nav class="sidebar">
+            <div class="logo-area"><h1 style="cursor:pointer" onclick="closeApp()">寧靜音樂節<br>TRANQUIL OS</h1></div>
+            <ul class="nav-links">
+                <li><a onclick="openApp('NEWS_ARCHIVE.exe', 'news.html')">> NEWS</a></li>
+                <li><a onclick="openApp('LIVE_DATA.sys', 'lineup.html')">> LIVE_陣容</a></li>
+                <li><a onclick="openApp('TIMETABLE.exe', 'timetable.html')">> RELEASE_時刻表</a></li>
+                <li><a onclick="openApp('MAP_NAVIGATOR.sys', 'map.html')">> MAP_地圖</a></li>
+                <li><a onclick="openApp('STORE_DATA.pkg', 'goods.html')">> STORE_周邊</a></li>
+                <li><a onclick="openApp('SAFETY_PROTOCOL.txt', 'guidelines.html')">> INFO_須知</a></li>
+                <li><a onclick="openApp('CREDITS.txt', 'credits.html')" style="color:var(--highlight-color)">> CREDITS_名單</a></li>
+            </ul>
+            <button class="mode-toggle" id="mode-toggle">模式切換: 雜訊</button>
+        </nav>
+
+        <main class="main-content">
+            <div class="window teaser-win" id="win-1"><div class="window-header"><span class="title">💾 NEWS.exe</span><span class="close-btn">X</span></div><div class="window-content"><p>官網系統啟動</p><button class="sys-btn yes" onclick="openApp('NEWS_ARCHIVE.exe', 'news.html')">讀取(Y)</button></div></div>
+            <div class="window teaser-win" id="win-2"><div class="window-header"><span class="title">🎵 LIVE.txt</span><span class="close-btn">X</span></div><div class="window-content"><p>演出陣容解禁</p><button class="sys-btn yes" onclick="openApp('LIVE_DATA.sys', 'lineup.html')">查看(Y)</button></div></div>
+            <div class="window teaser-win" id="win-3"><div class="window-header"><span class="title">⏳ TIME.exe</span><span class="close-btn">X</span></div><div class="window-content"><p>讀取時間軸</p><button class="sys-btn yes" onclick="openApp('TIMETABLE.exe', 'timetable.html')">展開(Y)</button></div></div>
+            <div class="window teaser-win" id="win-4"><div class="window-header"><span class="title">🗺️ MAP.sys</span><span class="close-btn">X</span></div><div class="window-content"><p>座標確認(G9)</p><button class="sys-btn yes" onclick="openApp('MAP_NAVIGATOR.sys', 'map.html')">掃描(Y)</button></div></div>
+            <div class="window teaser-win" id="win-5"><div class="window-header"><span class="title">🛍️ STORE.pkg</span><span class="close-btn">X</span></div><div class="window-content"><p>周邊預購中</p><button class="sys-btn yes" onclick="openApp('STORE_DATA.pkg', 'goods.html')">購買(Y)</button></div></div>
+            <div class="window teaser-win" id="win-6"><div class="window-header"><span class="title">⚠️ INFO.txt</span><span class="close-btn">X</span></div><div class="window-content"><p>安全規範須知</p><button class="sys-btn yes" onclick="openApp('SAFETY_PROTOCOL.txt', 'guidelines.html')">確認(Y)</button></div></div>
+            <div class="window teaser-win" id="win-7"><div class="window-header"><span class="title">📜 CREDITS.txt</span><span class="close-btn">X</span></div><div class="window-content"><p>系統製作群解密</p><button class="sys-btn yes" onclick="openApp('CREDITS.txt', 'credits.html')">解密(Y)</button></div></div>
+
+            <div class="window" id="main-app-window"><div class="window-header"><span class="title" id="app-window-title">SYSTEM_APP.exe</span><span class="close-btn" onclick="closeApp()">X</span></div><div class="window-content" id="app-dynamic-content"></div></div>
+            
+            <div class="desktop-icon blink" onclick="showIgWarning()"><div class="icon-img">📷</div><div>IG_LINK.url</div></div>
+        </main>
+    </div>
+
+    <div class="modal-overlay" id="ig-overlay" onclick="closeIgWarning()"></div>
+    <div class="window alert-modal" id="ig-modal">
+        <div class="window-header" style="background-color: #aa0000;"><span class="title">⚠️ 系統警告</span><span class="close-btn" onclick="closeIgWarning()">X</span></div>
+        <div class="window-content">
+            <p>即將離開寧靜 OS，連接至外部社群網路 (Instagram)。</p>
+            <p style="color:#aa0000; font-weight:bold;">是否授權開啟？</p>
+            <div style="margin-top:15px; display:flex; justify-content:space-around;">
+                <a href="https://www.instagram.com/" target="_blank" class="sys-btn yes" onclick="closeIgWarning()">授權 (Y)</a>
+                <button class="sys-btn" onclick="closeIgWarning()">拒絕 (N)</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="marquee-container"><div class="marquee-content">/// 2026.05.20 寧靜音樂節 /// 嘉義文化園區 /// 主辦單位：中正大學 /// 全程免費入場 /// 🍍 游標異常干擾中 ///</div></div>
+
+    <script>
+        // --- 1. BIOS 開機畫面 ---
+        const biosLines = ["BOOTING TRANQUIL_OS...", "MOUNTING PINEAPPLE_DRIVE...", "LOADING FETCH_MODULE... OK", "SYSTEM READY."];
+        const biosText = document.getElementById('bios-text'); let lineIdx = 0;
+        function showBios() { if (lineIdx < biosLines.length) { biosText.innerHTML += biosLines[lineIdx] + "<br>"; lineIdx++; setTimeout(showBios, 150); } else { setTimeout(() => { document.getElementById('bios-screen').style.display = 'none'; }, 500); } }
+        window.onload = showBios;
+
+        // --- 2. 視窗拖曳邏輯 ---
+        const windows = document.querySelectorAll('.window:not(.alert-modal)'); let topZ = 100;
+        windows.forEach(win => {
+            const header = win.querySelector('.window-header'); let isDragging = false, offsetX, offsetY;
+            const startDrag = (e) => { if(e.target.classList.contains('close-btn')) return; isDragging = true; win.style.zIndex = ++topZ; const clientX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX; const clientY = e.type.includes('mouse') ? e.clientY : e.touches[0].clientY; offsetX = clientX - win.offsetLeft; offsetY = clientY - win.offsetTop; };
+            const moveDrag = (e) => { if (!isDragging) return; if(e.cancelable && e.type.includes('touch')) { e.preventDefault(); } const clientX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX; const clientY = e.type.includes('mouse') ? e.clientY : e.touches[0].clientY; win.style.left = `${clientX - offsetX}px`; win.style.top = `${clientY - offsetY}px`; };
+            const stopDrag = () => isDragging = false;
+            header.addEventListener('mousedown', startDrag); header.addEventListener('touchstart', startDrag, { passive: false }); document.addEventListener('mousemove', moveDrag); document.addEventListener('touchmove', moveDrag, { passive: false }); document.addEventListener('mouseup', stopDrag); document.addEventListener('touchend', stopDrag);
+            if(win.classList.contains('teaser-win')) win.querySelector('.close-btn').onclick = () => win.style.display = 'none';
+        });
+
+        // --- 3. 動態載入 ---
+        async function openApp(windowTitle, fileUrl) {
+            const appWin = document.getElementById('main-app-window'); const contentArea = document.getElementById('app-dynamic-content'); const titleArea = document.getElementById('app-window-title');
+            appWin.style.display = 'flex'; appWin.style.zIndex = ++topZ;
+            
+            // 👇 關鍵修改：將手機版 (else) 的 top 改為 20px
+            if(window.innerWidth > 800) { 
+                appWin.style.top = `${80 + Math.floor(Math.random() * 20)}px`; 
+                appWin.style.left = `${150 + Math.floor(Math.random() * 20)}px`; 
+            } else { 
+                appWin.style.top = `20px`;  // ✨ 修改這裡！讓視窗往上提
+                appWin.style.left = `2.5vw`; 
+            }
+            
+            titleArea.innerText = `📁 ${windowTitle}`; contentArea.innerHTML = "<h3 class='blink'>> 讀取資料中 / LOADING DATA...</h3>";
+            try { const response = await fetch(fileUrl); if (!response.ok) throw new Error('File not found'); const htmlContent = await response.text(); contentArea.innerHTML = htmlContent; } catch (error) { contentArea.innerHTML = `<h3 style='color:red;'>[ 系統錯誤 ] 無法連接到信號源 (${fileUrl})</h3><p>請確認您是否使用 Live Server 開啟網頁？</p>`; }
+        }
+        function closeApp() { document.getElementById('main-app-window').style.display = 'none'; document.getElementById('app-dynamic-content').innerHTML = ''; }
+        // --- 4. 警告視窗 ---
+        function showIgWarning() { document.getElementById('ig-overlay').style.display = 'block'; document.getElementById('ig-modal').style.display = 'block'; document.getElementById('ig-modal').style.zIndex = ++topZ + 10; }
+        function closeIgWarning() { document.getElementById('ig-overlay').style.display = 'none'; document.getElementById('ig-modal').style.display = 'none'; }
+
+        // --- 5. 模式切換 ---
+        const modes = ['noise', 'tranquil', 'pineapple']; const modeLabels = ['模式切換: 雜訊', '模式切換: 寧靜', '模式切換: 🍍鳳梨']; let currentModeIndex = 0;
+        document.getElementById('mode-toggle').onclick = (e) => { document.body.classList.remove(`${modes[currentModeIndex]}-mode`); currentModeIndex = (currentModeIndex + 1) % modes.length; document.body.classList.add(`${modes[currentModeIndex]}-mode`); e.target.innerText = modeLabels[currentModeIndex]; };
+
+        // --- 6. 滑鼠點擊爆炸特效 ---
+        const defaultColors = ['#ff00ff', '#00ff00', '#ffffff', '#9d00ff'];
+        const createExplosion = (x, y) => { if(document.body.classList.contains('tranquil-mode')) return; const isPineapple = document.body.classList.contains('pineapple-mode'); const particleCount = isPineapple ? 12 : 30; for (let i = 0; i < particleCount; i++) { const p = document.createElement('div'); p.className = 'particle'; p.style.left = `${x}px`; p.style.top = `${y}px`; if (isPineapple) { p.innerText = '🍍'; } else { const size = Math.random() * 6 + 4; p.style.width = `${size}px`; p.style.height = `${size}px`; p.style.backgroundColor = defaultColors[Math.floor(Math.random() * defaultColors.length)]; } const angle = Math.random() * Math.PI * 2; const distance = Math.random() * 150 + 50; p.style.setProperty('--tx', `${Math.cos(angle) * distance}px`); p.style.setProperty('--ty', `${Math.sin(angle) * distance}px`); document.body.appendChild(p); setTimeout(() => p.remove(), 800); } };
+        const createTrail = (x, y) => { if(document.body.classList.contains('tranquil-mode') || Math.random() > 0.6) return; const trail = document.createElement('div'); trail.className = 'trail-particle'; trail.style.left = `${x}px`; trail.style.top = `${y}px`; if(document.body.classList.contains('pineapple-mode')){ trail.innerText = '🍍'; trail.style.fontSize = '12px'; } else { trail.style.width = '4px'; trail.style.height = '4px'; trail.style.backgroundColor = defaultColors[Math.floor(Math.random() * defaultColors.length)]; } document.body.appendChild(trail); setTimeout(() => trail.remove(), 400); };
+        document.addEventListener('mousedown', (e) => { if(!e.target.closest('#ig-modal')) createExplosion(e.clientX, e.clientY); }); document.addEventListener('touchstart', (e) => { if(!e.target.closest('#ig-modal')) createExplosion(e.touches[0].clientX, e.touches[0].clientY); }, {passive: true}); document.addEventListener('mousemove', (e) => createTrail(e.clientX, e.clientY)); document.addEventListener('touchmove', (e) => createTrail(e.touches[0].clientX, e.touches[0].clientY), {passive: true});
+
+        // ==========================================
+        // 7. ✨ 動態桌布：Canvas Matrix Rain ✨
+        // ==========================================
+        const canvas = document.getElementById('matrix-bg');
+        const ctx = canvas.getContext('2d');
+        
+        let cw, ch;
+        const fontSize = 18;
+        let columns = [];
+
+        // 字符池：混入片假名與「寧靜音樂節」的彩蛋
+        const baseChars = 'ｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄﾅﾆﾇﾈﾉﾊﾋﾌﾍﾎﾏﾐﾑﾒﾓﾔﾕﾖﾗﾘﾙﾚﾛﾜﾝ0123456789'.split('');
+        // 刻意重複放入寧靜音樂節，提高掉落出現的機率
+        const easterEgg = ['寧','寧','靜','靜','音','樂','節']; 
+        const noiseChars = baseChars.concat(easterEgg);
+        const pineappleChars = ['🍍'];
+
+        // 初始化與響應式調整 (防模糊處理)
+        function initCanvas() {
+            const dpr = window.devicePixelRatio || 1; // 獲取設備像素比 (Retina)
+            cw = window.innerWidth;
+            ch = window.innerHeight;
+            
+            // 將畫布內部解析度放大，解決手機與高階螢幕的模糊問題
+            canvas.width = cw * dpr;
+            canvas.height = ch * dpr;
+            ctx.scale(dpr, dpr);
+            
+            // 計算需要幾列
+            const colCount = Math.floor(cw / fontSize) + 1;
+            columns = [];
+            for (let i = 0; i < colCount; i++) {
+                // 讓它們一開始從畫面上方隨機高度開始掉落
+                columns[i] = Math.random() * -100; 
+            }
+        }
+
+        // 監聽螢幕旋轉或視窗縮放
+        window.addEventListener('resize', initCanvas);
+        initCanvas();
+
+        // 動畫繪製邏輯
+        function drawMatrix() {
+            const isTranquil = document.body.classList.contains('tranquil-mode');
+            const isPineapple = document.body.classList.contains('pineapple-mode');
+
+            // 寧靜模式：塗上極暗的透明黑，讓畫面逐漸變全黑且停止掉落
+            if (isTranquil) {
+                ctx.fillStyle = 'rgba(17, 17, 17, 0.15)';
+                ctx.fillRect(0, 0, cw, ch);
+                return; // 不畫新的字
+            }
+
+            // 雜訊/鳳梨模式：塗上一層半透明的背景色，製造字體的「拖尾殘影」
+            ctx.fillStyle = isPineapple ? 'rgba(26, 26, 0, 0.15)' : 'rgba(10, 5, 16, 0.15)';
+            ctx.fillRect(0, 0, cw, ch);
+
+            // 設定字體與顏色
+            ctx.font = `${fontSize}px 'DotGothic16', monospace`;
+            ctx.textBaseline = 'top'; // 確保 emoji 渲染位置正確
+            ctx.fillStyle = isPineapple ? '#ffcc00' : '#0f0'; // 黃色 vs 駭客綠
+            
+            // 切換字符池
+            const chars = isPineapple ? pineappleChars : noiseChars;
+
+            // 逐列繪製字體
+            for (let i = 0; i < columns.length; i++) {
+                const char = chars[Math.floor(Math.random() * chars.length)];
+                const x = i * fontSize;
+                const y = columns[i] * fontSize;
+
+                // 畫出字符
+                ctx.fillText(char, x, y);
+
+                // 如果字掉出螢幕底部，加上隨機機率讓它回到頂部重新掉落
+                if (y > ch && Math.random() > 0.975) {
+                    columns[i] = 0;
+                } else {
+                    columns[i]++;
+                }
+            }
+        }
+
+        // 啟動動畫迴圈 (每隔 50 毫秒畫一張圖，相當於 20 FPS，節省手機效能)
+        setInterval(drawMatrix, 50);
+
+    </script>
+</body>
+</html>
