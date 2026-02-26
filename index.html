@@ -47,9 +47,9 @@
         #matrix-bg {
             position: fixed; top: 0; left: 0;
             width: 100vw; height: 100vh;
-            z-index: 0; /* 放在最底層 */
-            pointer-events: none; /* 確保不會阻擋滑鼠點擊 */
-            opacity: 0.6; /* 稍微透明，才不會搶了視窗的風采 */
+            z-index: 0; 
+            pointer-events: none; 
+            opacity: 0.6; 
         }
 
         .bg-grid { 
@@ -66,12 +66,39 @@
             z-index: 9990; background-size: 100% 2px, 3px 100%; pointer-events: none; opacity: var(--crt-opacity); 
         }
 
-        #bios-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; color: #0f0; z-index: 9999; padding: 20px; font-size: 16px; box-sizing: border-box; }
-        .layout-container { display: flex; height: 100%; width: 100%; position: relative; z-index: 10; }
+        /* =========================================
+           ✨ BIOS 終端機與開機動畫 (午夜霓虹紫) ✨
+           ========================================= */
+        #crt-boot {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: transparent; /* 解除黑布遮擋 */
+            z-index: 10000; pointer-events: none;
+            display: flex; justify-content: center; align-items: center;
+        }
+        .crt-line {
+            width: 0; height: 2px; background: #ff00ff; /* 霓虹紫 */
+            box-shadow: 0 0 15px #ff00ff, 0 0 30px #ff00ff;
+            animation: crt-turn-on 1.8s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+        }
+        @keyframes crt-turn-on {
+            0% { width: 0; height: 2px; opacity: 1; }
+            30% { width: 100%; height: 2px; opacity: 1; }
+            40% { height: 100vh; background: rgba(255, 0, 255, 0.7); opacity: 1; }
+            70% { height: 100vh; background: transparent; opacity: 1; }
+            100% { height: 100vh; background: transparent; opacity: 0; }
+        }
+
+        #bios-screen { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: #000; color: #ff00ff; /* 文字為紫色 */
+            z-index: 9999; padding: 20px; font-size: 16px; box-sizing: border-box; 
+            text-shadow: 0 0 5px #ff00ff; 
+        }
 
         /* =========================================
            3. 側邊欄與視窗 UI
            ========================================= */
+        .layout-container { display: flex; height: 100%; width: 100%; position: relative; z-index: 10; }
         .sidebar { width: 250px; background-color: var(--sidebar-bg); border-right: 2px solid var(--win-border); padding: 30px 20px; display: flex; flex-direction: column; position: relative; z-index: 50; }
         .logo-area h1 { color: #fff; font-size: 26px; margin: 0; line-height: 1.2; text-shadow: 2px 2px 0px var(--win-border); }
         .nav-links { list-style: none; padding: 0; margin: 20px 0 0 0; flex-grow: 1; overflow-y: auto;}
@@ -92,7 +119,6 @@
         .sys-btn:active { border: 2px solid #555; border-right-color: #fff; border-bottom-color: #fff; }
         .sys-btn.yes:hover { color: var(--highlight-color); font-weight: bold; }
 
-        /* 電腦版小視窗 */
         .teaser-win { width: 240px; } 
         #win-1 { top: 50px; left: 50px; } #win-2 { top: 90px; left: 340px; } #win-3 { top: 260px; left: 80px; }
         #win-4 { top: 320px; left: 380px; } #win-5 { top: 480px; left: 140px; } #win-6 { top: 520px; left: 450px; } #win-7 { top: 180px; left: 620px; }
@@ -121,27 +147,6 @@
         @keyframes blinker { 50% { opacity: 0; } }
 
         /* =========================================
-           ✨ 正確放置：CRT 開機動畫特效 (確保在 @media 外)
-           ========================================= */
-        #crt-boot {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background: #000; z-index: 10000; pointer-events: none;
-            display: flex; justify-content: center; align-items: center;
-        }
-        .crt-line {
-            width: 0; height: 2px; background: #fff;
-            box-shadow: 0 0 10px #fff, 0 0 20px #fff;
-            animation: crt-turn-on 1.8s cubic-bezier(0.23, 1, 0.32, 1) forwards;
-        }
-        @keyframes crt-turn-on {
-            0% { width: 0; height: 2px; opacity: 1; }
-            30% { width: 100%; height: 2px; opacity: 1; }
-            40% { height: 100vh; background: #fff; opacity: 1; }
-            70% { height: 100vh; background: transparent; opacity: 1; }
-            100% { height: 100vh; background: transparent; opacity: 0; }
-        }
-
-        /* =========================================
            📱 手機版專屬設定
            ========================================= */
         @media (max-width: 800px) {
@@ -149,26 +154,14 @@
             .sidebar { width: 100%; height: auto; border-right: none; border-bottom: 2px solid var(--win-border); padding: 15px; box-sizing: border-box;}
             .nav-links li { display: inline-block; margin-right: 10px; margin-bottom: 5px; }
             .teaser-win { width: 150px; }
-            /* 亂序交疊 */
             #win-1 { top: 20px; left: 15px; } #win-2 { top: 60px; left: 100px; } #win-3 { top: 30px; left: 180px; }
             #win-4 { top: 130px; left: 25px; } #win-5 { top: 170px; left: 120px; } #win-6 { top: 100px; left: 190px; } #win-7 { top: 210px; left: 60px; }
             #main-app-window { width: 95vw; height: 60vh; } 
             .desktop-icon { bottom: 80px; right: 20px; } 
         
-            /* ✨ 修正：手機版火雞遊戲防跑版 (利用 auto 撐開高度) ✨ */
-            #game-window {
-                width: 95vw !important;
-                height: auto !important; /* 解除高度限制 */
-                min-height: 50vh; /* 給予基本高度 */
-                top: 5vh !important;
-            }
-            #game-window .window-content {
-                aspect-ratio: auto !important; /* 取消固定的寬高比 */
-                min-height: 300px; /* 確保結算文字有空間顯示 */
-            }
-            #game-score {
-                top: 5px !important; right: 10px !important; font-size: 16px !important;
-            }
+            #game-window { width: 95vw !important; height: auto !important; min-height: 50vh; top: 5vh !important; }
+            #game-window .window-content { aspect-ratio: auto !important; min-height: 300px; }
+            #game-score { top: 5px !important; right: 10px !important; font-size: 16px !important; }
         }
     </style>
 </head>
@@ -244,25 +237,46 @@
     <div class="marquee-container"><div class="marquee-content">/// 2026.05.20 寧靜音樂節 /// 嘉義文化園區 /// 主辦單位：中正大學 /// 全程免費入場 /// 🍍 游標異常干擾中 ///</div></div>
 
     <script>
-        // --- 1. BIOS 開機畫面 (加入延遲配合開機白線) ---
-        const biosLines = ["BOOTING TRANQUIL_OS...", "MOUNTING PINEAPPLE_DRIVE...", "LOADING FETCH_MODULE... OK", "SYSTEM READY."];
-        const biosText = document.getElementById('bios-text'); let lineIdx = 0;
+        // ==========================================
+        // 1. ✨ 完美時間軸：BIOS 開機載入動畫
+        // ==========================================
+        const biosLines = [
+            "[0x0000] INITIATING KERNEL_CORE...",
+            "[0x001A] ALLOCATING MEMORY BLOCK...",
+            "[0xCCU] ALLOCATING CSIE_MODULE...",
+            "[0x002B] MOUNTING SIGNAL_PROCESSOR...",
+            "...",
+            "> BOOTING TRANQUIL_OS...",
+            "> MOUNTING PINEAPPLE_DRIVE...",
+            "> LOADING FETCH_MODULE... OK",
+            "> SYSTEM READY."
+        ];
+        
+        const biosText = document.getElementById('bios-text'); 
+        let lineIdx = 0;
+        
         function showBios() { 
             if (lineIdx < biosLines.length) { 
                 biosText.innerHTML += biosLines[lineIdx] + "<br>"; 
                 lineIdx++; 
-                setTimeout(showBios, 150); 
+                setTimeout(showBios, 150); // 微調印字速度，更有駭客感
             } else { 
-                setTimeout(() => { document.getElementById('bios-screen').style.display = 'none'; }, 500); 
+                // 印完後多停留 0.5 秒，再優雅淡出
+                setTimeout(() => {
+                    const biosScreen = document.getElementById('bios-screen');
+                    biosScreen.style.transition = "opacity 0.6s ease";
+                    biosScreen.style.opacity = "0";
+                    setTimeout(() => { biosScreen.style.display = 'none'; }, 600); 
+                }, 500); 
             } 
         }
         
-        // 延遲 800 毫秒才開始印字，讓白光閃爍先震撼一下視覺
+        // 延遲 1200 毫秒才開始印字，讓紫光特效盡情發揮
         window.onload = () => {
-            setTimeout(showBios, 800);
-            // 動畫結束後移除 DOM 以防阻擋點擊
-            setTimeout(() => { document.getElementById('crt-boot').remove(); }, 2000); 
+            setTimeout(showBios, 1200);
+            setTimeout(() => { document.getElementById('crt-boot').remove(); }, 2500); 
         };
+
         // --- 2. 視窗拖曳邏輯 ---
         const windows = document.querySelectorAll('.window:not(.alert-modal)'); let topZ = 100;
         windows.forEach(win => {
@@ -279,7 +293,6 @@
             const appWin = document.getElementById('main-app-window'); const contentArea = document.getElementById('app-dynamic-content'); const titleArea = document.getElementById('app-window-title');
             appWin.style.display = 'flex'; appWin.style.zIndex = ++topZ;
             
-            // 手機版的 top 改為 20px 往上提
             if(window.innerWidth > 800) { 
                 appWin.style.top = `${80 + Math.floor(Math.random() * 20)}px`; 
                 appWin.style.left = `${150 + Math.floor(Math.random() * 20)}px`; 
@@ -292,15 +305,11 @@
             try { const response = await fetch(fileUrl); if (!response.ok) throw new Error('File not found'); const htmlContent = await response.text(); contentArea.innerHTML = htmlContent; } catch (error) { contentArea.innerHTML = `<h3 style='color:red;'>[ 系統錯誤 ] 無法連接到信號源 (${fileUrl})</h3><p>請確認您是否使用 Live Server 開啟網頁？</p>`; }
         }
         function closeApp() { document.getElementById('main-app-window').style.display = 'none'; document.getElementById('app-dynamic-content').innerHTML = ''; }
+        
         // --- 4. 警告視窗 ---
-        function showIgWarning() { 
-            document.getElementById('ig-overlay').style.display = 'block'; 
-            document.getElementById('ig-modal').style.display = 'block'; 
-        }
-        function closeIgWarning() { 
-            document.getElementById('ig-overlay').style.display = 'none'; 
-            document.getElementById('ig-modal').style.display = 'none'; 
-        }
+        function showIgWarning() { document.getElementById('ig-overlay').style.display = 'block'; document.getElementById('ig-modal').style.display = 'block'; }
+        function closeIgWarning() { document.getElementById('ig-overlay').style.display = 'none'; document.getElementById('ig-modal').style.display = 'none'; }
+        
         // --- 5. 模式切換 ---
         const modes = ['noise', 'tranquil', 'pineapple']; const modeLabels = ['模式切換: 雜訊', '模式切換: 寧靜', '模式切換: 🍍鳳梨']; let currentModeIndex = 0;
         document.getElementById('mode-toggle').onclick = (e) => { document.body.classList.remove(`${modes[currentModeIndex]}-mode`); currentModeIndex = (currentModeIndex + 1) % modes.length; document.body.classList.add(`${modes[currentModeIndex]}-mode`); e.target.innerText = modeLabels[currentModeIndex]; };
@@ -321,13 +330,11 @@
         const fontSize = 18;
         let columns = [];
 
-        // 字符池：混入片假名與「寧靜音樂節」的彩蛋
         const baseChars = 'ｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄﾅﾆﾇﾈﾉﾊﾋﾌﾍﾎﾏﾐﾑﾒﾓﾔﾕﾖﾗﾘﾙﾚﾛﾜﾝ0123456789'.split('');
         const easterEgg = ['寧','寧','靜','靜','音','樂','節']; 
         const noiseChars = baseChars.concat(easterEgg);
         const pineappleChars = ['🍍'];
 
-        // 初始化與響應式調整
         function initCanvas() {
             const dpr = window.devicePixelRatio || 1; 
             cw = window.innerWidth;
@@ -339,9 +346,7 @@
             
             const colCount = Math.floor(cw / fontSize) + 1;
             columns = [];
-            for (let i = 0; i < colCount; i++) {
-                columns[i] = Math.random() * -100; 
-            }
+            for (let i = 0; i < colCount; i++) { columns[i] = Math.random() * -100; }
         }
 
         window.addEventListener('resize', initCanvas);
@@ -351,40 +356,27 @@
             const isTranquil = document.body.classList.contains('tranquil-mode');
             const isPineapple = document.body.classList.contains('pineapple-mode');
 
-            if (isTranquil) {
-                ctx.fillStyle = 'rgba(17, 17, 17, 0.15)';
-                ctx.fillRect(0, 0, cw, ch);
-                return; 
-            }
+            if (isTranquil) { ctx.fillStyle = 'rgba(17, 17, 17, 0.15)'; ctx.fillRect(0, 0, cw, ch); return; }
 
             ctx.fillStyle = isPineapple ? 'rgba(26, 26, 0, 0.15)' : 'rgba(10, 5, 16, 0.15)';
             ctx.fillRect(0, 0, cw, ch);
 
-            ctx.font = `${fontSize}px 'DotGothic16', monospace`;
-            ctx.textBaseline = 'top'; 
+            ctx.font = `${fontSize}px 'DotGothic16', monospace`; ctx.textBaseline = 'top'; 
             ctx.fillStyle = isPineapple ? '#ffcc00' : '#0f0'; 
             
             const chars = isPineapple ? pineappleChars : noiseChars;
 
             for (let i = 0; i < columns.length; i++) {
                 const char = chars[Math.floor(Math.random() * chars.length)];
-                const x = i * fontSize;
-                const y = columns[i] * fontSize;
-
+                const x = i * fontSize; const y = columns[i] * fontSize;
                 ctx.fillText(char, x, y);
-
-                if (y > ch && Math.random() > 0.975) {
-                    columns[i] = 0;
-                } else {
-                    columns[i]++;
-                }
+                if (y > ch && Math.random() > 0.975) { columns[i] = 0; } else { columns[i]++; }
             }
         }
-
         setInterval(drawMatrix, 50);
 
         // ==========================================
-        // ✨ 新增：地圖雷達掃描邏輯 (放在這裡才能被觸發)
+        // ✨ 地圖雷達掃描邏輯
         // ==========================================
         window.scanNode = function(title, desc) {
             const infoBox = document.getElementById('radar-info');
@@ -395,6 +387,6 @@
         };
 
     </script>
-    <script src="game.js?v=3.0"></script>
+    <script src="game.js?v=4.0"></script>
 </body>
 </html>
