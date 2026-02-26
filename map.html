@@ -3,20 +3,40 @@
 地址：嘉義市西區中山路 616 號</p>
 
 <style>
-    /* ✨ 加入 box-sizing: border-box 徹底解決左右滑動溢出的問題 */
+    /* ✨ 保持 box-sizing 確保佈局穩定 */
     #radar-map { 
         position: relative; width: 100%; height: 200px; background: #0a0510; 
         border: inset 2px #555; overflow: hidden; 
         background-image: radial-gradient(#9d00ff 1px, transparent 1px); background-size: 20px 20px; 
         box-sizing: border-box; 
     }
+    
     .map-node { 
         position: absolute; width: 12px; height: 12px; background: #0f0; 
         border-radius: 50%; cursor: pointer; transform: translate(-50%, -50%); 
         box-shadow: 0 0 8px #0f0; transition: 0.2s;
     }
+    
+    /* ✨ 解決點擊不靈敏：新增隱形觸控範圍 (Hitbox) */
+    .map-node::after {
+        content: '';
+        position: absolute;
+        top: 50%; left: 50%;
+        width: 44px; height: 44px; /* iOS/Android 建議之最小觸控尺寸 */
+        transform: translate(-50%, -50%);
+    }
+
     .map-node:hover { background: #ff00ff; box-shadow: 0 0 12px #ff00ff; transform: translate(-50%, -50%) scale(1.3); }
     
+    /* ✨ 新增：選中狀態樣式 (變色、放大、停止閃爍) */
+    .map-node.active {
+        background: #ff00ff !important;
+        box-shadow: 0 0 15px #ff00ff, 0 0 30px #ff00ff !important;
+        transform: translate(-50%, -50%) scale(1.5) !important;
+        animation: none !important;
+        z-index: 10;
+    }
+
     .node-noise { top: 40%; left: 30%; }
     .node-silence { top: 60%; left: 70%; }
     .node-store { top: 80%; left: 50%; background: #ffcc00; box-shadow: 0 0 8px #ffcc00; }
@@ -25,9 +45,9 @@
 </style>
 
 <div id="radar-map">
-    <div class="map-node node-noise blink" onclick="scanNode('NOISE_STAGE (主舞台)', '搖滾與電子訊號的發源地。位於園區左側廣場。')"></div>
-    <div class="map-node node-silence blink" onclick="scanNode('SILENCE_STAGE (副舞台)', '沉浸式氛圍實驗區域。位於園區右側倉庫群。')"></div>
-    <div class="map-node node-store" onclick="scanNode('STORE_DATA (官方周邊)', '官方周邊發送點與補給站。請備妥取貨代碼。')"></div>
+    <div class="map-node node-noise blink" onclick="document.querySelectorAll('.map-node').forEach(n=>n.classList.remove('active')); this.classList.add('active'); scanNode('NOISE_STAGE (主舞台)', '搖滾與電子訊號的發源地。位於園區左側廣場。')"></div>
+    <div class="map-node node-silence blink" onclick="document.querySelectorAll('.map-node').forEach(n=>n.classList.remove('active')); this.classList.add('active'); scanNode('SILENCE_STAGE (副舞台)', '沉浸式氛圍實驗區域。位於園區右側倉庫群。')"></div>
+    <div class="map-node node-store" onclick="document.querySelectorAll('.map-node').forEach(n=>n.classList.remove('active')); this.classList.add('active'); scanNode('STORE_DATA (官方周邊)', '官方周邊發送點與補給站。請備妥取貨代碼。')"></div>
     <div style="position:absolute; bottom:5px; right:5px; font-size:10px; color:#555; pointer-events:none;">[ RADAR ACTIVE ]</div>
 </div>
 

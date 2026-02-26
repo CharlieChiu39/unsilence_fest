@@ -159,9 +159,15 @@
             #main-app-window { width: 95vw; height: 60vh; } 
             .desktop-icon { bottom: 80px; right: 20px; } 
         
-            #game-window { width: 95vw !important; height: auto !important; min-height: 50vh; top: 5vh !important; }
-            #game-window .window-content { aspect-ratio: auto !important; min-height: 300px; }
-            #game-score { top: 5px !important; right: 10px !important; font-size: 16px !important; }
+            #game-window { width: 95vw !important; height: auto !important; top: 5vh !important; }
+            #game-window .window-content { 
+                aspect-ratio: auto !important; /* 取消死板的比例限制 */
+                 min-height: 420px !important;  /* 給予足夠的最小高度，確保塞得下折扣碼和長串文字 */
+                height: 60vh !important;       /* 讓視窗在手機上能佔據舒適的比例 */
+                
+}
+#run-canvas { object-fit: cover; } /* 讓畫布能適應變高的視窗，避免變形 */
+#game-score { top: 15px !important; right: 15px !important; font-size: 16px !important; }
         }
     </style>
 </head>
@@ -206,8 +212,7 @@
                     <span class="close-btn" onclick="closeGame()">X</span>
                 </div>
                 <div class="window-content" style="padding: 0; background-color: #05020a; position: relative; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; aspect-ratio: 8/3;">
-                    <div id="game-score" style="position: absolute; top: 10px; right: 20px; color: #0f0; font-size: 20px; font-weight: bold; text-shadow: 2px 2px 0 #000; z-index: 10;">SCORE: 0</div>
-                    
+                <div id="game-score" style="position: absolute; top: 10px; right: 20px; color: #0f0; font-size: 20px; font-weight: bold; text-shadow: 2px 2px 0 #000; z-index: 10; pointer-events: none;">SCORE: 0</div>                    
                     <div id="game-msg" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; color: #0f0; text-align: center; z-index: 10; cursor: pointer; display: flex; flex-direction: column; justify-content: center; align-items: center; background: rgba(0,0,0,0.6);">
                         <h2 class="blink" style="margin: 0; color: #ff00ff; font-size: 2rem; text-shadow: 2px 2px #000;">SYSTEM BREACH</h2>
                         <p style="margin-top: 10px; font-size: 1.2rem; text-shadow: 1px 1px #000;">> 點擊畫面 或 按空白鍵開始逃亡 &lt;</p>

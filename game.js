@@ -7,7 +7,7 @@ const runCtx = runCanvas.getContext('2d');
 const gameMsg = document.getElementById('game-msg');
 const scoreBoard = document.getElementById('game-score');
 
-let gameReq, isPlaying = false, score = 0, speed = 6;
+let gameReq, isPlaying = false, score = 0, speed = 8;
 let frames = 0;
 
 // 🎯 解鎖彩蛋的目標分數
@@ -17,14 +17,15 @@ let hasWon = false;
 // 🔥 固定時間步長 (Fixed Time Step) 變數
 let lastTime = 0;
 let accumulator = 0;
-const step = 1000 / 60; // 固定每次物理更新為 60 FPS 的時間 (約 16.66ms)
+const step = 1000 / 60; // 60 FPS
 
-// 火雞物理設定
-const turkey = { x: 50, y: 150, size: 30, vy: 0, gravity: 0.8, jumpPower: -12, isJumping: false };
+// 🦖 小恐龍物理引擎設定 (高重力、爆發跳躍、大尺寸)
+const FLOOR_Y = 170; 
+const turkey = { x: 50, y: FLOOR_Y, size: 60, vy: 0, gravity: 1.2, jumpPower: -18, isJumping: false };
 let obstacles = [];
 
 // ==========================================
-// 1. 遊戲視窗控制
+// 1. 遊戲視窗與 UI 控制
 // ==========================================
 function openGame() {
     gameWinUI.style.display = 'flex';
@@ -42,17 +43,27 @@ function closeGame() {
 }
 
 function resetGame() {
-    isPlaying = false; hasWon = false; score = 0; speed = 6; frames = 0; lastTime = 0; accumulator = 0; turkey.y = 150; turkey.vy = 0; turkey.isJumping = false; obstacles = []; 
+    isPlaying = false; hasWon = false; score = 0; speed = 8; frames = 0; lastTime = 0; accumulator = 0; 
+    turkey.y = FLOOR_Y; turkey.vy = 0; turkey.isJumping = false; obstacles = []; 
     
     scoreBoard.innerText = `SCORE: ${score}`;
-    scoreBoard.style.display = 'none'; // ✨ 修改這裡：遊戲尚未開始前，先隱藏分數板
+    scoreBoard.style.display = 'none'; // 尚未開始前隱藏分數防重疊
     runCanvas.style.display = 'block'; 
     
-    // ✨ 保持絕對定位，完美覆蓋畫布且不破壞外層比例
+    // ✨ 滿版覆蓋排版：絕對居中、禁止滾動、彈性字體
     gameMsg.style.position = 'absolute'; 
     gameMsg.style.background = 'rgba(0,0,0,0.6)';
     gameMsg.style.display = 'flex'; 
-    gameMsg.innerHTML = '<h2 class="blink" style="margin: 0; color: #ff00ff; font-size: clamp(1.5rem, 5vw, 2rem); text-shadow: 2px 2px #000;">SYSTEM BREACH</h2><p style="margin-top: 10px; font-size: clamp(1rem, 3vw, 1.2rem); text-shadow: 1px 1px #000;">> 點擊畫面 或 按空白鍵開始逃亡 &lt;</p>';
+    gameMsg.style.flexDirection = 'column';
+    gameMsg.style.justifyContent = 'center'; 
+    gameMsg.style.alignItems = 'center';
+    gameMsg.style.overflowY = 'hidden'; 
+    gameMsg.style.padding = '0';
+    
+    gameMsg.innerHTML = `
+        <h2 class="blink" style="margin: 0; color: #ff00ff; font-size: clamp(1.8rem, 6vw, 2.5rem); text-shadow: 2px 2px #000;">SYSTEM BREACH</h2>
+        <p style="margin-top: 10px; font-size: clamp(0.9rem, 3vw, 1.2rem); text-shadow: 1px 1px #000;">> 點擊畫面 或 按空白鍵開始逃亡 &lt;</p>
+    `;
 }
 
 // ==========================================
@@ -65,7 +76,7 @@ function jump() {
         resetGame(); 
         isPlaying = true;
         gameMsg.style.display = 'none'; 
-        scoreBoard.style.display = 'block'; // ✨ 新增這行：玩家點擊開始逃亡後，才顯示分數板
+        scoreBoard.style.display = 'block'; // 正式起跑才顯示分數
         gameReq = requestAnimationFrame(gameLoop); 
         return;
     }
@@ -91,31 +102,16 @@ startEvents.forEach(evt => {
 // ==========================================
 // 3. 畫面繪製與動畫迴圈
 // ==========================================
-// ==========================================
-// 3. 畫面繪製與動畫迴圈
-// ==========================================
-function drawTurkey() {
-    runCtx.save(); 
-    runCtx.scale(-1, 1); 
-    runCtx.font = "30px Arial";
-    runCtx.fillText("🦃", -turkey.x - 30, turkey.y + 25);
-    runCtx.restore(); 
-}
-
-// ✨ 新增全域變數：控制網格滾動的偏移量
 let bgOffset = 0; 
 
-// ✨ 新增：繪製賽博龐克動態網格背景
-// ✨ 繪製賽博龐克動態網格背景
 function drawNeonGrid() {
     runCtx.fillStyle = '#05020a'; 
     runCtx.fillRect(0, 0, runCanvas.width, runCanvas.height);
     
-    // 🔥 提升亮度與粗細，讓手機上也清晰可見！
-    runCtx.strokeStyle = 'rgba(255, 0, 255, 0.8)'; // 改為明亮的桃紅色
+    runCtx.strokeStyle = 'rgba(255, 0, 255, 0.8)';
     runCtx.lineWidth = 2.5; 
     
-    const horizonY = 180;
+    const horizonY = 230; // ✨ 修改這裡：將地平線從 180 往下移到 230
     const vpX = runCanvas.width / 2;
     const gridSpacing = 40;
 
@@ -141,13 +137,20 @@ function drawNeonGrid() {
     runCtx.stroke();
 }
 
+function drawTurkey() {
+    runCtx.save(); 
+    runCtx.scale(-1, 1); 
+    runCtx.font = "60px Arial"; // 字體配合 Size 放大
+    runCtx.fillText("🦃", -turkey.x - 60, turkey.y + 50); // 基線精確對齊地板
+    runCtx.restore(); 
+}
+
 function drawStaticScene() {
-    bgOffset = 0; // 靜態畫面重置偏移
-    drawNeonGrid(); // 取代原本的純色背景
+    bgOffset = 0; 
+    drawNeonGrid(); 
     drawTurkey(); 
 }
 
-// 🔥 採用時間累加器 (Fixed Time Step) 的主迴圈
 function gameLoop(timestamp) {
     if (!isPlaying) return;
     
@@ -165,8 +168,8 @@ function gameLoop(timestamp) {
         turkey.vy += turkey.gravity;
         turkey.y += turkey.vy;
         
-        if (turkey.y >= 150) {
-            turkey.y = 150;
+        if (turkey.y >= FLOOR_Y) {
+            turkey.y = FLOOR_Y;
             turkey.isJumping = false;
             turkey.vy = 0;
         }
@@ -174,30 +177,34 @@ function gameLoop(timestamp) {
         let canSpawn = true;
         if (obstacles.length > 0) {
             let lastObs = obstacles[obstacles.length - 1];
-            if (runCanvas.width - lastObs.x < 250) {
+            let minGap = 250 + (speed * 10); // 隨速度動態調整障礙物間距
+            if (runCanvas.width - lastObs.x < minGap) {
                 canSpawn = false;
             }
         }
 
-        if (canSpawn && frames % Math.floor(Math.random() * 60 + 60) === 0) {
-            const type = Math.random() > 0.3 ? "📺" : "🍍";
-            obstacles.push({ x: runCanvas.width, y: 155, size: 25, type: type });
+       if (canSpawn && frames % Math.floor(Math.random() * 50 + 50) === 0) {
+            const type = Math.random() > 0.4 ? "📺" : "🍍";
+            obstacles.push({ x: runCanvas.width, y: 175, size: 55, type: type }); // ✨ 修改這裡：將 y 從 125 往下移到 175
         }
+
+        // 🛡️ 內縮碰撞框 (Hitbox)：給予玩家 15px 的容錯空間
+        let hitMargin = 15; 
 
         for (let i = 0; i < obstacles.length; i++) {
             let obs = obstacles[i];
             obs.x -= speed;
 
-            if (turkey.x < obs.x + obs.size - 5 && 
-                turkey.x + turkey.size - 5 > obs.x &&
-                turkey.y < obs.y + obs.size - 5 && 
-                turkey.y + turkey.size - 5 > obs.y) {
+            if (turkey.x + hitMargin < obs.x + obs.size - hitMargin && 
+                turkey.x + turkey.size - hitMargin > obs.x + hitMargin &&
+                turkey.y + hitMargin < obs.y + obs.size - hitMargin && 
+                turkey.y + turkey.size - hitMargin > obs.y + hitMargin) {
                 gameOver();
                 return;
             }
         }
 
-        if (obstacles.length > 0 && obstacles[0].x < -30) {
+        if (obstacles.length > 0 && obstacles[0].x < -60) {
             obstacles.shift();
             score += 10;
             scoreBoard.innerText = `SCORE: ${score}`;
@@ -206,8 +213,7 @@ function gameLoop(timestamp) {
                 triggerWin();
                 return; 
             }
-
-            if (score % 100 === 0) speed += 0.5; 
+            if (score % 30 === 0) speed += 0.5; // 每過 3 個障礙物微微加速
         }
 
         frames++;
@@ -215,15 +221,13 @@ function gameLoop(timestamp) {
     }
 
     // --- 區塊 B: 畫面繪製 (Render) ---
-    // ✨ 呼叫我們剛剛寫的超酷網格背景
     drawNeonGrid();
-
     drawTurkey();
 
     for (let i = 0; i < obstacles.length; i++) {
         let obs = obstacles[i];
-        runCtx.font = "25px Arial";
-        runCtx.fillText(obs.type, obs.x, obs.y + 25);
+        runCtx.font = "55px Arial";
+        runCtx.fillText(obs.type, obs.x, obs.y + 45); 
     }
 }
 
@@ -234,13 +238,23 @@ function gameOver() {
     isPlaying = false;
     cancelAnimationFrame(gameReq);
     
-    scoreBoard.style.display = 'none'; // 隱藏分數
-    runCanvas.style.display = 'none';  // ✨ 徹底隱藏畫布，釋放空間
+    scoreBoard.style.display = 'none'; 
+    runCanvas.style.display = 'none';  
     
     gameMsg.style.position = 'absolute'; 
     gameMsg.style.background = 'rgba(0,0,0,0.9)';
     gameMsg.style.display = 'flex';
-    gameMsg.innerHTML = `<h2 style="margin: 0; color: #ff0000; text-shadow: 2px 2px #000; font-size: clamp(1.5rem, 5vw, 2rem);">[ FATAL ERROR ]</h2><p style="margin-top: 10px; font-size: clamp(1rem, 3vw, 1.2rem);">火雞已被攔截。最終分數: ${score}</p><p class="blink" style="font-size: 1rem; margin-top: 15px; color: #ff00ff;">> 點擊重新連線 &lt;</p>`;
+    gameMsg.style.flexDirection = 'column';
+    gameMsg.style.justifyContent = 'center'; 
+    gameMsg.style.alignItems = 'center';
+    gameMsg.style.overflowY = 'hidden'; // 強制鎖定捲軸
+    gameMsg.style.padding = '10px';
+
+    gameMsg.innerHTML = `
+        <h2 style="margin: 0; color: #ff0000; text-shadow: 2px 2px #000; font-size: clamp(1.5rem, 5vw, 2rem);">[ FATAL ERROR ]</h2>
+        <p style="margin: 10px 0; font-size: clamp(1rem, 3vw, 1.2rem);">火雞已被攔截。最終分數: ${score}</p>
+        <p class="blink" style="margin: 10px 0 0 0; font-size: 1rem; color: #ff00ff;">> 點擊重新連線 &lt;</p>
+    `;
 }
 
 function triggerWin() {
@@ -248,17 +262,23 @@ function triggerWin() {
     hasWon = true;
     cancelAnimationFrame(gameReq); 
     
-    scoreBoard.style.display = 'none'; // 隱藏分數防重疊
-    runCanvas.style.display = 'none';  // ✨ 徹底隱藏畫布，釋放空間
+    scoreBoard.style.display = 'none'; 
+    runCanvas.style.display = 'none';  
     
     gameMsg.style.position = 'absolute';
     gameMsg.style.background = 'rgba(0,0,0,0.9)';
     gameMsg.style.display = 'flex';
+    gameMsg.style.flexDirection = 'column';
+    gameMsg.style.justifyContent = 'center'; 
+    gameMsg.style.alignItems = 'center';
+    gameMsg.style.overflowY = 'hidden'; // 強制鎖定捲軸
+    gameMsg.style.padding = '10px'; 
+    
     gameMsg.innerHTML = `
-        <h2 class="blink" style="margin: 0; color: #00ff00; text-shadow: 2px 2px #000; font-size: clamp(1.2rem, 5vw, 2rem);">[ SYSTEM OVERRIDE SUCCESS ]</h2>
-        <p style="margin-top: 10px; font-size: clamp(0.9rem, 4vw, 1.1rem); color: #fff; padding: 0 10px;">你成功駭入了寧靜系統！<br>獲得隱藏周邊折扣碼：</p>
-        <div style="background: #ff00ff; color: #fff; padding: 10px 15px; margin-top: 10px; font-weight: bold; font-size: clamp(1.2rem, 5vw, 1.5rem); border: 2px solid #fff; word-break: break-all;">TURKEY_BREACH_2026</div>
-        <p style="font-size: clamp(0.75rem, 3vw, 0.9rem); margin-top: 15px; color: #aaa; padding: 0 10px;">> 請截圖此畫面，<br>至現場周邊攤位出示以享有折價優惠 &lt;</p>
-        <p class="blink" style="font-size: clamp(0.8rem, 3vw, 1rem); margin-top: 10px; color: #00ff00;">> 點擊畫面重新開始挑戰 &lt;</p>
+        <h2 class="blink" style="margin: 0; color: #00ff00; text-shadow: 2px 2px #000; font-size: clamp(1.2rem, 5vw, 1.8rem);">[ SYSTEM OVERRIDE SUCCESS ]</h2>
+        <p style="margin: 5px 0 0 0; font-size: clamp(0.8rem, 3.5vw, 1rem); color: #fff; text-align: center;">你成功駭入了寧靜系統！獲得隱藏折扣碼：</p>
+        <div style="background: #ff00ff; color: #fff; padding: 5px 10px; margin: 10px 0; font-weight: bold; font-size: clamp(1.1rem, 5vw, 1.5rem); border: 2px solid #fff; word-break: break-all;">TURKEY_BREACH_2026</div>
+        <p style="margin: 0; font-size: clamp(0.7rem, 2.5vw, 0.85rem); color: #aaa; text-align: center;">> 請截圖此畫面，至現場周邊攤位出示以享有優惠 &lt;</p>
+        <p class="blink" style="margin: 15px 0 0 0; font-size: clamp(0.8rem, 3vw, 1rem); color: #00ff00;">> 點擊畫面重新開始挑戰 &lt;</p>
     `;
 }
