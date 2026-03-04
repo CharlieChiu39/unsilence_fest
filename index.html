@@ -7,7 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Shippori+Mincho+B1:wght@800&display=swap" rel="stylesheet">
     <style>
         :root {
-            /* ✨ 還原經典配色方案 */
+            /* 配色方案 */
             --bg-color: #0a0510; 
             --text-color: #0f0; 
             --highlight-color: #ff00ff; 
@@ -53,7 +53,6 @@
             background-color: var(--bg-color); color: var(--text-color); 
             font-family: 'DotGothic16', sans-serif; overflow: hidden; 
             user-select: none; -webkit-user-select: none; touch-action: none; 
-            /* ✨ 鳳梨鼠標保留 */
             cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" style="font-size:24px"><text y="24">🍍</text></svg>'), auto; 
         }
 
@@ -63,11 +62,9 @@
         ::-webkit-scrollbar-thumb { background: var(--highlight-color); border: 1px solid #fff; }
         ::-webkit-scrollbar-thumb:hover { background: #fff; }
 
-        * { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
+        * { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; box-sizing: border-box; }
 
-        /* =========================================
-           背景質感與濾鏡
-           ========================================= */
+        /* 背景與濾鏡 */
         #matrix-bg { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 0; pointer-events: none; opacity: 0.6; }
         .bg-grid { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; background-image: linear-gradient(rgba(157, 0, 255, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(157, 0, 255, 0.1) 1px, transparent 1px); background-size: 40px 40px; }
         .film-grain { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 9996; pointer-events: none; opacity: 0.04; background-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><filter id="noiseFilter"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23noiseFilter)"/></svg>'); }
@@ -75,17 +72,15 @@
         .scanline { position: fixed; top: 0; left: 0; width: 100vw; height: 8px; background: rgba(255, 255, 255, 0.1); opacity: 0.6; z-index: 9998; pointer-events: none; animation: rollDown 8s linear infinite; }
         @keyframes rollDown { 0% { transform: translateY(-10vh); } 100% { transform: translateY(110vh); } }
 
-        /* CRT Boot 開機畫面 */
+        /* CRT Boot */
         #crt-boot { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: transparent; z-index: 10000; pointer-events: none; display: flex; justify-content: center; align-items: center; }
         .crt-line { width: 0; height: 2px; background: #ff00ff; box-shadow: 0 0 15px #ff00ff, 0 0 30px #ff00ff; animation: crt-turn-on 1.8s cubic-bezier(0.23, 1, 0.32, 1) forwards; }
         @keyframes crt-turn-on { 0% { width: 0; height: 2px; opacity: 1; } 30% { width: 100%; height: 2px; opacity: 1; } 40% { height: 100vh; background: rgba(255, 0, 255, 0.7); opacity: 1; } 70% { height: 100vh; background: transparent; opacity: 1; } 100% { height: 100vh; background: transparent; opacity: 0; } }
         #bios-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; color: #ff00ff; z-index: 9999; padding: 20px; font-size: 16px; box-sizing: border-box; text-shadow: 0 0 5px #ff00ff; }
 
         /* =========================================
-           ✨ 特效樣式
+           特效樣式
            ========================================= */
-        
-        /* 滑鼠星塵拖尾 */
         .stardust { 
             position: fixed; pointer-events: none; z-index: 9999; 
             color: var(--highlight-color); font-family: 'DotGothic16'; font-weight: bold;
@@ -97,52 +92,32 @@
             100% { opacity: 0; transform: translate(var(--tx), var(--ty)) scale(0.2); } 
         }
 
-        /* ✨ 優化版：手機聲納波紋 (GPU加速) */
-        .sonar-ripple {
+        .particle { 
+            position: fixed; pointer-events: none; z-index: 10001; 
+            border-radius: 50%; 
+            animation: explode-drop 0.8s cubic-bezier(0.1, 0.8, 0.3, 1) forwards; 
+        }
+        @keyframes explode-drop { 
+            0% { transform: translate(0, 0) scale(1); opacity: 1; } 
+            60% { opacity: 0.8; }
+            100% { transform: translate(var(--tx), var(--ty)) scale(0); opacity: 0; } 
+        }
+
+        /* 輕量化手機波紋 (無卡頓版) */
+        .tap-ripple {
             position: fixed; pointer-events: none; z-index: 9999;
-            width: 20px; height: 20px; /* 初始尺寸縮小 */
+            width: 20px; height: 20px; 
             border-radius: 50%;
-            background: rgba(255, 255, 255, 0.1); /* 降低填充透明度 */
-            border: 1px solid var(--highlight-color);
-            transform: translate(-50%, -50%) scale(1); /* 初始狀態 */
-            animation: sonar-expand-gpu 0.6s ease-out forwards;
-            will-change: transform, opacity; /* 啟用 GPU 加速 */
-            mix-blend-mode: screen; /* 讓波紋與背景融合 */
-        }
-        
-        @keyframes sonar-expand-gpu {
-            0% { transform: translate(-50%, -50%) scale(1); opacity: 0.8; }
-            100% { transform: translate(-50%, -50%) scale(8); opacity: 0; } /* 使用 scale 放大 */
-        }
-
-        /* 按鈕傳輸震動 */
-        .transmitting {
-            animation: rgb-shake 0.3s linear;
-            background: var(--highlight-color) !important;
-            color: #000 !important;
-            box-shadow: 0 0 15px var(--highlight-color) !important;
-            border-color: #fff !important;
-        }
-        @keyframes rgb-shake {
-            0% { transform: translate(0,0); text-shadow: none; }
-            25% { transform: translate(-2px, 1px); text-shadow: 2px 0 #ff0000, -2px 0 #0000ff; }
-            50% { transform: translate(2px, -1px); text-shadow: -2px 0 #ff0000, 2px 0 #0000ff; }
-            75% { transform: translate(-1px, 2px); text-shadow: 2px 0 #ff0000, -2px 0 #0000ff; }
-            100% { transform: translate(0,0); text-shadow: none; }
-        }
-
-        /* 爆炸特效 1: 反相虛空波紋 */
-        .void-wave {
-            position: fixed; pointer-events: none; z-index: 10000;
-            border-radius: 50%;
-            background: #fff;
-            mix-blend-mode: difference;
+            border: 2px solid rgba(255, 255, 255, 0.8); /* 空心圓圈 */
+            background: transparent;
             transform: translate(-50%, -50%);
-            animation: void-expand 0.4s cubic-bezier(0.1, 0.9, 0.2, 1) forwards;
+            /* 使用 will-change 優化效能 */
+            will-change: transform, opacity;
+            animation: ripple-expand 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
         }
-        @keyframes void-expand {
-            0% { width: 0; height: 0; opacity: 1; }
-            100% { width: 300px; height: 300px; opacity: 0; }
+        @keyframes ripple-expand {
+            0% { transform: translate(-50%, -50%) scale(0.5); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(5); opacity: 0; }
         }
 
         /* 爆炸特效 2: 數據崩壞粒子 */
@@ -163,7 +138,23 @@
             100% { transform: translate(var(--tx), var(--ty)) scale(0.5); opacity: 0; }
         }
 
-        /* 介面佈局 */
+        /* 按鈕傳輸震動 */
+        .transmitting {
+            animation: rgb-shake 0.3s linear;
+            background: var(--highlight-color) !important;
+            color: #000 !important;
+            box-shadow: 0 0 15px var(--highlight-color) !important;
+            border-color: #fff !important;
+        }
+        @keyframes rgb-shake {
+            0% { transform: translate(0,0); text-shadow: none; }
+            25% { transform: translate(-2px, 1px); text-shadow: 2px 0 #ff0000, -2px 0 #0000ff; }
+            50% { transform: translate(2px, -1px); text-shadow: -2px 0 #ff0000, 2px 0 #0000ff; }
+            75% { transform: translate(-1px, 2px); text-shadow: 2px 0 #ff0000, -2px 0 #0000ff; }
+            100% { transform: translate(0,0); text-shadow: none; }
+        }
+
+        /* 介面佈局 (PC) */
         .layout-container { display: flex; height: 100%; width: 100%; position: relative; z-index: 10; }
         
         .sidebar { width: 250px; background-color: var(--sidebar-bg); border-right: 2px solid var(--win-border); padding: 30px 20px; display: flex; flex-direction: column; position: relative; z-index: 10000; }
@@ -194,6 +185,7 @@
 
         .main-content { flex-grow: 1; position: relative; }
         
+        /* 視窗樣式 */
         .window { 
             position: absolute; 
             background-color: var(--win-bg); 
@@ -240,70 +232,68 @@
         .marquee-content { display: inline-block; white-space: nowrap; animation: marquee 20s linear infinite; font-size: 16px; }
         @keyframes marquee { 0% { transform: translateX(100vw); } 100% { transform: translateX(-100%); } }
 
-        /* ✨ 手機版優化 (Mobile Optimization) */
+        /* =========================================
+           ✨ MOBILE OPTIMIZATION 手機版優化核心
+           ========================================= */
         @media (max-width: 800px) {
             .layout-container { flex-direction: column; }
             
-            /* 1. Header 空間壓縮 */
+            /* 1. Header 壓縮 */
             .sidebar { 
                 width: 100%; height: auto; 
                 border-right: none; border-bottom: 2px solid var(--win-border); 
-                padding: 10px 15px; /* 減少 padding */
+                padding: 10px 15px; /* 減少邊距 */
                 box-sizing: border-box;
             }
-            .logo-area { margin-bottom: 5px; } /* 減少 logo 下方空間 */
-            .logo-area h1 { font-size: 26px; } /* 稍微縮小標題 */
-            .nav-links { 
-                margin: 5px 0; 
-                text-align: center;
-                display: flex; 
-                flex-wrap: wrap; 
-                justify-content: center;
-                gap: 5px; /* 緊湊排列 */
-            }
-            .nav-links li { margin: 2px 4px; display: inline-block; }
+
+            /* Logo 縮小並排 */
+            .logo-area { margin-bottom: 5px; text-align: center; }
+            .logo-area h1 { font-size: 22px; line-height: 1.2; display: inline-block;}
+            .logo-area h1 br { display: none; } /* 強制不換行 */
+            .logo-area h1::after { content: " | "; color: #555; } /* 分隔線 */
             
-            .mode-toggle { 
-                margin-top: 5px; 
-                padding: 6px; 
-                font-size: 14px; 
-                width: auto; 
-                display: inline-block;
+            /* 導覽列 Flex 緊湊排列 */
+            .nav-links { 
+                margin: 5px 0 10px 0; 
+                display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; /* 使用 gap 代替 margin */
+            }
+            .nav-links li { margin: 0; }
+            .nav-links a { font-size: 16px; padding: 4px 8px; }
+            
+            /* 模式切換按鈕縮小 */
+            .mode-toggle { margin-top: 5px; padding: 5px; font-size: 14px; width: auto; display: inline-block; }
+
+            /* 2. 視窗絕對置中 + 避免被切掉 */
+            #main-app-window, #game-window { 
+                position: fixed !important; /* 強制固定 */
+                top: 50% !important; left: 50% !important; 
+                transform: translate(-50%, -50%) !important;
+                
+                width: 92vw !important; 
+                height: auto !important; 
+                max-height: 75dvh !important; /* 使用 dvh 避開網址列 */
+                
+                margin: 0 !important;
+                z-index: 10005 !important; /* 確保在最上層 */
+                display: none; /* 預設隱藏 */
+            }
+            
+            /* 確保視窗內容可以捲動 */
+            #main-app-window .window-content, #game-window .window-content { 
+                overflow-y: auto; 
+                max-height: 65dvh; 
             }
 
-            .teaser-win { width: 160px; } 
-            #win-1 { top: 2vh; left: 2vw; } #win-2 { top: 8vh; left: 15vw; } #win-3 { top: 14vh; left: 30vw; }
-            #win-4 { top: 20vh; left: 5vw; } #win-5 { top: 26vh; left: 25vw; } #win-6 { top: 32vh; left: 45vw; } #win-7 { top: 38vh; left: 10vw; }
+            /* 手機版隱藏小視窗，只留主視窗邏輯 */
+            .teaser-win { display: none !important; }
+
+            /* 3. 底部安全區與圖示 */
+            .desktop-icon { bottom: calc(40px + env(safe-area-inset-bottom, 20px)); right: 20px; } 
             
-            /* 2. 主視窗完美置中與高度控制 */
-            #main-app-window { 
-                width: 90vw !important; 
-                height: auto !important;
-                max-height: 80dvh !important; /* 使用動態視口高度 */
-                
-                /* 絕對置中大法 */
-                top: 50% !important; 
-                left: 50% !important; 
-                transform: translate(-50%, -50%) !important;
-                
-                /* 確保底部有安全距離，且內容可滾動 */
-                padding-bottom: env(safe-area-inset-bottom);
-                display: none; 
-                flex-direction: column;
-            }
-            
-            .desktop-icon { bottom: calc(40px + env(safe-area-inset-bottom, 20px) + 30px); right: 5vw; } 
-            
-            #game-window { 
-                width: 95vw !important; 
-                height: auto !important; 
-                top: 50% !important; 
-                left: 50% !important;
-                transform: translate(-50%, -50%) !important;
-            }
-            #game-window .window-content { aspect-ratio: auto !important; min-height: 320px !important; height: auto !important; display: flex !important; flex-direction: column !important; justify-content: center !important; }
-            #run-canvas { object-fit: contain !important; width: 100% !important; height: auto !important; max-height: 100% !important; } 
+            #game-window .window-content { aspect-ratio: auto !important; min-height: 320px !important; }
+            #run-canvas { object-fit: contain !important; width: 100% !important; } 
         }
+
         .blink { animation: blinker 1s linear infinite; }
         @keyframes blinker { 50% { opacity: 0; } }
     </style>
@@ -378,7 +368,7 @@
     <div class="marquee-container"><div class="marquee-content">/// 2026.05.20 寧靜音樂節 /// 嘉義文化園區 /// 主辦單位：中正大學 /// 全程免費入場 /// 🍍 游標異常干擾中 ///</div></div>
 
     <script>
-        // ✨ 按鈕訊號傳輸干擾
+        // ✨ 按鈕訊號傳輸干擾 (Signal Glitch)
         function signalClick(btnElement, windowTitle, fileUrl) {
             if (btnElement.classList.contains('transmitting')) return;
 
@@ -403,7 +393,7 @@
             }, 300);
         }
 
-        // ✨ 極限星塵特效
+        // ✨ 極限星塵特效 (High-Density Stardust)
         let lastX = 0, lastY = 0;
         const createStardust = (x, y) => {
             if(document.body.classList.contains('tranquil-mode')) return;
@@ -420,6 +410,7 @@
                 p.innerText = shapes[Math.floor(Math.random() * shapes.length)];
                 p.style.left = `${x}px`;
                 p.style.top = `${y}px`;
+                
                 p.style.fontSize = Math.random() > 0.5 ? '10px' : '14px';
                 
                 const tx = (Math.random() - 0.5) * 60; 
@@ -432,19 +423,11 @@
             }
         };
 
-        // ✨ 爆炸特效：數據崩壞 + 反相虛空
+        // ✨ 爆炸特效：數據崩壞 (PC點擊)
         const createExplosion = (x, y) => { 
             if(document.body.classList.contains('tranquil-mode')) return; 
 
-            // 1. 生成反相虛空波紋
-            const wave = document.createElement('div');
-            wave.className = 'void-wave';
-            wave.style.left = `${x}px`;
-            wave.style.top = `${y}px`;
-            document.body.appendChild(wave);
-            setTimeout(() => wave.remove(), 400);
-
-            // 2. 生成數據崩壞粒子
+            // 數據崩壞粒子
             const crashSymbols = ["ERROR", "NULL", "0xFF", "†", "⚠", "{}", "//", "FATAL", "NaN", "?", "█"];
             const particleCount = 12;
 
@@ -454,6 +437,7 @@
                 p.innerText = crashSymbols[Math.floor(Math.random() * crashSymbols.length)];
                 p.style.left = `${x}px`; 
                 p.style.top = `${y}px`; 
+                
                 p.style.fontSize = Math.random() > 0.6 ? '16px' : '12px';
                 if(Math.random() > 0.8) p.style.color = '#fff';
 
@@ -471,19 +455,20 @@
         };
 
         document.addEventListener('pointerdown', (e) => { 
-            if (!e.target.closest('.window-header')) {
+            // 如果不是手機，且不是點擊 Header，則觸發爆炸
+            if (!isMobile && !e.target.closest('.window-header')) {
                 createExplosion(e.clientX, e.clientY); 
             }
         });
 
-        // ✨ 優化版：手機聲納波紋 (GPU Scale)
+        // ✨ 手機輕量化波紋 (無卡頓版)
         const createRipple = (x, y) => {
             const r = document.createElement('div');
-            r.className = 'sonar-ripple';
+            r.className = 'tap-ripple';
             r.style.left = `${x}px`;
             r.style.top = `${y}px`;
             document.body.appendChild(r);
-            setTimeout(() => r.remove(), 600);
+            setTimeout(() => r.remove(), 500); // 配合 CSS 動畫時間
         };
 
         const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
@@ -542,7 +527,7 @@
         const cache = {};
         function preloadApps() { const filesToPreload = ['news.html', 'lineup.html', 'timetable.html', 'map.html', 'goods.html', 'guidelines.html', 'credits.html']; filesToPreload.forEach(file => { fetch(file).then(res => res.text()).then(html => cache[file] = html).catch(e=>console.log("Preload Error:", file)); }); }
 
-        // 視窗拖曳
+        // 視窗拖曳 (PC Only)
         const windows = document.querySelectorAll('.window:not(.alert-modal)'); 
         let topZ = 100;
         function focusWindow(win) { windows.forEach(w => w.classList.remove('focused')); win.classList.add('focused'); win.style.zIndex = ++topZ; }
@@ -552,6 +537,7 @@
             let isDragging = false; let offsetX, offsetY, parentX, parentY;
             win.addEventListener('pointerdown', () => focusWindow(win)); 
             const startDrag = (e) => {
+                if (isMobile) return; // 手機版禁用拖曳
                 if (e.target.classList.contains('close-btn')) return;
                 isDragging = true; focusWindow(win);
                 const rect = win.getBoundingClientRect(); const parentRect = win.offsetParent.getBoundingClientRect();
@@ -567,13 +553,11 @@
             if (win.classList.contains('teaser-win')) win.querySelector('.close-btn').onclick = () => win.style.display = 'none';
         });
 
-        // 智慧排版 (Cascade / 置中)
+        // 智慧排版
         let cascadeX = 60, cascadeY = 60;
         function getSmartPosition() {
-            if (window.innerWidth <= 800) {
-                // 手機版不需要計算 cascade，由 CSS 絕對置中接管
-                return { top: '50%', left: '50%' };
-            }
+            // 手機版不使用瀑布流，直接回傳預設，由 CSS fixed 控制
+            if (isMobile) return { top: '0', left: '0' }; 
             cascadeX += 30; cascadeY += 30;
             if (cascadeX > window.innerWidth - 650 || cascadeY > window.innerHeight - 450) { cascadeX = 80; cascadeY = 80; } 
             return { top: `${cascadeY}px`, left: `${cascadeX}px` };
@@ -583,21 +567,12 @@
         async function openApp(windowTitle, fileUrl) {
             const appWin = document.getElementById('main-app-window'); const contentArea = document.getElementById('app-dynamic-content'); const titleArea = document.getElementById('app-window-title');
             
-            // 每次開啟前先移除 style 屬性中的 top/left/transform，避免 JS 干擾 CSS 的置中
-            if (window.innerWidth <= 800) {
-                appWin.style.removeProperty('top');
-                appWin.style.removeProperty('left');
-                appWin.style.removeProperty('transform');
-            }
-
-            appWin.style.display = 'flex'; 
-            focusWindow(appWin);
+            // 手機版顯示視窗時，自動滾動到視窗位置 (雖然是 fixed，但確保焦點)
+            appWin.style.display = 'flex'; focusWindow(appWin);
             
-            // 只有電腦版才需要計算位置，手機版 CSS 會強制置中
-            if (window.innerWidth > 800) {
+            if (!isMobile) {
                 const pos = getSmartPosition();
-                appWin.style.top = pos.top; 
-                appWin.style.left = pos.left;
+                appWin.style.top = pos.top; appWin.style.left = pos.left;
             }
             
             titleArea.innerText = `📁 ${windowTitle}`; contentArea.innerHTML = "<h3 class='blink'>> 讀取資料中 / LOADING DATA...</h3>";
@@ -641,6 +616,5 @@
         function drawMatrix() { if (document.body.classList.contains('tranquil-mode')) { ctx.fillStyle = 'rgba(17, 17, 17, 0.15)'; ctx.fillRect(0, 0, cw, ch); return; } ctx.fillStyle = document.body.classList.contains('pineapple-mode') ? 'rgba(26, 26, 0, 0.15)' : 'rgba(10, 5, 16, 0.15)'; ctx.fillRect(0, 0, cw, ch); ctx.font = `${fontSize}px 'DotGothic16', monospace`; ctx.textBaseline = 'top'; ctx.fillStyle = document.body.classList.contains('pineapple-mode') ? '#ffcc00' : '#0f0'; const chars = document.body.classList.contains('pineapple-mode') ? pineappleChars : noiseChars; for (let i = 0; i < columns.length; i++) { const char = chars[Math.floor(Math.random() * chars.length)]; const x = i * fontSize; const y = columns[i] * fontSize; ctx.fillText(char, x, y); if (y > ch && Math.random() > 0.975) { columns[i] = 0; } else { columns[i]++; } } }
         setInterval(drawMatrix, 50);
     </script>
-    <script src="game.js?v=14.0"></script>
 </body>
 </html>
