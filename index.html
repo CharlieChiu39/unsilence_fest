@@ -7,14 +7,13 @@
     <link href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Shippori+Mincho+B1:wght@800&display=swap" rel="stylesheet">
     <style>
         :root {
-            /* ✨ 還原：原本的配色方案 */
+            /* 配色方案 (維持還原後) */
             --bg-color: #0a0510; 
             --text-color: #0f0; 
             --highlight-color: #ff00ff; 
             --sidebar-bg: #05020a; 
             
-            /* ✨ 還原：原本的淺紫色視窗，改為 RGBA 以支援玻璃特效 */
-            --win-bg: rgba(230, 204, 255, 0.9); /* #e6ccff 的 90% 透明度 */
+            --win-bg: rgba(230, 204, 255, 0.9); 
             --win-border: #9d00ff; 
             --win-text: #000; 
             --win-shadow: 4px 4px 0px #000; 
@@ -28,7 +27,7 @@
             --bg-color: #111; 
             --text-color: #666; 
             --highlight-color: #444; 
-            --win-bg: rgba(51, 45, 59, 0.9); /* #332d3b 的 90% 透明度 */
+            --win-bg: rgba(51, 45, 59, 0.9); 
             --win-border: #444; 
             --win-text: #e6ccff; 
             --btn-bg: #443b4d; 
@@ -40,7 +39,7 @@
             --bg-color: #1a1a00; 
             --text-color: #00ff00; 
             --highlight-color: #ff6600; 
-            --win-bg: rgba(255, 251, 230, 0.9); /* #fffbe6 的 90% 透明度 */
+            --win-bg: rgba(255, 251, 230, 0.9); 
             --win-border: #ffcc00; 
             --win-text: #004d00; 
             --btn-bg: #ffee99; 
@@ -53,10 +52,11 @@
             background-color: var(--bg-color); color: var(--text-color); 
             font-family: 'DotGothic16', sans-serif; overflow: hidden; 
             user-select: none; -webkit-user-select: none; touch-action: none; 
-            cursor: default; /* 游標交給 JS 處理或是預設 */
+            /* ✨ 修正：鳳梨鼠標強勢回歸！ */
+            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" style="font-size:24px"><text y="24">🍍</text></svg>'), auto; 
         }
 
-        /* ✨ 新增：霓虹捲軸 (配色對應 highlight-color) */
+        /* 霓虹捲軸 */
         ::-webkit-scrollbar { width: 8px; height: 8px; }
         ::-webkit-scrollbar-track { background: #000; border-left: 1px solid var(--win-border); }
         ::-webkit-scrollbar-thumb { background: var(--highlight-color); border: 1px solid #fff; }
@@ -64,9 +64,7 @@
 
         * { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
 
-        /* =========================================
-           原本的濾鏡與背景 (完全保留)
-           ========================================= */
+        /* 背景與濾鏡 */
         #matrix-bg { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 0; pointer-events: none; opacity: 0.6; }
         .bg-grid { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; background-image: linear-gradient(rgba(157, 0, 255, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(157, 0, 255, 0.1) 1px, transparent 1px); background-size: 40px 40px; }
         .film-grain { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 9996; pointer-events: none; opacity: 0.04; background-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><filter id="noiseFilter"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23noiseFilter)"/></svg>'); }
@@ -74,24 +72,36 @@
         .scanline { position: fixed; top: 0; left: 0; width: 100vw; height: 8px; background: rgba(255, 255, 255, 0.1); opacity: 0.6; z-index: 9998; pointer-events: none; animation: rollDown 8s linear infinite; }
         @keyframes rollDown { 0% { transform: translateY(-10vh); } 100% { transform: translateY(110vh); } }
 
-        /* ✨ 還原：原本的開機動畫 (CRT Boot) */
+        /* CRT Boot */
         #crt-boot { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: transparent; z-index: 10000; pointer-events: none; display: flex; justify-content: center; align-items: center; }
         .crt-line { width: 0; height: 2px; background: #ff00ff; box-shadow: 0 0 15px #ff00ff, 0 0 30px #ff00ff; animation: crt-turn-on 1.8s cubic-bezier(0.23, 1, 0.32, 1) forwards; }
         @keyframes crt-turn-on { 0% { width: 0; height: 2px; opacity: 1; } 30% { width: 100%; height: 2px; opacity: 1; } 40% { height: 100vh; background: rgba(255, 0, 255, 0.7); opacity: 1; } 70% { height: 100vh; background: transparent; opacity: 1; } 100% { height: 100vh; background: transparent; opacity: 0; } }
         #bios-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; color: #ff00ff; z-index: 9999; padding: 20px; font-size: 16px; box-sizing: border-box; text-shadow: 0 0 5px #ff00ff; }
 
         /* =========================================
-           ✨ 新增：特效樣式 (星塵、聲納、震動)
+           ✨ 特效樣式：星塵拖尾 & 點擊爆炸
            ========================================= */
         .stardust { 
             position: fixed; pointer-events: none; z-index: 9999; 
-            color: var(--highlight-color); font-family: 'DotGothic16'; font-size: 10px;
-            animation: fall-fade 0.8s forwards; 
-            text-shadow: 0 0 5px var(--highlight-color);
+            color: var(--highlight-color); font-family: 'DotGothic16'; font-weight: bold;
+            animation: fall-fade 0.6s forwards; 
+            text-shadow: 0 0 4px var(--highlight-color);
+            pointer-events: none;
         }
         @keyframes fall-fade { 
             0% { opacity: 1; transform: translate(0, 0) scale(1); } 
-            100% { opacity: 0; transform: translate(var(--tx), var(--ty)) scale(0.5); } 
+            100% { opacity: 0; transform: translate(var(--tx), var(--ty)) scale(0.2); } 
+        }
+
+        .particle { 
+            position: fixed; pointer-events: none; z-index: 10001; 
+            border-radius: 50%; 
+            animation: explode-drop 0.8s cubic-bezier(0.1, 0.8, 0.3, 1) forwards; 
+        }
+        @keyframes explode-drop { 
+            0% { transform: translate(0, 0) scale(1); opacity: 1; } 
+            60% { opacity: 0.8; }
+            100% { transform: translate(var(--tx), var(--ty)) scale(0); opacity: 0; } 
         }
 
         .sonar-ripple {
@@ -108,6 +118,7 @@
             100% { width: 150px; height: 150px; opacity: 0; border-width: 0; }
         }
 
+        /* 按鈕傳輸震動 */
         .transmitting {
             animation: rgb-shake 0.3s linear;
             background: var(--highlight-color) !important;
@@ -128,17 +139,16 @@
         
         .sidebar { width: 250px; background-color: var(--sidebar-bg); border-right: 2px solid var(--win-border); padding: 30px 20px; display: flex; flex-direction: column; position: relative; z-index: 10000; }
         
-        /* ✨ 修正：Logo 使用新字體 + 呼吸動畫 (但顏色還原) */
         .logo-area { position: relative; margin-bottom: 20px; }
         .logo-area h1 { 
             color: var(--logo-color); 
-            font-family: 'Shippori Mincho B1', serif; /* 新字體 */
+            font-family: 'Shippori Mincho B1', serif; 
             font-size: 32px; 
             margin: 0; 
             line-height: 1.1; 
             letter-spacing: -1px;
             text-shadow: 0 0 10px rgba(184, 41, 255, 0.6), 3px 3px 0px #000; 
-            animation: logo-breathe 4s ease-in-out infinite; /* 呼吸燈 */
+            animation: logo-breathe 4s ease-in-out infinite; 
         }
         @keyframes logo-breathe {
             0%, 100% { text-shadow: 0 0 10px rgba(184, 41, 255, 0.6), 3px 3px 0px #000; opacity: 0.9; }
@@ -155,11 +165,10 @@
 
         .main-content { flex-grow: 1; position: relative; }
         
-        /* ✨ 修正：視窗還原樣式，但加入 backdrop-filter 磨砂感 */
         .window { 
             position: absolute; 
-            background-color: var(--win-bg); /* RGBA 顏色 */
-            backdrop-filter: blur(5px);      /* 磨砂玻璃 */
+            background-color: var(--win-bg); 
+            backdrop-filter: blur(5px);      
             -webkit-backdrop-filter: blur(5px);
             color: var(--win-text); 
             border: 2px solid #fff; 
@@ -178,8 +187,6 @@
         .close-btn:active { border: 1px solid #555; border-right-color: #fff; border-bottom-color: #fff; }
         
         .window-content { padding: 12px; font-size: 14px; flex-grow: 1; overflow-y: auto; text-align: center; }
-        
-        /* 捲軸部分已移至上方 ::-webkit-scrollbar 統一設定 */
         
         .sys-btn { background: var(--btn-bg); color: var(--win-text); padding: 4px 12px; display: inline-block; margin-top: 10px; font-size: 14px; border: 2px solid #fff; border-right-color: #555; border-bottom-color: #555; cursor: pointer; text-decoration: none;}
         .sys-btn:active { border: 2px solid #555; border-right-color: #fff; border-bottom-color: #fff; transform: translate(1px, 1px); }
@@ -325,31 +332,41 @@
             }, 300);
         }
 
-        // ✨ 桌面版：數位星塵特效 (Digital Stardust)
+        // ✨ 桌面版：數位星塵特效 (增強版：多重粒子)
         let lastX = 0, lastY = 0;
         const createStardust = (x, y) => {
             if(document.body.classList.contains('tranquil-mode')) return;
+            // 距離檢測改小，讓粒子更密集
             const dist = Math.hypot(x - lastX, y - lastY);
-            if(dist < 5) return; 
+            if(dist < 2) return; 
             lastX = x; lastY = y;
 
             const shapes = ["+", "□", "0", "1", "·"];
-            const p = document.createElement('div');
-            p.className = 'stardust';
-            p.innerText = shapes[Math.floor(Math.random() * shapes.length)];
-            p.style.left = `${x}px`;
-            p.style.top = `${y}px`;
+            // 每次生成 2-3 個粒子
+            const count = Math.floor(Math.random() * 2) + 2;
             
-            const tx = (Math.random() - 0.5) * 30;
-            const ty = Math.random() * 30 + 10;
-            p.style.setProperty('--tx', `${tx}px`);
-            p.style.setProperty('--ty', `${ty}px`);
-            
-            document.body.appendChild(p);
-            setTimeout(() => p.remove(), 800);
+            for(let i=0; i<count; i++) {
+                const p = document.createElement('div');
+                p.className = 'stardust';
+                p.innerText = shapes[Math.floor(Math.random() * shapes.length)];
+                p.style.left = `${x}px`;
+                p.style.top = `${y}px`;
+                
+                // 隨機大小
+                p.style.fontSize = Math.random() > 0.5 ? '10px' : '14px';
+                
+                // 更大的隨機擴散
+                const tx = (Math.random() - 0.5) * 60; 
+                const ty = Math.random() * 40 + 20;
+                p.style.setProperty('--tx', `${tx}px`);
+                p.style.setProperty('--ty', `${ty}px`);
+                
+                document.body.appendChild(p);
+                setTimeout(() => p.remove(), 600);
+            }
         };
 
-        // ✨ 手機版：聲納波紋特效 (Sonar Ripple)
+        // ✨ 手機版：聲納波紋特效
         const createRipple = (x, y) => {
             const r = document.createElement('div');
             r.className = 'sonar-ripple';
@@ -359,7 +376,6 @@
             setTimeout(() => r.remove(), 500);
         };
 
-        // 偵測設備類型並綁定對應特效
         const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
         if (isMobile) {
             document.addEventListener('touchstart', (e) => {
@@ -370,26 +386,39 @@
             document.addEventListener('mousemove', (e) => createStardust(e.clientX, e.clientY));
         }
 
-        // 💥 粒子爆炸 (保留)
+        // ✨ 爆炸特效回歸 (點擊觸發)
+        const defaultColors = ['#ff00ff', '#00ff00', '#ffffff', '#9d00ff'];
         const createExplosion = (x, y) => { 
             if(document.body.classList.contains('tranquil-mode')) return; 
-            const p = document.createElement('div'); 
-            p.className = 'particle'; 
-            p.style.left = `${x}px`; p.style.top = `${y}px`; 
-            p.style.width = '6px'; p.style.height = '6px';
-            p.style.backgroundColor = 'var(--highlight-color)';
-            const angle = Math.random() * Math.PI * 2; 
-            const distance = Math.random() * 150 + 50; 
-            p.style.setProperty('--tx', `${Math.cos(angle) * distance}px`); 
-            p.style.setProperty('--ty', `${Math.sin(angle) * distance}px`); 
-            document.body.appendChild(p); 
-            setTimeout(() => p.remove(), 800); 
+            const isPineapple = document.body.classList.contains('pineapple-mode'); 
+            const particleCount = 20; 
+            for (let i = 0; i < particleCount; i++) { 
+                const p = document.createElement('div'); 
+                p.className = 'particle'; 
+                p.style.left = `${x}px`; p.style.top = `${y}px`; 
+                if (isPineapple) { p.innerText = '🍍'; p.style.fontSize = '12px'; } 
+                else { 
+                    const size = Math.random() * 6 + 3; 
+                    p.style.width = `${size}px`; p.style.height = `${size}px`; 
+                    p.style.backgroundColor = defaultColors[Math.floor(Math.random() * defaultColors.length)]; 
+                } 
+                const angle = Math.random() * Math.PI * 2; 
+                const distance = Math.random() * 100 + 30; 
+                // 模擬重力
+                p.style.setProperty('--tx', `${Math.cos(angle) * distance}px`); 
+                p.style.setProperty('--ty', `${Math.sin(angle) * distance + 50}px`); 
+                document.body.appendChild(p); 
+                setTimeout(() => p.remove(), 800); 
+            } 
         };
-        document.addEventListener('mousedown', (e) => { 
-            if (!e.target.closest('.window')) createExplosion(e.clientX, e.clientY); 
+        document.addEventListener('pointerdown', (e) => { 
+            // 確保除了點到視窗 header (拖曳) 以外都能爆炸
+            if (!e.target.closest('.window-header')) {
+                createExplosion(e.clientX, e.clientY); 
+            }
         });
 
-        // ✨ 階段一：動態文字特效 (保留)
+        // 文字亂碼特效 (保留)
         const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*寧靜音樂節";
         document.querySelector('.glitch-text').onmouseover = event => {
             let el = event.currentTarget; 
@@ -406,7 +435,6 @@
             }, 30);
         }
         
-        // 側邊欄動態文字 (保留)
         document.querySelectorAll('.nav-links a').forEach(link => {
             link.onmouseover = event => {
                 let el = event.currentTarget;
@@ -424,7 +452,7 @@
             }
         });
 
-        // ✨ 還原：BIOS 開機動畫與背景預載
+        // BIOS 開機與預載 (還原)
         const biosLines = ["[0x0000] INITIATING KERNEL_CORE...", "[0x001A] ALLOCATING MEMORY BLOCK...", "[0xCCU] ALLOCATING CSIE_MODULE...", "[0x002B] MOUNTING SIGNAL_PROCESSOR...", "...", "> BOOTING TRANQUIL_OS...", "> SYSTEM READY."];
         const biosText = document.getElementById('bios-text'); let lineIdx = 0;
         function showBios() { 
@@ -436,7 +464,7 @@
         const cache = {};
         function preloadApps() { const filesToPreload = ['news.html', 'lineup.html', 'timetable.html', 'map.html', 'goods.html', 'guidelines.html', 'credits.html']; filesToPreload.forEach(file => { fetch(file).then(res => res.text()).then(html => cache[file] = html).catch(e=>console.log("Preload Error:", file)); }); }
 
-        // 完美視窗拖曳與焦點
+        // 視窗拖曳
         const windows = document.querySelectorAll('.window:not(.alert-modal)'); 
         let topZ = 100;
         function focusWindow(win) { windows.forEach(w => w.classList.remove('focused')); win.classList.add('focused'); win.style.zIndex = ++topZ; }
@@ -461,7 +489,7 @@
             if (win.classList.contains('teaser-win')) win.querySelector('.close-btn').onclick = () => win.style.display = 'none';
         });
 
-        // 智慧排版系統
+        // 智慧排版
         let cascadeX = 60, cascadeY = 60;
         function getSmartPosition() {
             if (window.innerWidth <= 800) return { top: '8vh', left: '2.5vw' }; 
@@ -483,8 +511,6 @@
                 let htmlContent = cache[fileUrl];
                 if(!htmlContent) { const response = await fetch(fileUrl); if (!response.ok) throw new Error(); htmlContent = await response.text(); cache[fileUrl] = htmlContent; }
                 contentArea.innerHTML = htmlContent; 
-                
-                // 時刻表代管
                 if (fileUrl === 'timetable.html') {
                     setTimeout(() => {
                         const now = new Date(); const currentTime = now.getHours() + (now.getMinutes() / 60);
@@ -500,7 +526,6 @@
         }
         function closeApp() { document.getElementById('main-app-window').style.display = 'none'; document.getElementById('app-dynamic-content').innerHTML = ''; cascadeX = 60; cascadeY = 60;}
         
-        // 地圖解析全局函式
         window.scanNode = function(title, text) {
             const info = document.getElementById('radar-info'); if(!info) return;
             info.classList.remove('blink'); info.innerHTML = `<strong style="color:var(--highlight-color)">[解析完成] ${title}</strong><br>`;
@@ -509,11 +534,9 @@
             typeWriter();
         };
 
-        // 外部連結安全跳轉
         window.openExternalLink = function(url) { document.getElementById('ext-overlay').style.display = 'block'; document.getElementById('ext-modal').style.display = 'block'; document.getElementById('ext-confirm-btn').href = url; };
         function closeExternalWarning() { document.getElementById('ext-overlay').style.display = 'none'; document.getElementById('ext-modal').style.display = 'none'; }
         
-        // 主題切換與背景 Matrix
         const modes = ['noise', 'tranquil', 'pineapple']; const modeLabels = ['模式切換: 雜訊', '模式切換: 寧靜', '模式切換: 🍍鳳梨']; let currentModeIndex = 0;
         document.getElementById('mode-toggle').onclick = (e) => { document.body.classList.remove(`${modes[currentModeIndex]}-mode`); currentModeIndex = (currentModeIndex + 1) % modes.length; document.body.classList.add(`${modes[currentModeIndex]}-mode`); e.target.innerText = modeLabels[currentModeIndex]; };
 
@@ -524,6 +547,6 @@
         function drawMatrix() { if (document.body.classList.contains('tranquil-mode')) { ctx.fillStyle = 'rgba(17, 17, 17, 0.15)'; ctx.fillRect(0, 0, cw, ch); return; } ctx.fillStyle = document.body.classList.contains('pineapple-mode') ? 'rgba(26, 26, 0, 0.15)' : 'rgba(10, 5, 16, 0.15)'; ctx.fillRect(0, 0, cw, ch); ctx.font = `${fontSize}px 'DotGothic16', monospace`; ctx.textBaseline = 'top'; ctx.fillStyle = document.body.classList.contains('pineapple-mode') ? '#ffcc00' : '#0f0'; const chars = document.body.classList.contains('pineapple-mode') ? pineappleChars : noiseChars; for (let i = 0; i < columns.length; i++) { const char = chars[Math.floor(Math.random() * chars.length)]; const x = i * fontSize; const y = columns[i] * fontSize; ctx.fillText(char, x, y); if (y > ch && Math.random() > 0.975) { columns[i] = 0; } else { columns[i]++; } } }
         setInterval(drawMatrix, 50);
     </script>
-    <script src="game.js?v=11.0"></script>
+    <script src="game.js?v=12.0"></script>
 </body>
 </html>
