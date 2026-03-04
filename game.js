@@ -62,8 +62,22 @@ const turkeySprites = [
     ]
 ];
 
-function openGame() { gameWinUI.style.display = 'flex'; if (typeof focusWindow === 'function') focusWindow(gameWinUI); resetGame(); drawStaticScene(); }
-function closeGame() { gameWinUI.style.display = 'none'; isPlaying = false; cancelAnimationFrame(gameReq); }
+function openGame() { 
+    gameWinUI.style.display = 'flex'; 
+    if (typeof focusWindow === 'function') focusWindow(gameWinUI); 
+    resetGame(); 
+    drawStaticScene(); 
+}
+
+function closeGame() { 
+    gameWinUI.style.display = 'none'; 
+    isPlaying = false; 
+    cancelAnimationFrame(gameReq); 
+    // ✨ 確保手機版拖曳後關閉，下次開啟能回到完美的置中預設位置
+    gameWinUI.style.top = ''; 
+    gameWinUI.style.left = ''; 
+    gameWinUI.style.transform = '';
+}
 
 function setMsgStyle() {
     gameMsg.style.position = 'absolute'; gameMsg.style.top = '0'; gameMsg.style.left = '0'; gameMsg.style.width = '100%'; gameMsg.style.height = '100%';
@@ -118,8 +132,7 @@ function drawPixelTurkey() {
 
     runCtx.save();
     // ✨ 修正：移除翻轉，讓火雞面向右邊
-    // runCtx.scale(-1, 1); 
-    const startX = turkey.x; // ✨ 修正：起始座標直接使用 turkey.x，無需負值反轉
+    const startX = turkey.x; 
 
     for (let r = 0; r < pattern.length; r++) {
         let row = pattern[r];
@@ -128,7 +141,7 @@ function drawPixelTurkey() {
             if (char !== ' ') {
                 if (char === 'p') runCtx.fillStyle = '#ff00ff'; // 霓虹粉尾巴
                 else if (char === 'c') runCtx.fillStyle = '#00ffff'; // 青色尾巴
-                else if (char === 'b') runCtx.fillStyle = '#8b4513'; // 咖啡色身體 (SaddleBrown)
+                else if (char === 'b') runCtx.fillStyle = '#8b4513'; // 咖啡色身體
                 else if (char === 'r') runCtx.fillStyle = '#ff0000'; // 紅色肉垂
                 else if (char === 'y') runCtx.fillStyle = '#ffea00'; // 黃色嘴巴
                 else if (char === 'w') runCtx.fillStyle = '#ffffff'; // 白色眼球

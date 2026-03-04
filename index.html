@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#0a0510">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>寧靜音樂節 UNSILENCE FESTIVAL OS</title>
     <link href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Shippori+Mincho+B1:wght@800&display=swap" rel="stylesheet">
     <style>
@@ -79,7 +81,7 @@
         #bios-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; color: #ff00ff; z-index: 9999; padding: 20px; font-size: 16px; box-sizing: border-box; text-shadow: 0 0 5px #ff00ff; }
 
         /* =========================================
-           特效樣式
+           特效樣式 (完整保留)
            ========================================= */
         .stardust { 
             position: fixed; pointer-events: none; z-index: 9999; 
@@ -103,33 +105,11 @@
             100% { transform: translate(var(--tx), var(--ty)) scale(0); opacity: 0; } 
         }
 
-        /* 輕量化手機波紋 (無卡頓版) */
-        .tap-ripple {
-            position: fixed; pointer-events: none; z-index: 9999;
-            width: 20px; height: 20px; 
-            border-radius: 50%;
-            border: 2px solid rgba(255, 255, 255, 0.8); /* 空心圓圈 */
-            background: transparent;
-            transform: translate(-50%, -50%);
-            /* 使用 will-change 優化效能 */
-            will-change: transform, opacity;
-            animation: ripple-expand 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
-        }
-        @keyframes ripple-expand {
-            0% { transform: translate(-50%, -50%) scale(0.5); opacity: 1; }
-            100% { transform: translate(-50%, -50%) scale(5); opacity: 0; }
-        }
-
-        /* 爆炸特效 2: 數據崩壞粒子 */
         .glitch-particle {
             position: fixed; pointer-events: none; z-index: 10001;
-            font-family: 'DotGothic16', monospace;
-            font-weight: bold;
-            font-size: 14px;
-            color: var(--highlight-color);
-            text-shadow: 1px 1px 0 #000; 
-            white-space: nowrap;
-            animation: glitch-fly 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+            font-family: 'DotGothic16', monospace; font-weight: bold; font-size: 14px;
+            color: var(--highlight-color); text-shadow: 1px 1px 0 #000; 
+            white-space: nowrap; animation: glitch-fly 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
         }
         @keyframes glitch-fly {
             0% { transform: translate(0, 0) scale(1); opacity: 1; }
@@ -138,13 +118,15 @@
             100% { transform: translate(var(--tx), var(--ty)) scale(0.5); opacity: 0; }
         }
 
-        /* 按鈕傳輸震動 */
+        .shatter-particle {
+            position: fixed; width: 10px; height: 10px; pointer-events: none; z-index: 10001;
+            animation: shatter 0.6s ease-out forwards;
+        }
+        @keyframes shatter { 0% { opacity: 1; } 100% { transform: translate(var(--tx), var(--ty)) rotate(180deg); opacity: 0; } }
+
         .transmitting {
-            animation: rgb-shake 0.3s linear;
-            background: var(--highlight-color) !important;
-            color: #000 !important;
-            box-shadow: 0 0 15px var(--highlight-color) !important;
-            border-color: #fff !important;
+            animation: rgb-shake 0.3s linear; background: var(--highlight-color) !important;
+            color: #000 !important; box-shadow: 0 0 15px var(--highlight-color) !important; border-color: #fff !important;
         }
         @keyframes rgb-shake {
             0% { transform: translate(0,0); text-shadow: none; }
@@ -154,19 +136,15 @@
             100% { transform: translate(0,0); text-shadow: none; }
         }
 
-        /* 介面佈局 (PC) */
+        /* 介面佈局 */
         .layout-container { display: flex; height: 100%; width: 100%; position: relative; z-index: 10; }
         
         .sidebar { width: 250px; background-color: var(--sidebar-bg); border-right: 2px solid var(--win-border); padding: 30px 20px; display: flex; flex-direction: column; position: relative; z-index: 10000; }
         
         .logo-area { position: relative; margin-bottom: 20px; }
         .logo-area h1 { 
-            color: var(--logo-color); 
-            font-family: 'Shippori Mincho B1', serif; 
-            font-size: 32px; 
-            margin: 0; 
-            line-height: 1.1; 
-            letter-spacing: -1px;
+            color: var(--logo-color); font-family: 'Shippori Mincho B1', serif; font-size: 32px; 
+            margin: 0; line-height: 1.1; letter-spacing: -1px;
             text-shadow: 0 0 10px rgba(184, 41, 255, 0.6), 3px 3px 0px #000; 
             animation: logo-breathe 4s ease-in-out infinite; 
         }
@@ -177,26 +155,37 @@
         
         .nav-links { list-style: none; padding: 0; margin: 20px 0 0 0; flex-grow: 1; overflow-y: auto;}
         .nav-links li { margin-bottom: 12px; }
-        .nav-links a { color: var(--text-color); text-decoration: none; font-size: 18px; display: block; cursor: pointer; transition: color 0.2s, transform 0.2s; text-shadow: 0 0 2px #000; }
+        
+        .nav-links a { position: relative; color: var(--text-color); text-decoration: none; font-size: 18px; display: block; cursor: pointer; transition: color 0.2s, transform 0.2s; text-shadow: 0 0 2px #000; }
+        .nav-links a::after { content: ''; position: absolute; inset: 0; z-index: 10; }
         .nav-links a:hover { color: var(--highlight-color); transform: translateX(5px); text-shadow: 2px 0 red, -2px 0 cyan; }
         
-        .mode-toggle { background: #000; border: 2px solid var(--win-border); color: var(--text-color); padding: 10px; font-family: 'DotGothic16'; cursor: pointer; margin-top: 20px; font-size: 16px; }
+        /* ✨ 修復：實體火雞觸發按鈕 CSS (不閃爍、更大) */
+        #secret-turkey {
+            font-size: 48px; /* ✨ 放大了 */
+            text-align: center;
+            cursor: pointer;
+            margin: 15px 0 10px 0;
+            transition: transform 0.2s, text-shadow 0.2s;
+            position: relative;
+            z-index: 10050;
+            user-select: none;
+        }
+        #secret-turkey:hover {
+            transform: scale(1.2);
+            text-shadow: 0 0 15px var(--highlight-color);
+        }
+
+        .mode-toggle { background: #000; border: 2px solid var(--win-border); color: var(--text-color); padding: 10px; font-family: 'DotGothic16'; cursor: pointer; margin-top: 5px; font-size: 16px; }
         .mode-toggle:hover { background: var(--win-border); color: #000; }
 
         .main-content { flex-grow: 1; position: relative; }
         
         /* 視窗樣式 */
         .window { 
-            position: absolute; 
-            background-color: var(--win-bg); 
-            backdrop-filter: blur(5px);      
-            -webkit-backdrop-filter: blur(5px);
-            color: var(--win-text); 
-            border: 2px solid #fff; 
-            border-right-color: #555; 
-            border-bottom-color: #555; 
-            box-shadow: var(--win-shadow); 
-            z-index: 10; display: flex; flex-direction: column; touch-action: none; transition: opacity 0.2s; 
+            position: absolute; background-color: var(--win-bg); backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px);
+            color: var(--win-text); border: 2px solid #fff; border-right-color: #555; border-bottom-color: #555; 
+            box-shadow: var(--win-shadow); z-index: 10; display: flex; flex-direction: column; touch-action: none; transition: opacity 0.2s; 
         }
         
         .window-header { background-color: var(--win-border); color: #fff; padding: 4px 8px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; cursor: grab; user-select: none; touch-action: none; transition: text-shadow 0.2s; }
@@ -208,7 +197,6 @@
         .close-btn:active { border: 1px solid #555; border-right-color: #fff; border-bottom-color: #fff; }
         
         .window-content { padding: 12px; font-size: 14px; flex-grow: 1; overflow-y: auto; text-align: center; }
-        
         .sys-btn { background: var(--btn-bg); color: var(--win-text); padding: 4px 12px; display: inline-block; margin-top: 10px; font-size: 14px; border: 2px solid #fff; border-right-color: #555; border-bottom-color: #555; cursor: pointer; text-decoration: none;}
         .sys-btn:active { border: 2px solid #555; border-right-color: #fff; border-bottom-color: #fff; transform: translate(1px, 1px); }
 
@@ -237,59 +225,37 @@
            ========================================= */
         @media (max-width: 800px) {
             .layout-container { flex-direction: column; }
+            .sidebar { width: 100%; height: auto; border-right: none; border-bottom: 2px solid var(--win-border); padding: 10px 15px; box-sizing: border-box; position: relative; }
             
-            /* 1. Header 壓縮 */
-            .sidebar { 
-                width: 100%; height: auto; 
-                border-right: none; border-bottom: 2px solid var(--win-border); 
-                padding: 10px 15px; /* 減少邊距 */
-                box-sizing: border-box;
-            }
-
-            /* Logo 縮小並排 */
             .logo-area { margin-bottom: 5px; text-align: center; }
             .logo-area h1 { font-size: 22px; line-height: 1.2; display: inline-block;}
-            .logo-area h1 br { display: none; } /* 強制不換行 */
-            .logo-area h1::after { content: " | "; color: #555; } /* 分隔線 */
+            .logo-area h1 br { display: none; } 
             
-            /* 導覽列 Flex 緊湊排列 */
-            .nav-links { 
-                margin: 5px 0 10px 0; 
-                display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; /* 使用 gap 代替 margin */
+            /* ✨ 修復：手機版火雞位置與尺寸 */
+            #secret-turkey {
+                position: absolute;
+                top: 5px;
+                right: 15px;
+                margin: 0;
+                font-size: 38px; /* ✨ 放大了 */
             }
+            
+            .nav-links { margin: 5px 0 10px 0; display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
             .nav-links li { margin: 0; }
             .nav-links a { font-size: 16px; padding: 4px 8px; }
-            
-            /* 模式切換按鈕縮小 */
             .mode-toggle { margin-top: 5px; padding: 5px; font-size: 14px; width: auto; display: inline-block; }
 
-            /* 2. 視窗絕對置中 + 避免被切掉 */
+            .teaser-win { width: 160px; display: flex !important; }
+            #win-1 { top: 2vh; left: 2vw; } #win-2 { top: 8vh; left: 15vw; } #win-3 { top: 14vh; left: 30vw; }
+            #win-4 { top: 20vh; left: 5vw; } #win-5 { top: 26vh; left: 25vw; } #win-6 { top: 32vh; left: 45vw; } #win-7 { top: 38vh; left: 10vw; }
+
             #main-app-window, #game-window { 
-                position: fixed !important; /* 強制固定 */
-                top: 50% !important; left: 50% !important; 
-                transform: translate(-50%, -50%) !important;
-                
-                width: 92vw !important; 
-                height: auto !important; 
-                max-height: 75dvh !important; /* 使用 dvh 避開網址列 */
-                
-                margin: 0 !important;
-                z-index: 10005 !important; /* 確保在最上層 */
-                display: none; /* 預設隱藏 */
+                position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+                width: 92vw !important; height: auto !important; max-height: 75dvh !important; 
+                margin: 0; z-index: 10005; 
             }
-            
-            /* 確保視窗內容可以捲動 */
-            #main-app-window .window-content, #game-window .window-content { 
-                overflow-y: auto; 
-                max-height: 65dvh; 
-            }
-
-            /* 手機版隱藏小視窗，只留主視窗邏輯 */
-            .teaser-win { display: none !important; }
-
-            /* 3. 底部安全區與圖示 */
+            #main-app-window .window-content, #game-window .window-content { overflow-y: auto; max-height: 65dvh; }
             .desktop-icon { bottom: calc(40px + env(safe-area-inset-bottom, 20px)); right: 20px; } 
-            
             #game-window .window-content { aspect-ratio: auto !important; min-height: 320px !important; }
             #run-canvas { object-fit: contain !important; width: 100% !important; } 
         }
@@ -311,8 +277,9 @@
     <div class="layout-container">
         <nav class="sidebar">
             <div class="logo-area">
-                <h1 class="glitch-text" style="cursor:pointer" onclick="openGame()">寧靜音樂節<br>UNSILENCE OS</h1>
+                <h1 class="glitch-text">寧靜音樂節<br>UNSILENCE OS</h1>
             </div>
+            
             <ul class="nav-links">
                 <li><a data-text="> NEWS" onclick="signalClick(this, 'NEWS_ARCHIVE.exe', 'news.html')">> NEWS</a></li>
                 <li><a data-text="> LIVE_陣容" onclick="signalClick(this, 'LIVE_DATA.sys', 'lineup.html')">> LIVE_陣容</a></li>
@@ -322,6 +289,9 @@
                 <li><a data-text="> INFO_須知" onclick="signalClick(this, 'SAFETY_PROTOCOL.txt', 'guidelines.html')">> INFO_須知</a></li>
                 <li><a data-text="> CREDITS_名單" onclick="signalClick(this, 'CREDITS.txt', 'credits.html')" style="color:var(--highlight-color)">> CREDITS_名單</a></li>
             </ul>
+
+            <div id="secret-turkey" onclick="if(typeof openGame === 'function') openGame();" title="SYSTEM BREACH">🦃</div>
+            
             <button class="mode-toggle" id="mode-toggle">模式切換: 雜訊</button>
         </nav>
 
@@ -368,7 +338,7 @@
     <div class="marquee-container"><div class="marquee-content">/// 2026.05.20 寧靜音樂節 /// 嘉義文化園區 /// 主辦單位：中正大學 /// 全程免費入場 /// 🍍 游標異常干擾中 ///</div></div>
 
     <script>
-        // ✨ 按鈕訊號傳輸干擾 (Signal Glitch)
+        // 按鈕訊號傳輸干擾 (Signal Glitch)
         function signalClick(btnElement, windowTitle, fileUrl) {
             if (btnElement.classList.contains('transmitting')) return;
 
@@ -393,7 +363,7 @@
             }, 300);
         }
 
-        // ✨ 極限星塵特效 (High-Density Stardust)
+        // 極限星塵特效
         let lastX = 0, lastY = 0;
         const createStardust = (x, y) => {
             if(document.body.classList.contains('tranquil-mode')) return;
@@ -408,26 +378,19 @@
                 const p = document.createElement('div');
                 p.className = 'stardust';
                 p.innerText = shapes[Math.floor(Math.random() * shapes.length)];
-                p.style.left = `${x}px`;
-                p.style.top = `${y}px`;
-                
+                p.style.left = `${x}px`; p.style.top = `${y}px`;
                 p.style.fontSize = Math.random() > 0.5 ? '10px' : '14px';
                 
-                const tx = (Math.random() - 0.5) * 60; 
-                const ty = Math.random() * 40 + 20;
-                p.style.setProperty('--tx', `${tx}px`);
-                p.style.setProperty('--ty', `${ty}px`);
-                
-                document.body.appendChild(p);
-                setTimeout(() => p.remove(), 600);
+                const tx = (Math.random() - 0.5) * 60; const ty = Math.random() * 40 + 20;
+                p.style.setProperty('--tx', `${tx}px`); p.style.setProperty('--ty', `${ty}px`);
+                document.body.appendChild(p); setTimeout(() => p.remove(), 600);
             }
         };
 
-        // ✨ 爆炸特效：數據崩壞 (PC點擊)
+        // 爆炸特效：數據崩壞
         const createExplosion = (x, y) => { 
             if(document.body.classList.contains('tranquil-mode')) return; 
 
-            // 數據崩壞粒子
             const crashSymbols = ["ERROR", "NULL", "0xFF", "†", "⚠", "{}", "//", "FATAL", "NaN", "?", "█"];
             const particleCount = 12;
 
@@ -435,56 +398,51 @@
                 const p = document.createElement('div'); 
                 p.className = 'glitch-particle'; 
                 p.innerText = crashSymbols[Math.floor(Math.random() * crashSymbols.length)];
-                p.style.left = `${x}px`; 
-                p.style.top = `${y}px`; 
-                
+                p.style.left = `${x}px`; p.style.top = `${y}px`; 
                 p.style.fontSize = Math.random() > 0.6 ? '16px' : '12px';
                 if(Math.random() > 0.8) p.style.color = '#fff';
 
-                const angle = Math.random() * Math.PI * 2; 
-                const velocity = Math.random() * 120 + 40; 
-                const tx = Math.cos(angle) * velocity;
-                const ty = Math.sin(angle) * velocity;
-                
-                p.style.setProperty('--tx', `${tx}px`); 
-                p.style.setProperty('--ty', `${ty}px`); 
-                
-                document.body.appendChild(p); 
-                setTimeout(() => p.remove(), 800); 
+                const angle = Math.random() * Math.PI * 2; const velocity = Math.random() * 120 + 40; 
+                p.style.setProperty('--tx', `${Math.cos(angle) * velocity}px`); 
+                p.style.setProperty('--ty', `${Math.sin(angle) * velocity}px`); 
+                document.body.appendChild(p); setTimeout(() => p.remove(), 800); 
             } 
         };
 
+        const createShatter = (x, y) => {
+            if(document.body.classList.contains('tranquil-mode')) return;
+            for (let i = 0; i < 15; i++) {
+                const p = document.createElement('div'); p.className = 'shatter-particle'; p.style.left = `${x}px`; p.style.top = `${y}px`;
+                p.style.backgroundColor = '#9d00ff';
+                p.style.setProperty('--tx', `${(Math.random()-0.5)*200}px`); p.style.setProperty('--ty', `${Math.random()*150+50}px`);
+                document.body.appendChild(p); setTimeout(() => p.remove(), 600);
+            }
+        };
+
+        // 雙平台統一監聽：點擊爆炸與滑動星塵
         document.addEventListener('pointerdown', (e) => { 
-            // 如果不是手機，且不是點擊 Header，則觸發爆炸
-            if (!isMobile && !e.target.closest('.window-header')) {
-                createExplosion(e.clientX, e.clientY); 
+            if (e.target.id === 'secret-turkey') return; // 不要干擾火雞按鈕的點擊
+            
+            if (e.target.closest('.window')) {
+                 if (!e.target.closest('.window-header') && !e.target.closest('.close-btn')) {
+                     createShatter(e.clientX, e.clientY);
+                 }
+            } else if (!e.target.closest('.alert-modal') && !e.target.closest('.sidebar')) {
+                 createExplosion(e.clientX, e.clientY); 
             }
         });
 
-        // ✨ 手機輕量化波紋 (無卡頓版)
-        const createRipple = (x, y) => {
-            const r = document.createElement('div');
-            r.className = 'tap-ripple';
-            r.style.left = `${x}px`;
-            r.style.top = `${y}px`;
-            document.body.appendChild(r);
-            setTimeout(() => r.remove(), 500); // 配合 CSS 動畫時間
-        };
-
-        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-        if (isMobile) {
-            document.addEventListener('touchstart', (e) => {
-                const touch = e.touches[0];
-                createRipple(touch.clientX, touch.clientY);
-            }, {passive: true});
-        } else {
-            document.addEventListener('mousemove', (e) => createStardust(e.clientX, e.clientY));
-        }
+        document.addEventListener('pointermove', (e) => {
+            if (e.pointerType === 'mouse' || e.pointerType === 'touch') {
+                createStardust(e.clientX, e.clientY);
+            }
+        });
 
         // 文字亂碼特效
         const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*寧靜音樂節";
-        document.querySelector('.glitch-text').onmouseover = event => {
-            let el = event.currentTarget; 
+        document.querySelector('.logo-area').onmouseover = () => {
+            let el = document.querySelector('.glitch-text'); 
+            if (!el) return;
             let iterations = 0; 
             const originalText = "寧靜音樂節\nUNSILENCE OS";
             clearInterval(el.dataset.interval);
@@ -527,7 +485,7 @@
         const cache = {};
         function preloadApps() { const filesToPreload = ['news.html', 'lineup.html', 'timetable.html', 'map.html', 'goods.html', 'guidelines.html', 'credits.html']; filesToPreload.forEach(file => { fetch(file).then(res => res.text()).then(html => cache[file] = html).catch(e=>console.log("Preload Error:", file)); }); }
 
-        // 視窗拖曳 (PC Only)
+        // 視窗拖曳 (全平台可用)
         const windows = document.querySelectorAll('.window:not(.alert-modal)'); 
         let topZ = 100;
         function focusWindow(win) { windows.forEach(w => w.classList.remove('focused')); win.classList.add('focused'); win.style.zIndex = ++topZ; }
@@ -537,7 +495,6 @@
             let isDragging = false; let offsetX, offsetY, parentX, parentY;
             win.addEventListener('pointerdown', () => focusWindow(win)); 
             const startDrag = (e) => {
-                if (isMobile) return; // 手機版禁用拖曳
                 if (e.target.classList.contains('close-btn')) return;
                 isDragging = true; focusWindow(win);
                 const rect = win.getBoundingClientRect(); const parentRect = win.offsetParent.getBoundingClientRect();
@@ -556,8 +513,7 @@
         // 智慧排版
         let cascadeX = 60, cascadeY = 60;
         function getSmartPosition() {
-            // 手機版不使用瀑布流，直接回傳預設，由 CSS fixed 控制
-            if (isMobile) return { top: '0', left: '0' }; 
+            if (window.innerWidth <= 800) return { isMobile: true }; 
             cascadeX += 30; cascadeY += 30;
             if (cascadeX > window.innerWidth - 650 || cascadeY > window.innerHeight - 450) { cascadeX = 80; cascadeY = 80; } 
             return { top: `${cascadeY}px`, left: `${cascadeX}px` };
@@ -567,11 +523,10 @@
         async function openApp(windowTitle, fileUrl) {
             const appWin = document.getElementById('main-app-window'); const contentArea = document.getElementById('app-dynamic-content'); const titleArea = document.getElementById('app-window-title');
             
-            // 手機版顯示視窗時，自動滾動到視窗位置 (雖然是 fixed，但確保焦點)
             appWin.style.display = 'flex'; focusWindow(appWin);
             
-            if (!isMobile) {
-                const pos = getSmartPosition();
+            const pos = getSmartPosition();
+            if (!pos.isMobile) {
                 appWin.style.top = pos.top; appWin.style.left = pos.left;
             }
             
@@ -593,7 +548,14 @@
                 }
             } catch (error) { contentArea.innerHTML = `<h3 style='color:red;'>[ 系統錯誤 ] 無法連接到信號源 (${fileUrl})</h3>`; }
         }
-        function closeApp() { document.getElementById('main-app-window').style.display = 'none'; document.getElementById('app-dynamic-content').innerHTML = ''; cascadeX = 60; cascadeY = 60;}
+
+        function closeApp() { 
+            const appWin = document.getElementById('main-app-window');
+            appWin.style.display = 'none'; 
+            document.getElementById('app-dynamic-content').innerHTML = ''; 
+            cascadeX = 60; cascadeY = 60;
+            appWin.style.top = ''; appWin.style.left = ''; appWin.style.transform = '';
+        }
         
         window.scanNode = function(title, text) {
             const info = document.getElementById('radar-info'); if(!info) return;
@@ -616,5 +578,7 @@
         function drawMatrix() { if (document.body.classList.contains('tranquil-mode')) { ctx.fillStyle = 'rgba(17, 17, 17, 0.15)'; ctx.fillRect(0, 0, cw, ch); return; } ctx.fillStyle = document.body.classList.contains('pineapple-mode') ? 'rgba(26, 26, 0, 0.15)' : 'rgba(10, 5, 16, 0.15)'; ctx.fillRect(0, 0, cw, ch); ctx.font = `${fontSize}px 'DotGothic16', monospace`; ctx.textBaseline = 'top'; ctx.fillStyle = document.body.classList.contains('pineapple-mode') ? '#ffcc00' : '#0f0'; const chars = document.body.classList.contains('pineapple-mode') ? pineappleChars : noiseChars; for (let i = 0; i < columns.length; i++) { const char = chars[Math.floor(Math.random() * chars.length)]; const x = i * fontSize; const y = columns[i] * fontSize; ctx.fillText(char, x, y); if (y > ch && Math.random() > 0.975) { columns[i] = 0; } else { columns[i]++; } } }
         setInterval(drawMatrix, 50);
     </script>
+
+    <script src="game.js"></script>
 </body>
 </html>
