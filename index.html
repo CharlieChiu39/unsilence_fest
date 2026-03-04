@@ -4,135 +4,192 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>寧靜音樂節 UNSILENCE FESTIVAL OS</title>
-    <link href="https://fonts.googleapis.com/css2?family=DotGothic16&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Shippori+Mincho+B1:wght@800&display=swap" rel="stylesheet">
     <style>
-        /* =========================================
-           1. 變數設定 (色彩計畫與模式切換)
-           ========================================= */
         :root {
+            /* ✨ 還原：原本的配色方案 */
             --bg-color: #0a0510; 
             --text-color: #0f0; 
             --highlight-color: #ff00ff; 
-            --sidebar-bg: #05020a;
-            --win-bg: #c0c0c0; 
+            --sidebar-bg: #05020a; 
+            
+            /* ✨ 還原：原本的淺紫色視窗，改為 RGBA 以支援玻璃特效 */
+            --win-bg: rgba(230, 204, 255, 0.9); /* #e6ccff 的 90% 透明度 */
             --win-border: #9d00ff; 
             --win-text: #000; 
             --win-shadow: 4px 4px 0px #000; 
-            --btn-bg: #dfdfdf;
+            
+            --btn-bg: #d1b3ff; 
             --crt-opacity: 1;
+            --logo-color: #b829ff;
         }
 
         body.tranquil-mode { 
-            --bg-color: #111; --text-color: #666; --highlight-color: #444; 
-            --win-bg: #222; --win-border: #444; --win-text: #aaa; --btn-bg: #333; --crt-opacity: 0; 
+            --bg-color: #111; 
+            --text-color: #666; 
+            --highlight-color: #444; 
+            --win-bg: rgba(51, 45, 59, 0.9); /* #332d3b 的 90% 透明度 */
+            --win-border: #444; 
+            --win-text: #e6ccff; 
+            --btn-bg: #443b4d; 
+            --crt-opacity: 0; 
+            --logo-color: #888; 
         }
 
         body.pineapple-mode { 
-            --bg-color: #1a1a00; --text-color: #00ff00; --highlight-color: #ff6600; 
-            --win-bg: #fffbe6; --win-border: #ffcc00; --win-text: #004d00; --btn-bg: #ffee99; --win-shadow: 4px 4px 0px #331a00; 
+            --bg-color: #1a1a00; 
+            --text-color: #00ff00; 
+            --highlight-color: #ff6600; 
+            --win-bg: rgba(255, 251, 230, 0.9); /* #fffbe6 的 90% 透明度 */
+            --win-border: #ffcc00; 
+            --win-text: #004d00; 
+            --btn-bg: #ffee99; 
+            --win-shadow: 4px 4px 0px #331a00; 
+            --logo-color: #ffaa00; 
         }
 
         body, html { 
-            margin: 0; padding: 0; 
-            height: 100vh; 
-            height: 100dvh; 
-            width: 100vw; 
+            margin: 0; padding: 0; height: 100vh; height: 100dvh; width: 100vw; 
             background-color: var(--bg-color); color: var(--text-color); 
             font-family: 'DotGothic16', sans-serif; overflow: hidden; 
             user-select: none; -webkit-user-select: none; touch-action: none; 
-            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" style="font-size:24px"><text y="24">🍍</text></svg>'), auto; 
-            transition: background-color 0.5s ease; 
+            cursor: default; /* 游標交給 JS 處理或是預設 */
         }
+
+        /* ✨ 新增：霓虹捲軸 (配色對應 highlight-color) */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #000; border-left: 1px solid var(--win-border); }
+        ::-webkit-scrollbar-thumb { background: var(--highlight-color); border: 1px solid #fff; }
+        ::-webkit-scrollbar-thumb:hover { background: #fff; }
+
+        * { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
 
         /* =========================================
-           2. 背景畫布與網格 (Canvas & Grid)
+           原本的濾鏡與背景 (完全保留)
            ========================================= */
-        #matrix-bg {
-            position: fixed; top: 0; left: 0;
-            width: 100vw; height: 100vh;
-            z-index: 0; 
-            pointer-events: none; 
-            opacity: 0.6; 
-        }
+        #matrix-bg { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 0; pointer-events: none; opacity: 0.6; }
+        .bg-grid { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; background-image: linear-gradient(rgba(157, 0, 255, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(157, 0, 255, 0.1) 1px, transparent 1px); background-size: 40px 40px; }
+        .film-grain { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 9996; pointer-events: none; opacity: 0.04; background-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><filter id="noiseFilter"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23noiseFilter)"/></svg>'); }
+        .crt-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 9997; pointer-events: none; opacity: var(--crt-opacity); background: radial-gradient(circle at center, transparent 50%, rgba(0, 0, 0, 0.4) 100%), linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%); background-size: 100% 100%, 100% 2px; }
+        .scanline { position: fixed; top: 0; left: 0; width: 100vw; height: 8px; background: rgba(255, 255, 255, 0.1); opacity: 0.6; z-index: 9998; pointer-events: none; animation: rollDown 8s linear infinite; }
+        @keyframes rollDown { 0% { transform: translateY(-10vh); } 100% { transform: translateY(110vh); } }
 
-        .bg-grid { 
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            z-index: 1; pointer-events: none; 
-            background-image: linear-gradient(rgba(157, 0, 255, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(157, 0, 255, 0.1) 1px, transparent 1px); 
-            background-size: 40px 40px; 
-        }
-        body.pineapple-mode .bg-grid { background-image: linear-gradient(rgba(255, 204, 0, 0.15) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 204, 0, 0.15) 1px, transparent 1px); }
-
-        .crt::before { 
-            content: " "; display: block; position: fixed; top: 0; left: 0; bottom: 0; right: 0; 
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06)); 
-            z-index: 9990; background-size: 100% 2px, 3px 100%; pointer-events: none; opacity: var(--crt-opacity); 
-        }
+        /* ✨ 還原：原本的開機動畫 (CRT Boot) */
+        #crt-boot { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: transparent; z-index: 10000; pointer-events: none; display: flex; justify-content: center; align-items: center; }
+        .crt-line { width: 0; height: 2px; background: #ff00ff; box-shadow: 0 0 15px #ff00ff, 0 0 30px #ff00ff; animation: crt-turn-on 1.8s cubic-bezier(0.23, 1, 0.32, 1) forwards; }
+        @keyframes crt-turn-on { 0% { width: 0; height: 2px; opacity: 1; } 30% { width: 100%; height: 2px; opacity: 1; } 40% { height: 100vh; background: rgba(255, 0, 255, 0.7); opacity: 1; } 70% { height: 100vh; background: transparent; opacity: 1; } 100% { height: 100vh; background: transparent; opacity: 0; } }
+        #bios-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; color: #ff00ff; z-index: 9999; padding: 20px; font-size: 16px; box-sizing: border-box; text-shadow: 0 0 5px #ff00ff; }
 
         /* =========================================
-           ✨ BIOS 終端機與開機動畫 ✨
+           ✨ 新增：特效樣式 (星塵、聲納、震動)
            ========================================= */
-        #crt-boot {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background: transparent; 
-            z-index: 10000; pointer-events: none;
-            display: flex; justify-content: center; align-items: center;
+        .stardust { 
+            position: fixed; pointer-events: none; z-index: 9999; 
+            color: var(--highlight-color); font-family: 'DotGothic16'; font-size: 10px;
+            animation: fall-fade 0.8s forwards; 
+            text-shadow: 0 0 5px var(--highlight-color);
         }
-        .crt-line {
-            width: 0; height: 2px; background: #ff00ff; 
-            box-shadow: 0 0 15px #ff00ff, 0 0 30px #ff00ff;
-            animation: crt-turn-on 1.8s cubic-bezier(0.23, 1, 0.32, 1) forwards;
-        }
-        @keyframes crt-turn-on {
-            0% { width: 0; height: 2px; opacity: 1; }
-            30% { width: 100%; height: 2px; opacity: 1; }
-            40% { height: 100vh; background: rgba(255, 0, 255, 0.7); opacity: 1; }
-            70% { height: 100vh; background: transparent; opacity: 1; }
-            100% { height: 100vh; background: transparent; opacity: 0; }
+        @keyframes fall-fade { 
+            0% { opacity: 1; transform: translate(0, 0) scale(1); } 
+            100% { opacity: 0; transform: translate(var(--tx), var(--ty)) scale(0.5); } 
         }
 
-        #bios-screen { 
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: #000; color: #ff00ff; 
-            z-index: 9999; padding: 20px; font-size: 16px; box-sizing: border-box; 
-            text-shadow: 0 0 5px #ff00ff; 
+        .sonar-ripple {
+            position: fixed; pointer-events: none; z-index: 9999;
+            width: 10px; height: 10px; border-radius: 50%;
+            border: 2px solid var(--highlight-color);
+            background: transparent;
+            transform: translate(-50%, -50%);
+            animation: sonar-expand 0.5s cubic-bezier(0.1, 0.6, 0.2, 1) forwards;
+            box-shadow: 0 0 10px var(--highlight-color);
+        }
+        @keyframes sonar-expand {
+            0% { width: 0; height: 0; opacity: 0.8; border-width: 4px; }
+            100% { width: 150px; height: 150px; opacity: 0; border-width: 0; }
         }
 
-        /* =========================================
-           3. 側邊欄與視窗 UI
-           ========================================= */
+        .transmitting {
+            animation: rgb-shake 0.3s linear;
+            background: var(--highlight-color) !important;
+            color: #000 !important;
+            box-shadow: 0 0 15px var(--highlight-color) !important;
+            border-color: #fff !important;
+        }
+        @keyframes rgb-shake {
+            0% { transform: translate(0,0); text-shadow: none; }
+            25% { transform: translate(-2px, 1px); text-shadow: 2px 0 #ff0000, -2px 0 #0000ff; }
+            50% { transform: translate(2px, -1px); text-shadow: -2px 0 #ff0000, 2px 0 #0000ff; }
+            75% { transform: translate(-1px, 2px); text-shadow: 2px 0 #ff0000, -2px 0 #0000ff; }
+            100% { transform: translate(0,0); text-shadow: none; }
+        }
+
+        /* 介面佈局 */
         .layout-container { display: flex; height: 100%; width: 100%; position: relative; z-index: 10; }
-        .sidebar { width: 250px; background-color: var(--sidebar-bg); border-right: 2px solid var(--win-border); padding: 30px 20px; display: flex; flex-direction: column; position: relative; z-index: 50; }
-        .logo-area h1 { color: #fff; font-size: 26px; margin: 0; line-height: 1.2; text-shadow: 2px 2px 0px var(--win-border); }
+        
+        .sidebar { width: 250px; background-color: var(--sidebar-bg); border-right: 2px solid var(--win-border); padding: 30px 20px; display: flex; flex-direction: column; position: relative; z-index: 10000; }
+        
+        /* ✨ 修正：Logo 使用新字體 + 呼吸動畫 (但顏色還原) */
+        .logo-area { position: relative; margin-bottom: 20px; }
+        .logo-area h1 { 
+            color: var(--logo-color); 
+            font-family: 'Shippori Mincho B1', serif; /* 新字體 */
+            font-size: 32px; 
+            margin: 0; 
+            line-height: 1.1; 
+            letter-spacing: -1px;
+            text-shadow: 0 0 10px rgba(184, 41, 255, 0.6), 3px 3px 0px #000; 
+            animation: logo-breathe 4s ease-in-out infinite; /* 呼吸燈 */
+        }
+        @keyframes logo-breathe {
+            0%, 100% { text-shadow: 0 0 10px rgba(184, 41, 255, 0.6), 3px 3px 0px #000; opacity: 0.9; }
+            50% { text-shadow: 0 0 20px rgba(184, 41, 255, 0.9), 3px 3px 0px #000; opacity: 1; }
+        }
+        
         .nav-links { list-style: none; padding: 0; margin: 20px 0 0 0; flex-grow: 1; overflow-y: auto;}
         .nav-links li { margin-bottom: 12px; }
-        .nav-links a { color: var(--text-color); text-decoration: none; font-size: 18px; display: block; cursor: inherit; transition: 0.2s;}
-        .nav-links a:hover { color: var(--highlight-color); transform: translateX(5px); }
-        .mode-toggle { background: #000; border: 2px solid var(--win-border); color: var(--text-color); padding: 10px; font-family: 'DotGothic16'; cursor: inherit; margin-top: 20px; font-size: 16px; }
+        .nav-links a { color: var(--text-color); text-decoration: none; font-size: 18px; display: block; cursor: pointer; transition: color 0.2s, transform 0.2s; text-shadow: 0 0 2px #000; }
+        .nav-links a:hover { color: var(--highlight-color); transform: translateX(5px); text-shadow: 2px 0 red, -2px 0 cyan; }
+        
+        .mode-toggle { background: #000; border: 2px solid var(--win-border); color: var(--text-color); padding: 10px; font-family: 'DotGothic16'; cursor: pointer; margin-top: 20px; font-size: 16px; }
         .mode-toggle:hover { background: var(--win-border); color: #000; }
 
         .main-content { flex-grow: 1; position: relative; }
-        .window { position: absolute; background-color: var(--win-bg); color: var(--win-text); border: 2px solid #fff; border-right-color: #555; border-bottom-color: #555; box-shadow: var(--win-shadow); z-index: 10; display: flex; flex-direction: column; touch-action: none; /* 讓整個視窗不受 iOS 手勢干擾 */ }
         
-        /* ✨ 視窗紫色標題列 - 拖曳的抓取區，加入 touch-action: none 確保手機完美拖曳 */
-        .window-header { background-color: var(--win-border); color: #fff; padding: 4px 8px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; cursor: grab; user-select: none; -webkit-user-select: none; touch-action: none; }
+        /* ✨ 修正：視窗還原樣式，但加入 backdrop-filter 磨砂感 */
+        .window { 
+            position: absolute; 
+            background-color: var(--win-bg); /* RGBA 顏色 */
+            backdrop-filter: blur(5px);      /* 磨砂玻璃 */
+            -webkit-backdrop-filter: blur(5px);
+            color: var(--win-text); 
+            border: 2px solid #fff; 
+            border-right-color: #555; 
+            border-bottom-color: #555; 
+            box-shadow: var(--win-shadow); 
+            z-index: 10; display: flex; flex-direction: column; touch-action: none; transition: opacity 0.2s; 
+        }
+        
+        .window-header { background-color: var(--win-border); color: #fff; padding: 4px 8px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; cursor: grab; user-select: none; touch-action: none; transition: text-shadow 0.2s; }
+        .window.focused .window-header { text-shadow: 0 0 8px #fff, 0 0 15px #fff; }
         .window-header:active { cursor: grabbing; }
         
-        .close-btn { background: var(--win-bg); color: #000; border: 1px solid #fff; border-right-color: #555; border-bottom-color: #555; padding: 0 6px; cursor: inherit; font-size: 12px; font-weight: bold; }
+        .close-btn { position: relative; background: var(--win-bg); color: #000; border: 1px solid #fff; border-right-color: #555; border-bottom-color: #555; padding: 0 6px; cursor: pointer; font-size: 12px; font-weight: bold; }
+        .close-btn::after { content: ''; position: absolute; top: -10px; left: -10px; right: -10px; bottom: -10px; }
         .close-btn:active { border: 1px solid #555; border-right-color: #fff; border-bottom-color: #fff; }
         
         .window-content { padding: 12px; font-size: 14px; flex-grow: 1; overflow-y: auto; text-align: center; }
-        .sys-btn { background: var(--btn-bg); color: var(--win-text); padding: 4px 12px; display: inline-block; margin-top: 10px; font-size: 14px; border: 2px solid #fff; border-right-color: #555; border-bottom-color: #555; cursor: inherit; }
-        .sys-btn:active { border: 2px solid #555; border-right-color: #fff; border-bottom-color: #fff; }
-        .sys-btn.yes:hover { color: var(--highlight-color); font-weight: bold; }
+        
+        /* 捲軸部分已移至上方 ::-webkit-scrollbar 統一設定 */
+        
+        .sys-btn { background: var(--btn-bg); color: var(--win-text); padding: 4px 12px; display: inline-block; margin-top: 10px; font-size: 14px; border: 2px solid #fff; border-right-color: #555; border-bottom-color: #555; cursor: pointer; text-decoration: none;}
+        .sys-btn:active { border: 2px solid #555; border-right-color: #fff; border-bottom-color: #fff; transform: translate(1px, 1px); }
 
-        /* 電腦版預設座標 */
         .teaser-win { width: 240px; } 
-        #win-1 { top: 50px; left: 50px; } #win-2 { top: 90px; left: 340px; } #win-3 { top: 260px; left: 80px; }
-        #win-4 { top: 320px; left: 380px; } #win-5 { top: 480px; left: 140px; } #win-6 { top: 520px; left: 450px; } #win-7 { top: 180px; left: 620px; }
+        #win-1 { top: 8vh; left: 5vw; } #win-2 { top: 12vh; left: 25vw; } #win-3 { top: 35vh; left: 8vw; }
+        #win-4 { top: 40vh; left: 30vw; } #win-5 { top: 60vh; left: 12vw; } #win-6 { top: 65vh; left: 35vw; } #win-7 { top: 25vh; left: 45vw; }
 
         #main-app-window { width: 600px; height: 400px; display: none; max-width: 90vw; max-height: 80vh; }
-        #main-app-window .window-content { background: #fff; border: inset 2px #555; margin: 10px; padding: 15px; text-align: left; }
+        #main-app-window .window-content { background: #f8f2ff; border: inset 2px #a366ff; margin: 10px; padding: 15px; text-align: left; }
         body.tranquil-mode #main-app-window .window-content { background: #333; }
         body.pineapple-mode #main-app-window .window-content { background: #ffffe6; }
 
@@ -143,116 +200,72 @@
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.6); z-index: 9000; }
         .alert-modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 300px; z-index: 9001; }
         
-        .marquee-container { 
-            position: fixed; bottom: 0; left: 0; width: 100vw; 
-            background: var(--win-border); color: #fff; 
-            padding: 4px 0; z-index: 100; border-top: 2px solid #fff; 
-            padding-bottom: env(safe-area-inset-bottom, 4px); 
-        }
+        .marquee-container { position: fixed; bottom: 0; left: 0; width: 100vw; background: var(--win-border); color: #fff; padding: 4px 0; z-index: 100; border-top: 2px solid #fff; padding-bottom: env(safe-area-inset-bottom, 4px); }
         .marquee-content { display: inline-block; white-space: nowrap; animation: marquee 20s linear infinite; font-size: 16px; }
         @keyframes marquee { 0% { transform: translateX(100vw); } 100% { transform: translateX(-100%); } }
 
-        .particle { position: fixed; pointer-events: none; z-index: 9999; animation: explode 0.8s cubic-bezier(0.1, 0.8, 0.3, 1) forwards; font-size: 16px;}
-        @keyframes explode { 0% { transform: translate(0, 0) scale(1) rotate(0deg); opacity: 1; } 100% { transform: translate(var(--tx), var(--ty)) scale(0) rotate(720deg); opacity: 0; } }
-        .trail-particle { position: fixed; pointer-events: none; z-index: 9998; animation: fadeTrail 0.4s linear forwards; }
-        @keyframes fadeTrail { 0% { opacity: 0.8; transform: scale(1); } 100% { opacity: 0; transform: scale(0.2) translateY(15px); } }
-        .blink { animation: blinker 1s linear infinite; }
-        @keyframes blinker { 50% { opacity: 0; } }
-
-        /* =========================================
-           📱 手機版專屬設定 (終極修復方案)
-           ========================================= */
         @media (max-width: 800px) {
             .layout-container { flex-direction: column; }
             .sidebar { width: 100%; height: auto; border-right: none; border-bottom: 2px solid var(--win-border); padding: 15px; box-sizing: border-box;}
-            .logo-area h1 { font-size: 20px; text-align: center; }
             .nav-links { margin: 10px 0; text-align: center;}
             .nav-links li { display: inline-block; margin: 0 8px; }
-            .nav-links a { font-size: 16px; }
-            .mode-toggle { width: 100%; margin-top: 5px; }
-
+            
             .teaser-win { width: 160px; } 
-            #win-1 { top: 2vh; left: 2vw; } 
-            #win-2 { top: 8vh; left: 15vw; } 
-            #win-3 { top: 14vh; left: 30vw; }
-            #win-4 { top: 20vh; left: 5vw; } 
-            #win-5 { top: 26vh; left: 25vw; } 
-            #win-6 { top: 32vh; left: 45vw; } 
-            #win-7 { top: 38vh; left: 10vw; }
+            #win-1 { top: 2vh; left: 2vw; } #win-2 { top: 8vh; left: 15vw; } #win-3 { top: 14vh; left: 30vw; }
+            #win-4 { top: 20vh; left: 5vw; } #win-5 { top: 26vh; left: 25vw; } #win-6 { top: 32vh; left: 45vw; } #win-7 { top: 38vh; left: 10vw; }
             
-            #main-app-window { width: 95vw; height: 60dvh; top: 10vh; left: 2.5vw; }
-            .desktop-icon { bottom: calc(40px + env(safe-area-inset-bottom, 20px) + 50px); right: 5vw; } 
-        
-            #game-window { 
-    width: 95vw !important; 
-    height: auto !important; 
-    top: 5vh; 
-}
+            #main-app-window { width: 95vw; height: 68dvh; top: 8vh; left: 2.5vw; }
+            .desktop-icon { bottom: calc(40px + env(safe-area-inset-bottom, 20px) + 30px); right: 5vw; } 
             
-            #game-window .window-content { 
-                aspect-ratio: auto !important; 
-                min-height: 320px !important;  
-                height: auto !important;       
-                display: flex !important;
-                flex-direction: column !important;
-                justify-content: center !important;
-                touch-action: none !important; 
-                -webkit-touch-callout: none !important; 
-                -webkit-user-select: none !important; 
-                user-select: none !important; 
-            }
-            
-            #run-canvas { 
-                object-fit: contain !important; 
-                width: 100% !important; 
-                height: auto !important;
-                max-height: 100% !important; 
-            } 
-            #game-score { top: 15px !important; right: 15px !important; font-size: 16px !important; }
+            #game-window { width: 95vw !important; height: auto !important; top: 5vh; }
+            #game-window .window-content { aspect-ratio: auto !important; min-height: 320px !important; height: auto !important; display: flex !important; flex-direction: column !important; justify-content: center !important; }
+            #run-canvas { object-fit: contain !important; width: 100% !important; height: auto !important; max-height: 100% !important; } 
         }
+        .blink { animation: blinker 1s linear infinite; }
+        @keyframes blinker { 50% { opacity: 0; } }
     </style>
 </head>
-<body class="crt noise-mode">
+<body class="crt noise-mode" onselectstart="return false;">
     <div id="crt-boot"><div class="crt-line"></div></div>
-
     <div id="bios-screen"><div id="bios-text"></div></div>
     
     <canvas id="matrix-bg"></canvas>
-    
     <div class="bg-grid"></div>
+    <div class="film-grain"></div>
+    <div class="crt-overlay"></div>
+    <div class="scanline"></div>
 
     <div class="layout-container">
         <nav class="sidebar">
-            <div class="logo-area"><h1 style="cursor:pointer" onclick="openGame()">寧靜音樂節<br>UNSILENCE OS</h1></div>
+            <div class="logo-area">
+                <h1 class="glitch-text" style="cursor:pointer" onclick="openGame()">寧靜音樂節<br>UNSILENCE OS</h1>
+            </div>
             <ul class="nav-links">
-                <li><a onclick="openApp('NEWS_ARCHIVE.exe', 'news.html')">> NEWS</a></li>
-                <li><a onclick="openApp('LIVE_DATA.sys', 'lineup.html')">> LIVE_陣容</a></li>
-                <li><a onclick="openApp('TIMETABLE.exe', 'timetable.html')">> RELEASE_時刻表</a></li>
-                <li><a onclick="openApp('MAP_NAVIGATOR.sys', 'map.html')">> MAP_地圖</a></li>
-                <li><a onclick="openApp('STORE_DATA.pkg', 'goods.html')">> STORE_周邊</a></li>
-                <li><a onclick="openApp('SAFETY_PROTOCOL.txt', 'guidelines.html')">> INFO_須知</a></li>
-                <li><a onclick="openApp('CREDITS.txt', 'credits.html')" style="color:var(--highlight-color)">> CREDITS_名單</a></li>
+                <li><a data-text="> NEWS" onclick="signalClick(this, 'NEWS_ARCHIVE.exe', 'news.html')">> NEWS</a></li>
+                <li><a data-text="> LIVE_陣容" onclick="signalClick(this, 'LIVE_DATA.sys', 'lineup.html')">> LIVE_陣容</a></li>
+                <li><a data-text="> RELEASE_時刻表" onclick="signalClick(this, 'TIMETABLE.exe', 'timetable.html')">> RELEASE_時刻表</a></li>
+                <li><a data-text="> MAP_地圖" onclick="signalClick(this, 'MAP_NAVIGATOR.sys', 'map.html')">> MAP_地圖</a></li>
+                <li><a data-text="> STORE_周邊" onclick="signalClick(this, 'STORE_DATA.pkg', 'goods.html')">> STORE_周邊</a></li>
+                <li><a data-text="> INFO_須知" onclick="signalClick(this, 'SAFETY_PROTOCOL.txt', 'guidelines.html')">> INFO_須知</a></li>
+                <li><a data-text="> CREDITS_名單" onclick="signalClick(this, 'CREDITS.txt', 'credits.html')" style="color:var(--highlight-color)">> CREDITS_名單</a></li>
             </ul>
             <button class="mode-toggle" id="mode-toggle">模式切換: 雜訊</button>
         </nav>
 
         <main class="main-content">
-            <div class="window teaser-win" id="win-1"><div class="window-header"><span class="title">💾 NEWS.exe</span><span class="close-btn">X</span></div><div class="window-content"><p>官網系統啟動</p><button class="sys-btn yes" onclick="openApp('NEWS_ARCHIVE.exe', 'news.html')">讀取(Y)</button></div></div>
-            <div class="window teaser-win" id="win-2"><div class="window-header"><span class="title">🎵 LIVE.txt</span><span class="close-btn">X</span></div><div class="window-content"><p>演出陣容解禁</p><button class="sys-btn yes" onclick="openApp('LIVE_DATA.sys', 'lineup.html')">查看(Y)</button></div></div>
-            <div class="window teaser-win" id="win-3"><div class="window-header"><span class="title">⏳ TIME.exe</span><span class="close-btn">X</span></div><div class="window-content"><p>讀取時間軸</p><button class="sys-btn yes" onclick="openApp('TIMETABLE.exe', 'timetable.html')">展開(Y)</button></div></div>
-            <div class="window teaser-win" id="win-4"><div class="window-header"><span class="title">🗺️ MAP.sys</span><span class="close-btn">X</span></div><div class="window-content"><p>座標確認(G9)</p><button class="sys-btn yes" onclick="openApp('MAP_NAVIGATOR.sys', 'map.html')">掃描(Y)</button></div></div>
-            <div class="window teaser-win" id="win-5"><div class="window-header"><span class="title">🛍️ STORE.pkg</span><span class="close-btn">X</span></div><div class="window-content"><p>周邊預購中</p><button class="sys-btn yes" onclick="openApp('STORE_DATA.pkg', 'goods.html')">購買(Y)</button></div></div>
-            <div class="window teaser-win" id="win-6"><div class="window-header"><span class="title">⚠️ INFO.txt</span><span class="close-btn">X</span></div><div class="window-content"><p>安全規範須知</p><button class="sys-btn yes" onclick="openApp('SAFETY_PROTOCOL.txt', 'guidelines.html')">確認(Y)</button></div></div>
-            <div class="window teaser-win" id="win-7"><div class="window-header"><span class="title">📜 CREDITS.txt</span><span class="close-btn">X</span></div><div class="window-content"><p>系統製作群解密</p><button class="sys-btn yes" onclick="openApp('CREDITS.txt', 'credits.html')">解密(Y)</button></div></div>
+            <div class="window teaser-win" id="win-1"><div class="window-header"><span class="title">💾 NEWS.exe</span><span class="close-btn">X</span></div><div class="window-content"><p>官網系統啟動</p><button class="sys-btn yes" onclick="signalClick(this, 'NEWS_ARCHIVE.exe', 'news.html')">讀取(Y)</button></div></div>
+            <div class="window teaser-win" id="win-2"><div class="window-header"><span class="title">🎵 LIVE.txt</span><span class="close-btn">X</span></div><div class="window-content"><p>演出陣容解禁</p><button class="sys-btn yes" onclick="signalClick(this, 'LIVE_DATA.sys', 'lineup.html')">查看(Y)</button></div></div>
+            <div class="window teaser-win" id="win-3"><div class="window-header"><span class="title">⏳ TIME.exe</span><span class="close-btn">X</span></div><div class="window-content"><p>讀取時間軸</p><button class="sys-btn yes" onclick="signalClick(this, 'TIMETABLE.exe', 'timetable.html')">展開(Y)</button></div></div>
+            <div class="window teaser-win" id="win-4"><div class="window-header"><span class="title">🗺️ MAP.sys</span><span class="close-btn">X</span></div><div class="window-content"><p>座標確認(G9)</p><button class="sys-btn yes" onclick="signalClick(this, 'MAP_NAVIGATOR.sys', 'map.html')">掃描(Y)</button></div></div>
+            <div class="window teaser-win" id="win-5"><div class="window-header"><span class="title">🛍️ STORE.pkg</span><span class="close-btn">X</span></div><div class="window-content"><p>周邊預購中</p><button class="sys-btn yes" onclick="signalClick(this, 'STORE_DATA.pkg', 'goods.html')">購買(Y)</button></div></div>
+            <div class="window teaser-win" id="win-6"><div class="window-header"><span class="title">⚠️ INFO.txt</span><span class="close-btn">X</span></div><div class="window-content"><p>安全規範須知</p><button class="sys-btn yes" onclick="signalClick(this, 'SAFETY_PROTOCOL.txt', 'guidelines.html')">確認(Y)</button></div></div>
+            <div class="window teaser-win" id="win-7"><div class="window-header"><span class="title">📜 CREDITS.txt</span><span class="close-btn">X</span></div><div class="window-content"><p>系統製作群解密</p><button class="sys-btn yes" onclick="signalClick(this, 'CREDITS.txt', 'credits.html')">解密(Y)</button></div></div>
 
             <div class="window" id="main-app-window"><div class="window-header"><span class="title" id="app-window-title">SYSTEM_APP.exe</span><span class="close-btn" onclick="closeApp()">X</span></div><div class="window-content" id="app-dynamic-content"></div></div>
             
             <div class="window" id="game-window" style="display: none; width: 800px; max-width: 95vw; height: auto; position: absolute; top: 10vh; left: 50%; transform: translateX(-50%); z-index: 9999;">
-                <div class="window-header">
-                    <span class="title">🦃 ESCAPE.exe - 系統異常突破</span>
-                    <span class="close-btn" onclick="closeGame()">X</span>
-                </div>
-                <div class="window-content" style="padding: 0; background-color: #05020a; position: relative; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; aspect-ratio: 8/3;">
+                <div class="window-header"><span class="title">🦃 ESCAPE.exe - 系統異常突破</span><span class="close-btn" onclick="closeGame()">X</span></div>
+                <div class="window-content" style="padding: 0; background-color: #05020a; position: relative; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; aspect-ratio: 8/3; border: none;">
                 <div id="game-score" style="position: absolute; top: 10px; right: 20px; color: #0f0; font-size: 20px; font-weight: bold; text-shadow: 2px 2px 0 #000; z-index: 10; pointer-events: none;">SCORE: 0</div>                    
                     <div id="game-msg" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; color: #0f0; text-align: center; z-index: 10; cursor: pointer; display: flex; flex-direction: column; justify-content: center; align-items: center; background: rgba(0,0,0,0.6);">
                         <h2 class="blink" style="margin: 0; color: #ff00ff; font-size: 2rem; text-shadow: 2px 2px #000;">SYSTEM BREACH</h2>
@@ -262,19 +275,19 @@
                 </div>
             </div>
             
-            <div class="desktop-icon blink" onclick="showIgWarning()"><div class="icon-img">📷</div><div>IG_LINK.url</div></div>
+            <div class="desktop-icon blink" onclick="openExternalLink('https://www.instagram.com/unsilence_fest._?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==')"><div class="icon-img">📷</div><div>IG_LINK.url</div></div>
         </main>
     </div>
 
-    <div class="modal-overlay" id="ig-overlay" onclick="closeIgWarning()"></div>
-    <div class="window alert-modal" id="ig-modal">
-        <div class="window-header" style="background-color: #aa0000;"><span class="title">⚠️ 系統警告</span><span class="close-btn" onclick="closeIgWarning()">X</span></div>
-        <div class="window-content">
-            <p>即將離開寧靜 OS，連接至外部社群網路 (Instagram)。</p>
-            <p style="color:#aa0000; font-weight:bold;">是否授權開啟？</p>
+    <div class="modal-overlay" id="ext-overlay" onclick="closeExternalWarning()"></div>
+    <div class="window alert-modal" id="ext-modal" style="z-index: 9005;">
+        <div class="window-header" style="background-color: #aa0000;"><span class="title">⚠️ 系統警告</span><span class="close-btn" onclick="closeExternalWarning()">X</span></div>
+        <div class="window-content" style="background: #ffd9d9; border-color: #ff0000;">
+            <p>即將離開寧靜 OS，連接至外部網路空間。</p>
+            <p style="color:#aa0000; font-weight:bold;">是否授權開啟傳輸協定？</p>
             <div style="margin-top:15px; display:flex; justify-content:space-around;">
-                <a href="https://www.instagram.com/unsilence_fest._?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" target="_blank" class="sys-btn yes" onclick="closeIgWarning()">授權 (Y)</a>
-                <button class="sys-btn" onclick="closeIgWarning()">拒絕 (N)</button>
+                <a id="ext-confirm-btn" href="#" target="_blank" class="sys-btn yes" onclick="closeExternalWarning()">授權 (Y)</a>
+                <button class="sys-btn" onclick="closeExternalWarning()">拒絕 (N)</button>
             </div>
         </div>
     </div>
@@ -282,175 +295,235 @@
     <div class="marquee-container"><div class="marquee-content">/// 2026.05.20 寧靜音樂節 /// 嘉義文化園區 /// 主辦單位：中正大學 /// 全程免費入場 /// 🍍 游標異常干擾中 ///</div></div>
 
     <script>
-        // ==========================================
-        // 1. BIOS 開機載入動畫
-        // ==========================================
-        const biosLines = [
-            "[0x0000] INITIATING KERNEL_CORE...",
-            "[0x001A] ALLOCATING MEMORY BLOCK...",
-            "[0xCCU] ALLOCATING CSIE_MODULE...",
-            "[0x002B] MOUNTING SIGNAL_PROCESSOR...",
-            "...",
-            "> BOOTING TRANQUIL_OS...",
-            "> MOUNTING PINEAPPLE_DRIVE...",
-            "> LOADING FETCH_MODULE... OK",
-            "> SYSTEM READY."
-        ];
-        
-        const biosText = document.getElementById('bios-text'); 
-        let lineIdx = 0;
-        
-        function showBios() { 
-            if (lineIdx < biosLines.length) { 
-                biosText.innerHTML += biosLines[lineIdx] + "<br>"; 
-                lineIdx++; 
-                setTimeout(showBios, 150); 
-            } else { 
-                setTimeout(() => {
-                    const biosScreen = document.getElementById('bios-screen');
-                    biosScreen.style.transition = "opacity 0.6s ease";
-                    biosScreen.style.opacity = "0";
-                    setTimeout(() => { biosScreen.style.display = 'none'; }, 600); 
-                }, 500); 
-            } 
+        // ✨ 新功能：訊號傳輸干擾 (Signal Transmission Glitch)
+        function signalClick(btnElement, windowTitle, fileUrl) {
+            if (btnElement.classList.contains('transmitting')) return;
+
+            // 1. 保存原文字
+            const originalText = btnElement.innerText;
+            const glitchChars = "#$@&%*!";
+            
+            // 2. 觸發視覺震動
+            btnElement.classList.add('transmitting');
+            
+            // 3. 文字亂碼動畫 (快速閃動)
+            let scrambleInterval = setInterval(() => {
+                btnElement.innerText = originalText.split('').map((char) => {
+                    if (Math.random() > 0.6) return glitchChars[Math.floor(Math.random() * glitchChars.length)];
+                    return char;
+                }).join('');
+            }, 50);
+
+            // 4. 延遲 300ms 後執行
+            setTimeout(() => {
+                clearInterval(scrambleInterval);
+                if (document.body.contains(btnElement)) {
+                    btnElement.innerText = originalText;
+                    btnElement.classList.remove('transmitting');
+                }
+                openApp(windowTitle, fileUrl);
+            }, 300);
         }
-        
-        window.onload = () => {
-            setTimeout(showBios, 1200);
-            setTimeout(() => { document.getElementById('crt-boot').remove(); }, 2500); 
+
+        // ✨ 桌面版：數位星塵特效 (Digital Stardust)
+        let lastX = 0, lastY = 0;
+        const createStardust = (x, y) => {
+            if(document.body.classList.contains('tranquil-mode')) return;
+            const dist = Math.hypot(x - lastX, y - lastY);
+            if(dist < 5) return; 
+            lastX = x; lastY = y;
+
+            const shapes = ["+", "□", "0", "1", "·"];
+            const p = document.createElement('div');
+            p.className = 'stardust';
+            p.innerText = shapes[Math.floor(Math.random() * shapes.length)];
+            p.style.left = `${x}px`;
+            p.style.top = `${y}px`;
+            
+            const tx = (Math.random() - 0.5) * 30;
+            const ty = Math.random() * 30 + 10;
+            p.style.setProperty('--tx', `${tx}px`);
+            p.style.setProperty('--ty', `${ty}px`);
+            
+            document.body.appendChild(p);
+            setTimeout(() => p.remove(), 800);
         };
 
-        // ==========================================
-        // 2. ✨ 完美全視窗拖曳系統 (防跳躍精確定位版) ✨
-        // ==========================================
-        const windows = document.querySelectorAll('.window:not(.alert-modal)'); 
-        let topZ = 100;
+        // ✨ 手機版：聲納波紋特效 (Sonar Ripple)
+        const createRipple = (x, y) => {
+            const r = document.createElement('div');
+            r.className = 'sonar-ripple';
+            r.style.left = `${x}px`;
+            r.style.top = `${y}px`;
+            document.body.appendChild(r);
+            setTimeout(() => r.remove(), 500);
+        };
 
-        windows.forEach(win => {
-            const header = win.querySelector('.window-header'); 
-            let isDragging = false;
-            let offsetX, offsetY, parentX, parentY;
+        // 偵測設備類型並綁定對應特效
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        if (isMobile) {
+            document.addEventListener('touchstart', (e) => {
+                const touch = e.touches[0];
+                createRipple(touch.clientX, touch.clientY);
+            }, {passive: true});
+        } else {
+            document.addEventListener('mousemove', (e) => createStardust(e.clientX, e.clientY));
+        }
 
-            // 點擊標題列開始拖曳
-            const startDrag = (e) => {
-                // 如果點擊 X 按鈕，拒絕拖曳
-                if (e.target.classList.contains('close-btn')) return;
-                
-                isDragging = true;
-                win.style.zIndex = ++topZ; 
+        // 💥 粒子爆炸 (保留)
+        const createExplosion = (x, y) => { 
+            if(document.body.classList.contains('tranquil-mode')) return; 
+            const p = document.createElement('div'); 
+            p.className = 'particle'; 
+            p.style.left = `${x}px`; p.style.top = `${y}px`; 
+            p.style.width = '6px'; p.style.height = '6px';
+            p.style.backgroundColor = 'var(--highlight-color)';
+            const angle = Math.random() * Math.PI * 2; 
+            const distance = Math.random() * 150 + 50; 
+            p.style.setProperty('--tx', `${Math.cos(angle) * distance}px`); 
+            p.style.setProperty('--ty', `${Math.sin(angle) * distance}px`); 
+            document.body.appendChild(p); 
+            setTimeout(() => p.remove(), 800); 
+        };
+        document.addEventListener('mousedown', (e) => { 
+            if (!e.target.closest('.window')) createExplosion(e.clientX, e.clientY); 
+        });
 
-                // 取得「視窗」在整個螢幕上的真實座標
-                const rect = win.getBoundingClientRect();
-                // 取得「父容器 (main-content)」在螢幕上的真實座標
-                const parentRect = win.offsetParent.getBoundingClientRect();
-                
-                // 紀錄父容器的偏差值
-                parentX = parentRect.left;
-                parentY = parentRect.top;
-                
-                // 拔除魔法，並換算成「相對於父容器」的正確內部座標 (✨ 解決往下亂跳的關鍵)
-                win.style.transform = 'none'; 
-                win.style.margin = '0';
-                win.style.bottom = 'auto'; 
-                win.style.right = 'auto';  
-                win.style.left = `${rect.left - parentX}px`;
-                win.style.top = `${rect.top - parentY}px`;
-                
-                // 計算手指點擊位置與視窗左上角的距離
-                offsetX = e.clientX - rect.left;
-                offsetY = e.clientY - rect.top;
-                
-                // 封印手機滑動行為
-                if (e.pointerType === 'touch') win.style.touchAction = 'none';
-            };
-
-            // 滑動過程
-            const moveDrag = (e) => {
-                if (!isDragging) return;
-                e.preventDefault(); 
-                
-                // ✨ 計算新座標：滑鼠位置 - 手指內部偏移 - 父容器外部偏移
-                win.style.left = `${e.clientX - offsetX - parentX}px`;
-                win.style.top = `${e.clientY - offsetY - parentY}px`;
-            };
-
-            // 放開拖曳
-            const stopDrag = () => {
-                isDragging = false;
-                if (win.style.touchAction === 'none') win.style.touchAction = '';
-            };
-
-            // 綁定事件
-            header.addEventListener('pointerdown', startDrag);
-            document.addEventListener('pointermove', moveDrag, { passive: false });
-            document.addEventListener('pointerup', stopDrag);
-            document.addEventListener('pointercancel', stopDrag);
-
-            // X 按鈕關閉邏輯
-            if (win.classList.contains('teaser-win')) {
-                win.querySelector('.close-btn').onclick = () => win.style.display = 'none';
+        // ✨ 階段一：動態文字特效 (保留)
+        const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*寧靜音樂節";
+        document.querySelector('.glitch-text').onmouseover = event => {
+            let el = event.currentTarget; 
+            let iterations = 0; 
+            const originalText = "寧靜音樂節\nUNSILENCE OS";
+            clearInterval(el.dataset.interval);
+            el.dataset.interval = setInterval(() => {
+                el.innerHTML = originalText.split("").map((letter, index) => {
+                    if(index < iterations || letter === " " || letter === "\n") return letter === "\n" ? "<br>" : originalText[index];
+                    return letters[Math.floor(Math.random() * letters.length)];
+                }).join("");
+                if(iterations >= originalText.length) clearInterval(el.dataset.interval);
+                iterations += 1;
+            }, 30);
+        }
+        
+        // 側邊欄動態文字 (保留)
+        document.querySelectorAll('.nav-links a').forEach(link => {
+            link.onmouseover = event => {
+                let el = event.currentTarget;
+                let iterations = 0;
+                const originalText = el.dataset.text;
+                clearInterval(el.dataset.interval);
+                el.dataset.interval = setInterval(() => {
+                    el.innerText = originalText.split("").map((letter, index) => {
+                        if(index < iterations || letter === " " || letter === ">") return originalText[index];
+                        return letters[Math.floor(Math.random() * letters.length)];
+                    }).join("");
+                    if(iterations >= originalText.length) clearInterval(el.dataset.interval);
+                    iterations += 1;
+                }, 30);
             }
         });
 
-        // ==========================================
-        // 3. 其他 OS UI 功能 (載入、警告、模式)
-        // ==========================================
+        // ✨ 還原：BIOS 開機動畫與背景預載
+        const biosLines = ["[0x0000] INITIATING KERNEL_CORE...", "[0x001A] ALLOCATING MEMORY BLOCK...", "[0xCCU] ALLOCATING CSIE_MODULE...", "[0x002B] MOUNTING SIGNAL_PROCESSOR...", "...", "> BOOTING TRANQUIL_OS...", "> SYSTEM READY."];
+        const biosText = document.getElementById('bios-text'); let lineIdx = 0;
+        function showBios() { 
+            if (lineIdx < biosLines.length) { biosText.innerHTML += biosLines[lineIdx] + "<br>"; lineIdx++; setTimeout(showBios, 150); } 
+            else { setTimeout(() => { const biosScreen = document.getElementById('bios-screen'); biosScreen.style.transition = "opacity 0.6s ease"; biosScreen.style.opacity = "0"; setTimeout(() => { biosScreen.style.display = 'none'; preloadApps(); }, 600); }, 500); } 
+        }
+        window.onload = () => { setTimeout(showBios, 1200); setTimeout(() => { document.getElementById('crt-boot').remove(); }, 2500); };
+
+        const cache = {};
+        function preloadApps() { const filesToPreload = ['news.html', 'lineup.html', 'timetable.html', 'map.html', 'goods.html', 'guidelines.html', 'credits.html']; filesToPreload.forEach(file => { fetch(file).then(res => res.text()).then(html => cache[file] = html).catch(e=>console.log("Preload Error:", file)); }); }
+
+        // 完美視窗拖曳與焦點
+        const windows = document.querySelectorAll('.window:not(.alert-modal)'); 
+        let topZ = 100;
+        function focusWindow(win) { windows.forEach(w => w.classList.remove('focused')); win.classList.add('focused'); win.style.zIndex = ++topZ; }
+
+        windows.forEach(win => {
+            const header = win.querySelector('.window-header'); 
+            let isDragging = false; let offsetX, offsetY, parentX, parentY;
+            win.addEventListener('pointerdown', () => focusWindow(win)); 
+            const startDrag = (e) => {
+                if (e.target.classList.contains('close-btn')) return;
+                isDragging = true; focusWindow(win);
+                const rect = win.getBoundingClientRect(); const parentRect = win.offsetParent.getBoundingClientRect();
+                parentX = parentRect.left; parentY = parentRect.top;
+                win.style.transform = 'none'; win.style.margin = '0'; win.style.bottom = 'auto'; win.style.right = 'auto';  
+                win.style.left = `${rect.left - parentX}px`; win.style.top = `${rect.top - parentY}px`;
+                offsetX = e.clientX - rect.left; offsetY = e.clientY - rect.top;
+                if (e.pointerType === 'touch') win.style.touchAction = 'none';
+            };
+            const moveDrag = (e) => { if (!isDragging) return; e.preventDefault(); win.style.left = `${e.clientX - offsetX - parentX}px`; win.style.top = `${e.clientY - offsetY - parentY}px`; };
+            const stopDrag = () => { isDragging = false; if (win.style.touchAction === 'none') win.style.touchAction = ''; };
+            header.addEventListener('pointerdown', startDrag); document.addEventListener('pointermove', moveDrag, { passive: false }); document.addEventListener('pointerup', stopDrag); document.addEventListener('pointercancel', stopDrag);
+            if (win.classList.contains('teaser-win')) win.querySelector('.close-btn').onclick = () => win.style.display = 'none';
+        });
+
+        // 智慧排版系統
+        let cascadeX = 60, cascadeY = 60;
+        function getSmartPosition() {
+            if (window.innerWidth <= 800) return { top: '8vh', left: '2.5vw' }; 
+            cascadeX += 30; cascadeY += 30;
+            if (cascadeX > window.innerWidth - 650 || cascadeY > window.innerHeight - 450) { cascadeX = 80; cascadeY = 80; } 
+            return { top: `${cascadeY}px`, left: `${cascadeX}px` };
+        }
+
+        // 開啟 App
         async function openApp(windowTitle, fileUrl) {
             const appWin = document.getElementById('main-app-window'); const contentArea = document.getElementById('app-dynamic-content'); const titleArea = document.getElementById('app-window-title');
-            appWin.style.display = 'flex'; appWin.style.zIndex = ++topZ;
+            appWin.style.display = 'flex'; focusWindow(appWin);
             
-            if(window.innerWidth > 800) { 
-                appWin.style.top = `${80 + Math.floor(Math.random() * 20)}px`; 
-                appWin.style.left = `${150 + Math.floor(Math.random() * 20)}px`; 
-            } else { 
-                appWin.style.top = `20px`;  
-                appWin.style.left = `2.5vw`; 
-            }
+            const pos = getSmartPosition();
+            appWin.style.top = pos.top; appWin.style.left = pos.left;
             
             titleArea.innerText = `📁 ${windowTitle}`; contentArea.innerHTML = "<h3 class='blink'>> 讀取資料中 / LOADING DATA...</h3>";
-            try { const response = await fetch(fileUrl); if (!response.ok) throw new Error('File not found'); const htmlContent = await response.text(); contentArea.innerHTML = htmlContent; } catch (error) { contentArea.innerHTML = `<h3 style='color:red;'>[ 系統錯誤 ] 無法連接到信號源 (${fileUrl})</h3><p>請確認您是否使用 Live Server 開啟網頁？</p>`; }
+            try { 
+                let htmlContent = cache[fileUrl];
+                if(!htmlContent) { const response = await fetch(fileUrl); if (!response.ok) throw new Error(); htmlContent = await response.text(); cache[fileUrl] = htmlContent; }
+                contentArea.innerHTML = htmlContent; 
+                
+                // 時刻表代管
+                if (fileUrl === 'timetable.html') {
+                    setTimeout(() => {
+                        const now = new Date(); const currentTime = now.getHours() + (now.getMinutes() / 60);
+                        const rows = document.querySelectorAll('#timetable tbody tr');
+                        rows.forEach(row => {
+                            const startArr = row.dataset.start.split(':'); const endArr = row.dataset.end.split(':');
+                            const start = parseInt(startArr[0]) + (parseInt(startArr[1]) / 60); const end = parseInt(endArr[0]) + (parseInt(endArr[1]) / 60);
+                            if (currentTime >= start && currentTime < end) { row.classList.add('current-slot'); row.querySelector('td').innerHTML += '<span class="now-tag">[NOW]</span>'; }
+                        });
+                    }, 50);
+                }
+            } catch (error) { contentArea.innerHTML = `<h3 style='color:red;'>[ 系統錯誤 ] 無法連接到信號源 (${fileUrl})</h3>`; }
         }
-        function closeApp() { document.getElementById('main-app-window').style.display = 'none'; document.getElementById('app-dynamic-content').innerHTML = ''; }
+        function closeApp() { document.getElementById('main-app-window').style.display = 'none'; document.getElementById('app-dynamic-content').innerHTML = ''; cascadeX = 60; cascadeY = 60;}
         
-        function showIgWarning() { document.getElementById('ig-overlay').style.display = 'block'; document.getElementById('ig-modal').style.display = 'block'; }
-        function closeIgWarning() { document.getElementById('ig-overlay').style.display = 'none'; document.getElementById('ig-modal').style.display = 'none'; }
+        // 地圖解析全局函式
+        window.scanNode = function(title, text) {
+            const info = document.getElementById('radar-info'); if(!info) return;
+            info.classList.remove('blink'); info.innerHTML = `<strong style="color:var(--highlight-color)">[解析完成] ${title}</strong><br>`;
+            let i = 0; const speed = 30;
+            function typeWriter() { if (i < text.length) { info.innerHTML += text.charAt(i); i++; setTimeout(typeWriter, speed); } }
+            typeWriter();
+        };
+
+        // 外部連結安全跳轉
+        window.openExternalLink = function(url) { document.getElementById('ext-overlay').style.display = 'block'; document.getElementById('ext-modal').style.display = 'block'; document.getElementById('ext-confirm-btn').href = url; };
+        function closeExternalWarning() { document.getElementById('ext-overlay').style.display = 'none'; document.getElementById('ext-modal').style.display = 'none'; }
         
+        // 主題切換與背景 Matrix
         const modes = ['noise', 'tranquil', 'pineapple']; const modeLabels = ['模式切換: 雜訊', '模式切換: 寧靜', '模式切換: 🍍鳳梨']; let currentModeIndex = 0;
         document.getElementById('mode-toggle').onclick = (e) => { document.body.classList.remove(`${modes[currentModeIndex]}-mode`); currentModeIndex = (currentModeIndex + 1) % modes.length; document.body.classList.add(`${modes[currentModeIndex]}-mode`); e.target.innerText = modeLabels[currentModeIndex]; };
 
-        // 鳳梨與特效
-        const defaultColors = ['#ff00ff', '#00ff00', '#ffffff', '#9d00ff'];
-        const createExplosion = (x, y) => { if(document.body.classList.contains('tranquil-mode')) return; const isPineapple = document.body.classList.contains('pineapple-mode'); const particleCount = isPineapple ? 12 : 30; for (let i = 0; i < particleCount; i++) { const p = document.createElement('div'); p.className = 'particle'; p.style.left = `${x}px`; p.style.top = `${y}px`; if (isPineapple) { p.innerText = '🍍'; } else { const size = Math.random() * 6 + 4; p.style.width = `${size}px`; p.style.height = `${size}px`; p.style.backgroundColor = defaultColors[Math.floor(Math.random() * defaultColors.length)]; } const angle = Math.random() * Math.PI * 2; const distance = Math.random() * 150 + 50; p.style.setProperty('--tx', `${Math.cos(angle) * distance}px`); p.style.setProperty('--ty', `${Math.sin(angle) * distance}px`); document.body.appendChild(p); setTimeout(() => p.remove(), 800); } };
-        const createTrail = (x, y) => { if(document.body.classList.contains('tranquil-mode') || Math.random() > 0.6) return; const trail = document.createElement('div'); trail.className = 'trail-particle'; trail.style.left = `${x}px`; trail.style.top = `${y}px`; if(document.body.classList.contains('pineapple-mode')){ trail.innerText = '🍍'; trail.style.fontSize = '12px'; } else { trail.style.width = '4px'; trail.style.height = '4px'; trail.style.backgroundColor = defaultColors[Math.floor(Math.random() * defaultColors.length)]; } document.body.appendChild(trail); setTimeout(() => trail.remove(), 400); };
-        document.addEventListener('mousedown', (e) => { if(!e.target.closest('#ig-modal') && !e.target.closest('.window-header')) createExplosion(e.clientX, e.clientY); }); document.addEventListener('touchstart', (e) => { if(!e.target.closest('#ig-modal') && !e.target.closest('.window-header')) createExplosion(e.touches[0].clientX, e.touches[0].clientY); }, {passive: true}); document.addEventListener('mousemove', (e) => createTrail(e.clientX, e.clientY)); document.addEventListener('touchmove', (e) => createTrail(e.touches[0].clientX, e.touches[0].clientY), {passive: true});
-
-        // ==========================================
-        // 4. 動態桌布：Canvas Matrix Rain
-        // ==========================================
-        const canvas = document.getElementById('matrix-bg');
-        const ctx = canvas.getContext('2d');
-        let cw, ch; const fontSize = 18; let columns = [];
-        const baseChars = 'ｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄﾅﾆﾇﾈﾉﾊﾋﾌﾍﾎﾏﾐﾑﾒﾓﾔﾕﾖﾗﾘﾙﾚﾛﾜﾝ0123456789'.split('');
-        const easterEgg = ['寧','寧','靜','靜','音','樂','節']; 
-        const noiseChars = baseChars.concat(easterEgg);
-        const pineappleChars = ['🍍'];
-
-        function initCanvas() {
-            cw = window.innerWidth; ch = window.innerHeight;
-            canvas.width = cw; canvas.height = ch;
-            const colCount = Math.floor(cw / fontSize) + 1;
-            columns = [];
-            for (let i = 0; i < colCount; i++) { columns[i] = Math.random() * -100; }
-        }
+        const canvas = document.getElementById('matrix-bg'); const ctx = canvas.getContext('2d');
+        let cw, ch; const fontSize = 18; let columns = []; const noiseChars = 'ｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄﾅﾆﾇﾈﾉﾊﾋﾌﾍﾎﾏﾐﾑﾒﾓﾔﾕﾖﾗﾘﾙﾚﾛﾜﾝ0123456789寧靜音樂節'.split(''); const pineappleChars = ['🍍'];
+        function initCanvas() { cw = window.innerWidth; ch = window.innerHeight; canvas.width = cw; canvas.height = ch; const colCount = Math.floor(cw / fontSize) + 1; columns = []; for (let i = 0; i < colCount; i++) { columns[i] = Math.random() * -100; } }
         window.addEventListener('resize', initCanvas); initCanvas();
-
-        function drawMatrix() {
-            if (document.body.classList.contains('tranquil-mode')) { ctx.fillStyle = 'rgba(17, 17, 17, 0.15)'; ctx.fillRect(0, 0, cw, ch); return; }
-            ctx.fillStyle = document.body.classList.contains('pineapple-mode') ? 'rgba(26, 26, 0, 0.15)' : 'rgba(10, 5, 16, 0.15)'; ctx.fillRect(0, 0, cw, ch); ctx.font = `${fontSize}px 'DotGothic16', monospace`; ctx.textBaseline = 'top'; ctx.fillStyle = document.body.classList.contains('pineapple-mode') ? '#ffcc00' : '#0f0'; const chars = document.body.classList.contains('pineapple-mode') ? pineappleChars : noiseChars; for (let i = 0; i < columns.length; i++) { const char = chars[Math.floor(Math.random() * chars.length)]; const x = i * fontSize; const y = columns[i] * fontSize; ctx.fillText(char, x, y); if (y > ch && Math.random() > 0.975) { columns[i] = 0; } else { columns[i]++; } }
-        }
+        function drawMatrix() { if (document.body.classList.contains('tranquil-mode')) { ctx.fillStyle = 'rgba(17, 17, 17, 0.15)'; ctx.fillRect(0, 0, cw, ch); return; } ctx.fillStyle = document.body.classList.contains('pineapple-mode') ? 'rgba(26, 26, 0, 0.15)' : 'rgba(10, 5, 16, 0.15)'; ctx.fillRect(0, 0, cw, ch); ctx.font = `${fontSize}px 'DotGothic16', monospace`; ctx.textBaseline = 'top'; ctx.fillStyle = document.body.classList.contains('pineapple-mode') ? '#ffcc00' : '#0f0'; const chars = document.body.classList.contains('pineapple-mode') ? pineappleChars : noiseChars; for (let i = 0; i < columns.length; i++) { const char = chars[Math.floor(Math.random() * chars.length)]; const x = i * fontSize; const y = columns[i] * fontSize; ctx.fillText(char, x, y); if (y > ch && Math.random() > 0.975) { columns[i] = 0; } else { columns[i]++; } } }
         setInterval(drawMatrix, 50);
-
     </script>
-    <script src="game.js?v=4.2"></script>
+    <script src="game.js?v=11.0"></script>
 </body>
 </html>
