@@ -64,7 +64,14 @@
         ::-webkit-scrollbar-thumb { background: var(--highlight-color); border: 1px solid #fff; }
         ::-webkit-scrollbar-thumb:hover { background: #fff; }
 
-        * { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; box-sizing: border-box; }
+        * { 
+    -webkit-touch-callout: none; 
+    -webkit-user-select: none; 
+    user-select: none; 
+    box-sizing: border-box; 
+    -webkit-tap-highlight-color: transparent; /* ✨ 消除手機版點擊時的反白閃爍 */
+    outline: none;
+}
 
         /* 背景與濾鏡 */
         #matrix-bg { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 0; pointer-events: none; opacity: 0.6; }
@@ -440,37 +447,43 @@
 
         // 文字亂碼特效
         const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*寧靜音樂節";
-        document.querySelector('.logo-area').onmouseover = () => {
-            let el = document.querySelector('.glitch-text'); 
-            if (!el) return;
-            let iterations = 0; 
-            const originalText = "寧靜音樂節\nUNSILENCE OS";
+        
+        // 將亂碼邏輯獨立成一個函數
+        function triggerGlitch(el, originalText) {
+            let iterations = 0;
             clearInterval(el.dataset.interval);
             el.dataset.interval = setInterval(() => {
                 el.innerHTML = originalText.split("").map((letter, index) => {
-                    if(index < iterations || letter === " " || letter === "\n") return letter === "\n" ? "<br>" : originalText[index];
+                    // 保留換行與箭頭符號
+                    if(index < iterations || letter === " " || letter === "\n" || letter === ">") {
+                        return letter === "\n" ? "<br>" : originalText[index];
+                    }
                     return letters[Math.floor(Math.random() * letters.length)];
                 }).join("");
                 if(iterations >= originalText.length) clearInterval(el.dataset.interval);
                 iterations += 1;
             }, 30);
         }
+
+        // 綁定 Logo 特效
+        const logoArea = document.querySelector('.logo-area');
+        if (logoArea) {
+            const logoGlitch = () => {
+                let el = document.querySelector('.glitch-text'); 
+                if (el) triggerGlitch(el, "寧靜音樂節\nUNSILENCE OS");
+            };
+            logoArea.addEventListener('mouseover', logoGlitch);
+            logoArea.addEventListener('touchstart', logoGlitch, {passive: true}); // ✨ 支援手機觸控
+        }
         
+        // 綁定選單連結特效
         document.querySelectorAll('.nav-links a').forEach(link => {
-            link.onmouseover = event => {
+            const linkGlitch = (event) => {
                 let el = event.currentTarget;
-                let iterations = 0;
-                const originalText = el.dataset.text;
-                clearInterval(el.dataset.interval);
-                el.dataset.interval = setInterval(() => {
-                    el.innerText = originalText.split("").map((letter, index) => {
-                        if(index < iterations || letter === " " || letter === ">") return originalText[index];
-                        return letters[Math.floor(Math.random() * letters.length)];
-                    }).join("");
-                    if(iterations >= originalText.length) clearInterval(el.dataset.interval);
-                    iterations += 1;
-                }, 30);
-            }
+                triggerGlitch(el, el.dataset.text);
+            };
+            link.addEventListener('mouseover', linkGlitch);
+            link.addEventListener('touchstart', linkGlitch, {passive: true}); // ✨ 支援手機觸控
         });
 
         // BIOS 開機
@@ -487,7 +500,7 @@
 
         // 視窗拖曳 (全平台可用)
         const windows = document.querySelectorAll('.window:not(.alert-modal)'); 
-        let topZ = 100;
+        let topZ = 10010;
         function focusWindow(win) { windows.forEach(w => w.classList.remove('focused')); win.classList.add('focused'); win.style.zIndex = ++topZ; }
 
         windows.forEach(win => {
