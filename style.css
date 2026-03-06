@@ -13,7 +13,7 @@
 
     --btn-bg: #d1b3ff;
     --crt-opacity: 1;
-    --logo-color: #b829ff;
+    --logo-color: #d580ff;
 }
 
 body.tranquil-mode {
@@ -140,14 +140,53 @@ body, html {
 
 .logo-area { position: relative; margin-bottom: 20px; }
 .logo-area h1 {
-    color: var(--logo-color); font-family: 'Shippori Mincho B1', serif; font-size: 32px;
-    margin: 0; line-height: 1.1; letter-spacing: -1px;
-    text-shadow: 0 0 10px rgba(184, 41, 255, 0.6), 3px 3px 0px #000;
-    animation: logo-breathe 4s ease-in-out infinite;
+    color: var(--logo-color); margin: 0; line-height: 1.15; position: relative;
+    -webkit-text-stroke: 1px rgba(213, 128, 255, 0.6);
 }
-@keyframes logo-breathe {
-    0%, 100% { text-shadow: 0 0 10px rgba(184, 41, 255, 0.6), 3px 3px 0px #000; opacity: 0.9; }
-    50% { text-shadow: 0 0 20px rgba(184, 41, 255, 0.9), 3px 3px 0px #000; opacity: 1; }
+.logo-cn {
+    display: block; font-family: 'DotGothic16', sans-serif;
+    font-size: 32px; letter-spacing: 3px; position: relative;
+}
+.logo-en {
+    display: block; font-family: 'DotGothic16', sans-serif;
+    font-size: 22px; letter-spacing: 2px; position: relative;
+}
+
+/* Glitch RGB 色差 - 紅色層 */
+.logo-cn::before, .logo-en::before {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    overflow: hidden; color: #ff0040; z-index: -1;
+    -webkit-text-stroke: 0;
+    animation: glitch-r 3s infinite linear alternate-reverse;
+}
+.logo-cn::before { content: '寧靜音樂節'; }
+.logo-en::before { content: 'UNSILENCE OS'; }
+
+/* Glitch RGB 色差 - 青色層 */
+.logo-cn::after, .logo-en::after {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    overflow: hidden; color: #00ffff; z-index: -1;
+    -webkit-text-stroke: 0;
+    animation: glitch-b 2s infinite linear alternate-reverse;
+}
+.logo-cn::after { content: '寧靜音樂節'; }
+.logo-en::after { content: 'UNSILENCE OS'; }
+
+@keyframes glitch-r {
+    0% { clip-path: inset(40% 0 60% 0); transform: translate(-2px, 0); }
+    20% { clip-path: inset(10% 0 85% 0); transform: translate(2px, 0); }
+    40% { clip-path: inset(70% 0 5% 0); transform: translate(-1px, 0); }
+    60% { clip-path: inset(20% 0 70% 0); transform: translate(1px, 0); }
+    80% { clip-path: inset(55% 0 30% 0); transform: translate(-2px, 0); }
+    100% { clip-path: inset(5% 0 90% 0); transform: translate(2px, 0); }
+}
+@keyframes glitch-b {
+    0% { clip-path: inset(60% 0 20% 0); transform: translate(2px, 0); }
+    20% { clip-path: inset(5% 0 80% 0); transform: translate(-2px, 0); }
+    40% { clip-path: inset(30% 0 50% 0); transform: translate(1px, 0); }
+    60% { clip-path: inset(80% 0 5% 0); transform: translate(-1px, 0); }
+    80% { clip-path: inset(15% 0 65% 0); transform: translate(2px, 0); }
+    100% { clip-path: inset(50% 0 35% 0); transform: translate(-2px, 0); }
 }
 
 .nav-links { list-style: none; padding: 0; margin: 20px 0 0 0; flex-grow: 1; overflow-y: auto;}
@@ -165,7 +204,7 @@ body, html {
 
 /* 火雞觸發按鈕 */
 #secret-turkey {
-    font-size: 48px;
+    font-size: 32px;
     text-align: center;
     cursor: pointer;
     margin: 15px 0 10px 0;
@@ -186,11 +225,13 @@ body, html {
 .sidebar-bottom-link:hover { text-shadow: 2px 0 red, -2px 0 cyan; }
 .sidebar-bottom-icons { display: flex; align-items: center; gap: 8px; }
 .sidebar-ig {
+    display: none; /* 電腦版隱藏，手機版才顯示 */
     font-size: 28px; cursor: pointer; text-shadow: 2px 2px 0px #000;
     position: relative;
     animation: icon-pulse 2.5s ease-in-out infinite;
     animation-delay: 1.2s;
 }
+.sidebar-ig svg { width: 28px; height: 28px; }
 .sidebar-ig:hover {
     animation: none;
     transform: scale(1.3);
@@ -250,10 +291,14 @@ body, html {
 #main-app-window { width: 600px; height: 400px; display: none; max-width: 90vw; max-height: 80vh; }
 #main-app-window .window-content { background: #f8f2ff; border: inset 2px #a366ff; margin: 10px; padding: 15px; text-align: left; }
 body.tranquil-mode #main-app-window .window-content { background: #333; }
+body.tranquil-mode .logo-cn::before, body.tranquil-mode .logo-cn::after,
+body.tranquil-mode .logo-en::before, body.tranquil-mode .logo-en::after { display: none; }
+body.tranquil-mode .logo-area h1 { -webkit-text-stroke: 0; }
 body.pineapple-mode #main-app-window .window-content { background: #ffffe6; }
 
 .desktop-icon { position: absolute; bottom: 60px; right: 40px; text-align: center; color: var(--text-color); cursor: pointer; z-index: 5; text-shadow: 2px 2px 0px #000; }
-.desktop-icon .icon-img { font-size: 40px; margin-bottom: 5px; }
+.desktop-icon .icon-img { font-size: 40px; margin-bottom: 5px; color: var(--text-color); }
+.desktop-icon .icon-img svg { width: 36px; height: 36px; }
 .desktop-icon:hover { transform: scale(1.1); color: var(--highlight-color); }
 
 .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.6); z-index: 9000; }
@@ -270,7 +315,7 @@ body.pineapple-mode #main-app-window .window-content { background: #ffffe6; }
 /* timetable */
 .current-slot { background: var(--highlight-color); color: #000; font-weight: bold; }
 .current-slot td { border-color: #000 !important; }
-.now-tag { animation: blinker 1s linear infinite; display: inline-block; margin-left: 5px; font-size: 12px; }
+.now-tag { animation: blinker 2s linear infinite; display: inline-block; margin-left: 5px; font-size: 12px; }
 
 /* map */
 #radar-map {
@@ -318,18 +363,23 @@ body.pineapple-mode #main-app-window .window-content { background: #ffffe6; }
     .sidebar { width: 100%; height: auto; border-right: none; border-bottom: 2px solid var(--win-border); padding: 10px 15px; box-sizing: border-box; position: relative; z-index: 100; }
 
     .logo-area { margin-bottom: 5px; text-align: center; }
-    .logo-area h1 { font-size: 22px; line-height: 1.2; display: inline-block;}
+    .logo-area h1 { line-height: 1.2; display: inline-block;}
     .logo-area h1 br { display: none; }
+    .logo-cn { display: inline; font-size: 22px; letter-spacing: 2px; }
+    .logo-en { display: inline; font-size: 13px; letter-spacing: 1px; margin-left: 12px; }
+    .logo-cn::before, .logo-cn::after, .logo-en::before, .logo-en::after { display: none; }
 
     #secret-turkey {
         position: static;
         margin: 0;
-        font-size: 32px;
+        font-size: 26px;
     }
 
     .sidebar-bottom { margin-top: 5px; padding: 0 5px; }
     .sidebar-bottom-link { font-size: 14px; }
-    .sidebar-ig { font-size: 22px; }
+    .sidebar-ig { display: inline-flex; font-size: 26px; }
+    .sidebar-ig svg { width: 24px; height: 24px; }
+    .desktop-icon { display: none !important; }
 
     .nav-links { margin: 5px 0 5px 0; display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
     .nav-links li { margin: 0; }
@@ -351,7 +401,7 @@ body.pineapple-mode #main-app-window .window-content { background: #ffffe6; }
     #run-canvas { object-fit: contain !important; width: 100% !important; }
 }
 
-.blink { animation: blinker 1s linear infinite; }
+.blink { animation: blinker 2s linear infinite; }
 @keyframes blinker { 50% { opacity: 0; } }
 
 /* =========================================

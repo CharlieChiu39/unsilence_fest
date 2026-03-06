@@ -3,6 +3,7 @@
 // =========================================
 function signalClick(btnElement, windowTitle, fileUrl) {
     if (btnElement.classList.contains('transmitting')) return;
+    if (typeof gtag === 'function') gtag('event', 'nav_click', { page_name: fileUrl });
 
     const originalText = btnElement.innerText;
     const glitchChars = "#$@&%*!";
@@ -117,9 +118,9 @@ function triggerGlitch(el, originalText) {
     let iterations = 0;
     clearInterval(el.dataset.interval);
     el.dataset.interval = setInterval(() => {
-        el.innerHTML = originalText.split("").map((letter, index) => {
-            if (index < iterations || letter === " " || letter === "\n" || letter === ">") {
-                return letter === "\n" ? "<br>" : originalText[index];
+        el.textContent = originalText.split("").map((letter, index) => {
+            if (index < iterations || letter === " ") {
+                return originalText[index];
             }
             return letters[Math.floor(Math.random() * letters.length)];
         }).join("");
@@ -132,8 +133,10 @@ function triggerGlitch(el, originalText) {
 const logoArea = document.querySelector('.logo-area');
 if (logoArea) {
     const logoGlitch = () => {
-        let el = document.querySelector('.glitch-text');
-        if (el) triggerGlitch(el, "寧靜音樂節\nUNSILENCE OS");
+        let cn = document.querySelector('.logo-cn');
+        let en = document.querySelector('.logo-en');
+        if (cn) triggerGlitch(cn, "寧靜音樂節");
+        if (en) triggerGlitch(en, "UNSILENCE OS");
     };
     logoArea.addEventListener('mouseover', logoGlitch);
     logoArea.addEventListener('touchstart', logoGlitch, { passive: true });
@@ -296,8 +299,30 @@ window.scanNode = function(title, text) {
     typeWriter();
 };
 
-window.openExternalLink = function(url) { document.getElementById('ext-overlay').style.display = 'block'; document.getElementById('ext-modal').style.display = 'block'; document.getElementById('ext-confirm-btn').href = url; };
+window.openExternalLink = function(url) { if (typeof gtag === 'function') gtag('event', 'external_link_click', { link_url: url }); document.getElementById('ext-overlay').style.display = 'block'; document.getElementById('ext-modal').style.display = 'block'; document.getElementById('ext-confirm-btn').href = url; };
 function closeExternalWarning() { document.getElementById('ext-overlay').style.display = 'none'; document.getElementById('ext-modal').style.display = 'none'; }
+
+// =========================================
+// 分享按鈕 (Web Share API)
+// =========================================
+window.shareWebsite = function() {
+    if (typeof gtag === 'function') gtag('event', 'share_click');
+    const shareData = {
+        title: '寧靜音樂節 UNSILENCE FESTIVAL 2026',
+        text: '5/30-5/31 嘉義文化創意產業園區 | 全程免費入場 | 迷幻搖滾 x 獨立電子',
+        url: window.location.href
+    };
+    if (navigator.share) {
+        navigator.share(shareData);
+    } else {
+        navigator.clipboard.writeText(window.location.href).then(() => {
+            const btn = document.getElementById('share-btn');
+            const orig = btn.getAttribute('data-tooltip');
+            btn.setAttribute('data-tooltip', '> 已複製連結!');
+            setTimeout(() => btn.setAttribute('data-tooltip', orig), 2000);
+        });
+    }
+};
 
 // =========================================
 // 模式切換

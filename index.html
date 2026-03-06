@@ -5,17 +5,64 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#0a0510">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="description" content="2026 寧靜音樂節 UNSILENCE FESTIVAL，5/20 嘉義文化創意產業園區，全程免費入場。迷幻搖滾 x 獨立電子。">
+    <meta name="description" content="2026 寧靜音樂節 UNSILENCE FESTIVAL，5/30-5/31 嘉義文化創意產業園區，全程免費入場。迷幻搖滾 x 獨立電子。">
     <meta name="keywords" content="寧靜音樂節, UNSILENCE FESTIVAL, 嘉義, 音樂節, 免費, 2026, 獨立音樂">
     <meta property="og:type" content="website">
-    <meta property="og:title" content="寧靜音樂節 UNSILENCE FESTIVAL OS 2026">
-    <meta property="og:description" content="5/20 嘉義文化園區 | 全程免費入場 | 迷幻搖滾 x 獨立電子">
-    <meta property="og:image" content="og-image.png">
+    <meta property="og:title" content="寧靜音樂節 UNSILENCE FESTIVAL 2026">
+    <meta property="og:description" content="5/30-5/31 嘉義文化創意產業園區 | 全程免費入場 | 迷幻搖滾 x 獨立電子">
+    <meta property="og:image" content="og-image.svg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:locale" content="zh_TW">
     <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="寧靜音樂節 UNSILENCE FESTIVAL 2026">
+    <meta name="twitter:description" content="5/30-5/31 嘉義文化創意產業園區 | 全程免費入場 | 迷幻搖滾 x 獨立電子">
+    <meta name="twitter:image" content="og-image.svg">
     <title>寧靜音樂節 UNSILENCE FESTIVAL OS</title>
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
-    <link href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Shippori+Mincho+B1:wght@800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DotGothic16&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
+    <!-- SEO Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "MusicEvent",
+      "name": "寧靜音樂節 UNSILENCE FESTIVAL 2026",
+      "startDate": "2026-05-30",
+      "endDate": "2026-05-31",
+      "location": {
+        "@type": "Place",
+        "name": "嘉義文化創意產業園區",
+        "address": {
+          "@type": "PostalAddress",
+          "streetAddress": "中山路616號",
+          "addressLocality": "嘉義市",
+          "addressCountry": "TW"
+        }
+      },
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "TWD",
+        "availability": "https://schema.org/InStock"
+      },
+      "organizer": {
+        "@type": "Organization",
+        "name": "中正大學熱音社"
+      },
+      "description": "迷幻搖滾 x 獨立電子音樂節，全程免費入場",
+      "eventStatus": "https://schema.org/EventScheduled",
+      "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode"
+    }
+    </script>
+    <!-- Google Analytics 4 -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-EJQZMDTGH5"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-EJQZMDTGH5');
+    </script>
 </head>
 <body class="crt noise-mode" onselectstart="return false;">
     <div id="crt-boot" aria-hidden="true"><div class="crt-line"></div></div>
@@ -30,7 +77,7 @@
     <div class="layout-container">
         <nav class="sidebar">
             <div class="logo-area">
-                <h1 class="glitch-text">寧靜音樂節<br>UNSILENCE OS</h1>
+                <h1 class="glitch-text"><span class="logo-cn">寧靜音樂節</span><br><span class="logo-en">UNSILENCE OS</span></h1>
             </div>
 
             <ul class="nav-links">
@@ -45,8 +92,9 @@
             <div class="sidebar-bottom">
                 <a class="sidebar-bottom-link" data-text="> CREDITS_名單" onclick="signalClick(this, 'CREDITS.txt', 'credits.html')" style="color:var(--highlight-color)">> CREDITS_名單</a>
                 <div class="sidebar-bottom-icons">
-                    <div id="secret-turkey" onclick="if(typeof openGame === 'function') openGame();" title="SYSTEM BREACH">🦃</div>
-                    <div class="sidebar-ig" onclick="openExternalLink('https://www.instagram.com/unsilence_fest._?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==')">📷</div>
+                    <div id="secret-turkey" data-tooltip="> SYSTEM BREACH ?" onclick="if(typeof openGame === 'function'){ if(typeof gtag==='function') gtag('event','game_open'); openGame(); }" title="SYSTEM BREACH">🦃</div>
+                    <div id="share-btn" class="sidebar-ig" data-tooltip="> SHARE_訊號" onclick="shareWebsite()" title="分享活動"><svg viewBox="0 0 24 24" fill="none" stroke="#0f0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></div>
+                    <div class="sidebar-ig" data-tooltip="> FOLLOW_US" onclick="openExternalLink('https://www.instagram.com/unsilence_fest._?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><defs><linearGradient id="ig-grad-s" x1="0%" y1="100%" x2="100%" y2="0%"><stop offset="0%" stop-color="#f09433"/><stop offset="25%" stop-color="#e6683c"/><stop offset="50%" stop-color="#dc2743"/><stop offset="75%" stop-color="#cc2366"/><stop offset="100%" stop-color="#bc1888"/></linearGradient></defs><rect x="2" y="2" width="20" height="20" rx="5" ry="5" stroke="url(#ig-grad-s)"/><circle cx="12" cy="12" r="5" stroke="url(#ig-grad-s)"/><circle cx="17.5" cy="6.5" r="1.5" fill="url(#ig-grad-s)" stroke="none"/></svg></div>
                 </div>
             </div>
 
@@ -76,7 +124,7 @@
                 </div>
             </div>
 
-            <div class="desktop-icon blink" onclick="openExternalLink('https://www.instagram.com/unsilence_fest._?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==')"><div class="icon-img">📷</div><div>IG_LINK.url</div></div>
+            <div class="desktop-icon blink" onclick="openExternalLink('https://www.instagram.com/unsilence_fest._?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==')"><div class="icon-img"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><defs><linearGradient id="ig-grad-d" x1="0%" y1="100%" x2="100%" y2="0%"><stop offset="0%" stop-color="#f09433"/><stop offset="25%" stop-color="#e6683c"/><stop offset="50%" stop-color="#dc2743"/><stop offset="75%" stop-color="#cc2366"/><stop offset="100%" stop-color="#bc1888"/></linearGradient></defs><rect x="2" y="2" width="20" height="20" rx="5" ry="5" stroke="url(#ig-grad-d)"/><circle cx="12" cy="12" r="5" stroke="url(#ig-grad-d)"/><circle cx="17.5" cy="6.5" r="1.5" fill="url(#ig-grad-d)" stroke="none"/></svg></div><div>IG_LINK.url</div></div>
         </main>
     </div>
 
@@ -93,7 +141,7 @@
         </div>
     </div>
 
-    <div class="marquee-container" aria-hidden="true"><div class="marquee-content">/// 2026.05.20 寧靜音樂節 /// 嘉義文化園區 /// 主辦單位：中正大學 /// 全程免費入場 /// 🍍 游標異常干擾中 ///</div></div>
+    <div class="marquee-container" aria-hidden="true"><div class="marquee-content">/// 2026.05.30-31 寧靜音樂節 /// 嘉義文化園區 /// 主辦單位：中正大學 /// 全程免費入場 /// 🍍 游標異常干擾中 ///</div></div>
 
     <script src="main.js"></script>
     <script src="game.js"></script>
