@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://charliechiu39.github.io/unsilence_fest/sitemap.xml
