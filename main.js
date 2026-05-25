@@ -103,11 +103,15 @@ document.addEventListener('pointerdown', (e) => {
     }
 });
 
+// touch 模式降頻：每 3 次才產生一次星塵，避免手機過度耗電
+let stardustTouchCounter = 0;
 document.addEventListener('pointermove', (e) => {
-    if (e.pointerType === 'mouse' || e.pointerType === 'touch') {
+    if (e.pointerType === 'mouse') {
         createStardust(e.clientX, e.clientY);
+    } else if (e.pointerType === 'touch') {
+        if (++stardustTouchCounter % 3 === 0) createStardust(e.clientX, e.clientY);
     }
-});
+}, { passive: true });
 
 // =========================================
 // 文字亂碼特效
@@ -309,13 +313,13 @@ window.shareWebsite = function() {
     if (typeof gtag === 'function') gtag('event', 'share_click');
     const shareData = {
         title: '寧靜音樂節 UNSILENCE FESTIVAL 2026',
-        text: '5/30-5/31 嘉義文化創意產業園區 | 全程免費入場 | 迷幻搖滾 x 獨立電子',
-        url: window.location.href
+        text: '搖滾 × 吉他 × 嘻哈，全程免費入場｜5/30-31 嘉義文化創意產業園區',
+        url: 'https://unsilence-fest.com/'
     };
     if (navigator.share) {
-        navigator.share(shareData);
+        navigator.share(shareData).catch(() => {});
     } else {
-        navigator.clipboard.writeText(window.location.href).then(() => {
+        navigator.clipboard.writeText('https://unsilence-fest.com/').then(() => {
             const btn = document.getElementById('share-btn');
             const orig = btn.getAttribute('data-tooltip');
             btn.setAttribute('data-tooltip', '> 已複製連結!');
@@ -327,8 +331,18 @@ window.shareWebsite = function() {
 // =========================================
 // 模式切換
 // =========================================
-const modes = ['noise', 'tranquil', 'pineapple']; const modeLabels = ['模式切換: 雜訊', '模式切換: 寧靜', '模式切換: 🍍鳳梨']; let currentModeIndex = 0;
-document.getElementById('mode-toggle').onclick = (e) => { document.body.classList.remove(`${modes[currentModeIndex]}-mode`); currentModeIndex = (currentModeIndex + 1) % modes.length; document.body.classList.add(`${modes[currentModeIndex]}-mode`); e.target.innerText = modeLabels[currentModeIndex]; };
+const modes = ['noise', 'tranquil', 'pineapple'];
+const modeLabels = ['模式切換: 雜訊', '模式切換: 寧靜', '模式切換: 🍍鳳梨'];
+const modeThemeColors = ['#0a0510', '#111111', '#1a1a00'];
+let currentModeIndex = 0;
+const themeColorMeta = document.querySelector('meta[name="theme-color"]');
+document.getElementById('mode-toggle').onclick = (e) => {
+    document.body.classList.remove(`${modes[currentModeIndex]}-mode`);
+    currentModeIndex = (currentModeIndex + 1) % modes.length;
+    document.body.classList.add(`${modes[currentModeIndex]}-mode`);
+    e.target.innerText = modeLabels[currentModeIndex];
+    if (themeColorMeta) themeColorMeta.setAttribute('content', modeThemeColors[currentModeIndex]);
+};
 
 // =========================================
 // 矩陣背景（改用 requestAnimationFrame）
@@ -339,9 +353,12 @@ function initCanvas() { cw = window.innerWidth; ch = window.innerHeight; canvas.
 window.addEventListener('resize', initCanvas); initCanvas();
 function drawMatrix() { if (document.body.classList.contains('tranquil-mode')) { ctx.fillStyle = 'rgba(17, 17, 17, 0.15)'; ctx.fillRect(0, 0, cw, ch); return; } ctx.fillStyle = document.body.classList.contains('pineapple-mode') ? 'rgba(26, 26, 0, 0.15)' : 'rgba(10, 5, 16, 0.15)'; ctx.fillRect(0, 0, cw, ch); ctx.font = `${fontSize}px 'DotGothic16', monospace`; ctx.textBaseline = 'top'; ctx.fillStyle = document.body.classList.contains('pineapple-mode') ? '#ffcc00' : '#0f0'; const chars = document.body.classList.contains('pineapple-mode') ? pineappleChars : noiseChars; for (let i = 0; i < columns.length; i++) { const char = chars[Math.floor(Math.random() * chars.length)]; const x = i * fontSize; const y = columns[i] * fontSize; ctx.fillText(char, x, y); if (y > ch && Math.random() > 0.975) { columns[i] = 0; } else { columns[i]++; } } }
 
+// mobile 降頻：手機從 20fps 改為 10fps（省電 + 減少 jank）
+const isMobileDevice = window.matchMedia('(max-width: 800px)').matches || /Android|iPhone|iPad/i.test(navigator.userAgent);
+const matrixInterval = isMobileDevice ? 100 : 50;
 let lastMatrixTime = 0;
 function matrixLoop(timestamp) {
-    if (timestamp - lastMatrixTime > 50) {
+    if (timestamp - lastMatrixTime > matrixInterval) {
         drawMatrix();
         lastMatrixTime = timestamp;
     }
@@ -406,7 +423,7 @@ window.downloadSetlist = function() {
         lines.push('');
     });
     lines.push('—'.repeat(40));
-    lines.push('unsilencefestival.github.io');
+    lines.push('https://unsilence-fest.com');
 
     const text = lines.join('\n');
     const file = new File([text], 'UNSILENCE_2026_setlist.txt', { type: 'text/plain' });

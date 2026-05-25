@@ -1,4 +1,7 @@
 User-agent: *
 Allow: /
+Disallow: /.claude/
+Disallow: /docs/
+Disallow: /quotation.html
 
-Sitemap: https://charliechiu39.github.io/unsilence_fest/sitemap.xml
+Sitemap: https://unsilence-fest.com/sitemap.xml

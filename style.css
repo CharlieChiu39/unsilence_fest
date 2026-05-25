@@ -45,6 +45,9 @@ body, html {
     background-color: var(--bg-color); color: var(--text-color);
     font-family: 'DotGothic16', sans-serif; overflow: hidden;
     user-select: none; -webkit-user-select: none; touch-action: none;
+}
+/* 鳳梨游標僅在鳳梨模式下套用 */
+body.pineapple-mode {
     cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" style="font-size:24px"><text y="24">🍍</text></svg>'), auto;
 }
 
@@ -280,7 +283,7 @@ body, html {
 .close-btn::after { content: ''; position: absolute; top: -10px; left: -10px; right: -10px; bottom: -10px; }
 .close-btn:active { border: 1px solid #555; border-right-color: #fff; border-bottom-color: #fff; }
 
-.window-content { padding: 12px; font-size: 14px; flex-grow: 1; overflow-y: auto; text-align: center; }
+.window-content { padding: 12px; font-size: 14px; flex-grow: 1; overflow-y: auto; text-align: center; user-select: text; -webkit-user-select: text; }
 .sys-btn { background: var(--btn-bg); color: var(--win-text); padding: 4px 12px; display: inline-block; margin-top: 10px; font-size: 14px; border: 2px solid #fff; border-right-color: #555; border-bottom-color: #555; cursor: pointer; text-decoration: none;}
 .sys-btn:active { border: 2px solid #555; border-right-color: #fff; border-bottom-color: #fff; transform: translate(1px, 1px); }
 
@@ -393,6 +396,9 @@ body.pineapple-mode #main-app-window .window-content { background: #ffffe6; }
     #win-1 { top: 2vh; left: 2vw; } #win-2 { top: 8vh; left: 15vw; } #win-3 { top: 14vh; left: 30vw; }
     #win-4 { top: 20vh; left: 5vw; } #win-5 { top: 26vh; left: 25vw; } #win-6 { top: 32vh; left: 45vw; } #win-7 { top: 38vh; left: 10vw; }
     #win-8 { top: 44vh; left: 28vw; }
+
+    /* mobile 省電：關閉 backdrop-filter，改為純色背景 */
+    .window { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
 
     #main-app-window, #game-window {
         position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);

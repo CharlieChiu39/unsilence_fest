@@ -1,0 +1,26 @@
+{
+  "name": "寧靜音樂節 UNSILENCE FESTIVAL 2026",
+  "short_name": "寧靜音樂節",
+  "description": "2026 寧靜音樂節｜搖滾 × 吉他 × 嘻哈｜5/30-31 嘉義文化創意產業園區，全程免費入場",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#0a0510",
+  "theme_color": "#0a0510",
+  "orientation": "portrait-primary",
+  "lang": "zh-TW",
+  "icons": [
+    {
+      "src": "apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ],
+  "categories": ["music", "entertainment", "events"]
+}
