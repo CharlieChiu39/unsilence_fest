@@ -287,6 +287,7 @@ body, html {
 .teaser-win { width: 240px; }
 #win-1 { top: 8vh; left: 5vw; } #win-2 { top: 12vh; left: 25vw; } #win-3 { top: 35vh; left: 8vw; }
 #win-4 { top: 40vh; left: 30vw; } #win-5 { top: 60vh; left: 12vw; } #win-6 { top: 65vh; left: 35vw; } #win-7 { top: 25vh; left: 45vw; }
+#win-8 { bottom: 36px; right: 3vw; top: auto; left: auto; }
 
 #main-app-window { width: 600px; height: 400px; display: none; max-width: 90vw; max-height: 80vh; }
 #main-app-window .window-content { background: #f8f2ff; border: inset 2px #a366ff; margin: 10px; padding: 15px; text-align: left; }
@@ -389,6 +390,7 @@ body.pineapple-mode #main-app-window .window-content { background: #ffffe6; }
     .teaser-win { width: 160px; display: flex !important; }
     #win-1 { top: 2vh; left: 2vw; } #win-2 { top: 8vh; left: 15vw; } #win-3 { top: 14vh; left: 30vw; }
     #win-4 { top: 20vh; left: 5vw; } #win-5 { top: 26vh; left: 25vw; } #win-6 { top: 32vh; left: 45vw; } #win-7 { top: 38vh; left: 10vw; }
+    #win-8 { bottom: 36px; right: 2vw; top: auto; left: auto; }
 
     #main-app-window, #game-window {
         position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
