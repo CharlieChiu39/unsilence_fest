@@ -1,16 +1,125 @@
 <h2 class="blink">> 讀取時間軸: TIMETABLE.exe</h2>
 
-<table class="retro-table" id="timetable">
-    <thead><tr><th>TIME</th><th>NOISE_STAGE (雜訊舞台)</th><th>SILENCE_STAGE (寧靜舞台)</th></tr></thead>
-    <tbody>
-        <tr data-start="14:00" data-end="15:30"><td>14:00</td><td class="noise-td">熱音社 (OPENING)</td><td class="silence-td">---</td></tr>
-        <tr data-start="15:30" data-end="17:00"><td>15:30</td><td class="noise-td">雜訊生成器</td><td class="silence-td">氛圍實驗室</td></tr>
-        <tr data-start="17:00" data-end="22:00"><td>17:00</td><td class="noise-td">午夜終端</td><td class="silence-td">後搖光景</td></tr>
-    </tbody>
-</table>
-
-<div style="margin-top: 30px; border-top: 2px dashed #999; padding-top: 15px; text-align: center;">
-    <h3 style="margin-top: 0;">> 離線備份 (OFFLINE BACKUP)</h3>
-    <p style="font-size: 12px; color: #555;">建議將信號源存入行動裝置以防斷訊。</p>
-    <a href="timetable_image.jpg" download class="sys-btn yes" style="font-size: 16px; padding: 8px 20px;">💾 下載時刻表圖檔 (Y)</a>
+<!-- Day tabs -->
+<div style="display:flex; gap:3px; margin-bottom:0;">
+    <button id="tab-btn-530" onclick="switchDay('530')"
+        style="padding:5px 18px; border:2px solid #fff; border-right-color:#555; border-bottom-color:#555; background:var(--btn-bg); color:#000; font-family:inherit; cursor:pointer; font-size:13px; font-weight:bold;">
+        5/30 (六)
+    </button>
+    <button id="tab-btn-531" onclick="switchDay('531')"
+        style="padding:5px 18px; border:2px solid #555; border-right-color:#333; border-bottom-color:#333; background:#2a2a3a; color:#aaa; font-family:inherit; cursor:pointer; font-size:13px; font-weight:bold;">
+        5/31 (日)
+    </button>
 </div>
+<div style="border-top:2px solid var(--win-border); margin-bottom:10px;"></div>
+
+<!-- 5/30 -->
+<div id="day-530">
+    <div style="font-size:11px; color:var(--highlight-color); margin-bottom:8px;">
+        > 信號鎖定：2026.05.30 ｜ 12:30 – 20:00 ｜ 49 組演出
+    </div>
+    <table class="retro-table" style="width:100%; border-collapse:collapse; font-size:12px;">
+        <thead>
+            <tr>
+                <th style="width:30px; padding:4px 6px; border:1px solid var(--win-border); text-align:center;">#</th>
+                <th style="width:110px; padding:4px 6px; border:1px solid var(--win-border);">TIME</th>
+                <th style="padding:4px 6px; border:1px solid var(--win-border);">演出</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr style="color:var(--highlight-color);"><td style="padding:3px 6px; border:1px solid var(--win-border); text-align:center;">—</td><td style="padding:3px 6px; border:1px solid var(--win-border);">12:15 – 12:29</td><td style="padding:3px 6px; border:1px solid var(--win-border);">主持人時間</td></tr>
+            <tr><td style="padding:3px 6px; border:1px solid var(--win-border); text-align:center;">1</td><td style="padding:3px 6px; border:1px solid var(--win-border);">12:30 – 12:33</td><td style="padding:3px 6px; border:1px solid var(--win-border);">mochaa</td></tr>
+            <tr><td style="padding:3px 6px; border:1px solid var(--win-border); text-align:center;">2</td><td style="padding:3px 6px; border:1px solid var(--win-border);">12:34 – 12:40</td><td style="padding:3px 6px; border:1px solid var(--win-border);">Daydream</td></tr>
+            <tr><td style="padding:3px 6px; border:1px solid var(--win-border); text-align:center;">3</td><td style="padding:3px 6px; border:1px solid var(--win-border);">12:41 – 12:47</td><td style="padding:3px 6px; border:1px solid var(--win-border);">晴る打卡</td></tr>
+            <tr><td style="padding:3px 6px; border:1px solid var(--win-border); text-align:center;">4</td><td style="padding:3px 6px; border:1px solid var(--win-border);">12:48 – 12:55</td><td style="padding:3px 6px; border:1px solid var(--win-border);">背叛</td></tr>
+            <tr><td style="padding:3px 6px; border:1px solid var(--win-border); text-align:center;">5</td><td style="padding:3px 6px; border:1px solid var(--win-border);">12:56 – 13:04</td><td style="padding:3px 6px; border:1px solid var(--win-border);">那些失眠的夜與難以忘懷的事</td></tr>
+            <tr><td style="padding:3px 6px; border:1px solid var(--win-border); text-align:center;">6</td><td style="padding:3px 6px; border:1px solid var(--win-border);">13:05 – 13:09</td><td style="padding:3px 6px; border:1px solid var(--win-border);">P仔</td></tr>
+            <tr><td style="padding:3px 6px; border:1px solid var(--win-border); text-align:center;">7</td><td style="padding:3px 6px; border:1px solid var(--win-border);">13:10 – 13:17</td><td style="padding:3px 6px; border:1px solid var(--win-border);">你給過我的快樂</td></tr>
+            <tr><td style="padding:3px 6px; border:1px solid var(--win-border); text-align:center;">8</td><td style="padding:3px 6px; border:1px solid var(--win-border);">13:18 – 13:25</td><td style="padding:3px 6px; border:1px solid var(--win-border);">霧</td></tr>
+            <tr><td style="padding:3px 6px; border:1px solid var(--win-border); text-align:center;">9</td><td style="padding:3px 6px; border:1px solid var(--win-border);">13:26 – 13:30</td><td style="padding:3px 6px; border:1px solid var(--win-border);">劉韋均</td></tr>
+            <tr><td style="padding:3px 6px; border:1px solid var(--win-border); text-align:center;">10</td><td style="padding:3px 6px; border:1px solid var(--win-border);">13:31 – 13:35</td><td style="padding:3px 6px; border:1px solid var(--win-border);">Hushy</td></tr>
+            <tr><td style="padding:3px 6px; border:1px solid var(--win-border); text-align:center;">11</td><td style="padding:3px 6px; border:1px solid var(--win-border);">13:36 – 13:43</td><td style="padding:3px 6px; border:1px solid var(--win-border);">找到田大學</td></tr>
+            <tr><td style="padding:3px 6px; border:1px solid var(--win-border); text-align:center;">12</td><td style="padding:3px 6px; border:1px solid var(--win-border);">13:44 – 13:51</td><td style="padding:3px 6px; border:1px solid var(--win-border);">花季</td></tr>
+            <tr><td style="padding:3px 6px; border:1px solid var(--win-border); text-align:center;">13</td><td style="padding:3px 6px; border:1px solid var(--win-border);">13:51 – 13:58</td><td style="padding:3px 6px; border:1px solid var(--win-border);">停靠</td></tr>
+            <tr><td style="padding:3px 6px; border:1px solid var(--win-border); text-align:center;">14</td><td style="padding:3px 6px; border:1px solid var(--win-border);">13:59 – 14:03</td><td style="padding:3px 6px; border:1px solid var(--win-border);">Panthera</td></tr>
+            <tr><td style="padding:3px 6px; border:1px solid var(--win-border); text-align:center;">15</td><td style="padding:3px 6px; border:1px solid var(--win-border);">14:04 – 14:11</td><td style="padding:3px 6px; border:1px solid var(--win-border);">我當你空氣</td></tr>
+            <tr><td style="padding:3px 6px; border:1px solid var(--win-border); text-align:center;">16</td><td style="padding:3px 6px; border:1px solid var(--win-border);">14:12 – 14:19</td><td style="padding:3px 6px; border:1px solid var(--win-border);">黎明</td></tr>
+            <tr><td style="padding:3px 6px; border:1px solid var(--win-border); text-align:center;">17</td><td style="padding:3px 6px; border:1px solid var(--win-border);">14:20 – 14:25</td><td style="padding:3px 6px; border:1px solid var(--win-border);">ヒバナ</td></tr>
+            <tr><td style="padding:3px 6px; border:1px solid var(--win-border); text-align:center;">18</td><td style="padding:3px 6px; border:1px solid var(--win-border);">14:26 – 14:31</td><td style="padding:3px 6px; border:1px solid var(--win-border);">花之塔</td></tr>
+            <tr><td style="padding:3px 6px; border:1px solid var(--win-border); text-align:center;">19</td><td style="padding:3px 6px; border:1px solid var(--win-border);">14:32 – 14:36</td><td style="padding:3px 6px; border:1px solid var(--win-border);">モア ジャンプ モア</td></tr>
+            <tr><td style="padding:3px 6px; border:1px solid var(--win-border); text-align:center;">20</td><td style="padding:3px 6px; border:1px solid var(--win-border);">14:37 – 14:46</td><td style="padding:3px 6px; border:1px solid var(--win-border);">Sheaubii</td></tr>
+            <tr><td style="padding:3px 6px; border:1px solid var(--win-border); text-align:center;">21</td><td style="padding:3px 6px; border:1px solid var(--win-border);">14:47 – 14:54</td><td style="padding:3px 6px; border:1px solid var(--win-border);">Boxsheep</td></tr>
+            <tr><td style="padding:3px 6px; border:1px solid var(--win-border); text-align:center;">22</td><td style="padding:3px 6px; border:1px solid var(--win-border);">14:55 – 15:02</td><td style="padding:3px 6px; border:1px solid var(--win-border);">天堂</td></tr>
+            <tr><td style="padding:3px 6px; border:1px solid var(--win-border); text-align:center;">23</td><td style="padding:3px 6px; border:1px solid var(--win-border);">15:03 – 15:10</td><td style="padding:3px 6px; border:1px solid var(--win-border);">道別宣言</td></tr>
+            <tr><td style="padding:3px 6px; border:1px solid var(--win-border); text-align:center;">24</td><td style="padding:3px 6px; border:1px solid var(--win-border);">15:11 – 15:20</td><td style="padding:3px 6px; border:1px solid var(--win-border);">Ditto</td></tr>
+            <tr><td style="padding:3px 6px; border:1px solid var(--win-border); text-align:center;">25</td><td style="padding:3px 6px; border:1px solid var(--win-border);">15:21 – 15:41</td><td style="padding:3px 6px; border:1px solid var(--win-border);">俗頭</td></tr>
+            <tr><td style="padding:3px 6px; border:1px solid var(--win-border); text-align:center;">26</td><td style="padding:3px 6px; border:1px solid var(--win-border);">15:42 – 15:49</td><td style="padding:3px 6px; border:1px solid var(--win-border);">真白</td></tr>
+            <tr><td style="padding:3px 6px; border:1px solid var(--win-border); text-align:center;">27</td><td style="padding:3px 6px; border:1px solid var(--win-border);">15:50 – 15:57</td><td style="padding:3px 6px; border:1px solid var(--win-border);">你的行李</td></tr>
+            <tr><td style="padding:3px 6px; border:1px solid var(--win-border); text-align:center;">28</td><td style="padding:3px 6px; border:1px solid var(--win-border);">15:58 – 16:05</td><td style="padding:3px 6px; border:1px solid var(--win-border);">午夜猶明</td></tr>
+            <tr><td style="padding:3px 6px; border:1px solid var(--win-border); text-align:center;">29</td><td style="padding:3px 6px; border:1px solid var(--win-border);">16:06 – 16:11</td><td style="padding:3px 6px; border:1px solid var(--win-border);">tuw</td></tr>
+            <tr><td style="padding:3px 6px; border:1px solid var(--win-border); text-align:center;">30</td><td style="padding:3px 6px; border:1px solid var(--win-border);">16:12 – 16:30</td><td style="padding:3px 6px; border:1px solid var(--win-border);">洪叔叔</td></tr>
+            <tr><td style="padding:3px 6px; border:1px solid var(--win-border); text-align:center;">31</td><td style="padding:3px 6px; border:1px solid var(--win-border);">16:31 – 16:38</td><td style="padding:3px 6px; border:1px solid var(--win-border);">第一天</td></tr>
+            <tr><td style="padding:3px 6px; border:1px solid var(--win-border); text-align:center;">32</td><td style="padding:3px 6px; border:1px solid var(--win-border);">16:39 – 16:46</td><td style="padding:3px 6px; border:1px solid var(--win-border);">艷火</td></tr>
+            <tr><td style="padding:3px 6px; border:1px solid var(--win-border); text-align:center;">33</td><td style="padding:3px 6px; border:1px solid var(--win-border);">16:47 – 16:54</td><td style="padding:3px 6px; border:1px solid var(--win-border);">奇多</td></tr>
+            <tr><td style="padding:3px 6px; border:1px solid var(--win-border); text-align:center;">34</td><td style="padding:3px 6px; border:1px solid var(--win-border);">16:55 – 17:03</td><td style="padding:3px 6px; border:1px solid var(--win-border);">但</td></tr>
+            <tr><td style="padding:3px 6px; border:1px solid var(--win-border); text-align:center;">35</td><td style="padding:3px 6px; border:1px solid var(--win-border);">17:04 – 17:11</td><td style="padding:3px 6px; border:1px solid var(--win-border);">遊蕩的人</td></tr>
+            <tr><td style="padding:3px 6px; border:1px solid var(--win-border); text-align:center;">36</td><td style="padding:3px 6px; border:1px solid var(--win-border);">17:12 – 17:19</td><td style="padding:3px 6px; border:1px solid var(--win-border);">安妮</td></tr>
+            <tr><td style="padding:3px 6px; border:1px solid var(--win-border); text-align:center;">37</td><td style="padding:3px 6px; border:1px solid var(--win-border);">17:20 – 17:28</td><td style="padding:3px 6px; border:1px solid var(--win-border);">黃品昕</td></tr>
+            <tr><td style="padding:3px 6px; border:1px solid var(--win-border); text-align:center;">38</td><td style="padding:3px 6px; border:1px solid var(--win-border);">17:29 – 17:36</td><td style="padding:3px 6px; border:1px solid var(--win-border);">安眠曲</td></tr>
+            <tr><td style="padding:3px 6px; border:1px solid var(--win-border); text-align:center;">39</td><td style="padding:3px 6px; border:1px solid var(--win-border);">17:37 – 17:44</td><td style="padding:3px 6px; border:1px solid var(--win-border);">大海</td></tr>
+            <tr><td style="padding:3px 6px; border:1px solid var(--win-border); text-align:center;">40</td><td style="padding:3px 6px; border:1px solid var(--win-border);">17:45 – 17:52</td><td style="padding:3px 6px; border:1px solid var(--win-border);">weirdy</td></tr>
+            <tr><td style="padding:3px 6px; border:1px solid var(--win-border); text-align:center;">41</td><td style="padding:3px 6px; border:1px solid var(--win-border);">17:53 – 17:58</td><td style="padding:3px 6px; border:1px solid var(--win-border);">Boxsheep</td></tr>
+            <tr><td style="padding:3px 6px; border:1px solid var(--win-border); text-align:center;">42</td><td style="padding:3px 6px; border:1px solid var(--win-border);">17:59 – 18:04</td><td style="padding:3px 6px; border:1px solid var(--win-border);">RIICH</td></tr>
+            <tr><td style="padding:3px 6px; border:1px solid var(--win-border); text-align:center;">43</td><td style="padding:3px 6px; border:1px solid var(--win-border);">18:05 – 18:25</td><td style="padding:3px 6px; border:1px solid var(--win-border);">JINXX</td></tr>
+            <tr><td style="padding:3px 6px; border:1px solid var(--win-border); text-align:center;">44</td><td style="padding:3px 6px; border:1px solid var(--win-border);">18:26 – 18:44</td><td style="padding:3px 6px; border:1px solid var(--win-border);">賀爾蒙少年</td></tr>
+            <tr><td style="padding:3px 6px; border:1px solid var(--win-border); text-align:center;">45</td><td style="padding:3px 6px; border:1px solid var(--win-border);">18:45 – 18:52</td><td style="padding:3px 6px; border:1px solid var(--win-border);">final count down</td></tr>
+            <tr><td style="padding:3px 6px; border:1px solid var(--win-border); text-align:center;">46</td><td style="padding:3px 6px; border:1px solid var(--win-border);">18:53 – 19:18</td><td style="padding:3px 6px; border:1px solid var(--win-border);">Crimshes</td></tr>
+            <tr><td style="padding:3px 6px; border:1px solid var(--win-border); text-align:center;">47</td><td style="padding:3px 6px; border:1px solid var(--win-border);">19:19 – 19:24</td><td style="padding:3px 6px; border:1px solid var(--win-border);">Peinna</td></tr>
+            <tr><td style="padding:3px 6px; border:1px solid var(--win-border); text-align:center;">48</td><td style="padding:3px 6px; border:1px solid var(--win-border);">19:25 – 19:32</td><td style="padding:3px 6px; border:1px solid var(--win-border);">巫賭</td></tr>
+            <tr><td style="padding:3px 6px; border:1px solid var(--win-border); text-align:center;">49</td><td style="padding:3px 6px; border:1px solid var(--win-border);">19:33 – 19:45</td><td style="padding:3px 6px; border:1px solid var(--win-border);">艾瑪等八</td></tr>
+            <tr style="color:var(--highlight-color);"><td style="padding:3px 6px; border:1px solid var(--win-border); text-align:center;">—</td><td style="padding:3px 6px; border:1px solid var(--win-border);">19:46 – 20:00</td><td style="padding:3px 6px; border:1px solid var(--win-border);">主持人抽獎時間</td></tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- 5/31 -->
+<div id="day-531" style="display:none;">
+    <div style="font-size:11px; color:var(--highlight-color); margin-bottom:8px;">
+        > 信號鎖定：2026.05.31 ｜ 資料載入中...
+    </div>
+    <div style="border:1px dashed var(--win-border); padding:20px; text-align:center; color:#888; font-size:13px;">
+        [ SIGNAL PENDING ]<br>5/31 演出資料讀取中，請持續監控本頻道...
+    </div>
+</div>
+
+<script>
+function switchDay(day) {
+    document.getElementById('day-530').style.display = day === '530' ? '' : 'none';
+    document.getElementById('day-531').style.display = day === '531' ? '' : 'none';
+    var btn530 = document.getElementById('tab-btn-530');
+    var btn531 = document.getElementById('tab-btn-531');
+    if (day === '530') {
+        btn530.style.background = 'var(--btn-bg)';
+        btn530.style.color = '#000';
+        btn530.style.borderColor = '#fff';
+        btn530.style.borderRightColor = '#555';
+        btn530.style.borderBottomColor = '#555';
+        btn531.style.background = '#2a2a3a';
+        btn531.style.color = '#aaa';
+        btn531.style.borderColor = '#555';
+        btn531.style.borderRightColor = '#333';
+        btn531.style.borderBottomColor = '#333';
+    } else {
+        btn531.style.background = 'var(--btn-bg)';
+        btn531.style.color = '#000';
+        btn531.style.borderColor = '#fff';
+        btn531.style.borderRightColor = '#555';
+        btn531.style.borderBottomColor = '#555';
+        btn530.style.background = '#2a2a3a';
+        btn530.style.color = '#aaa';
+        btn530.style.borderColor = '#555';
+        btn530.style.borderRightColor = '#333';
+        btn530.style.borderBottomColor = '#333';
+    }
+}
+</script>
