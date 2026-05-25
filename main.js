@@ -370,6 +370,51 @@ window.switchDay = function(day) {
     }
 };
 
+window.downloadSetlist = function() {
+    const days = [
+        { id: 'day-530', label: '5/30 (六)' },
+        { id: 'day-531', label: '5/31 (日)' }
+    ];
+    let lines = [
+        '寧靜音樂節 UNSILENCE FESTIVAL 2026',
+        '完整演出時刻表 + 曲目',
+        '嘉義文化創意產業園區｜全程免費入場',
+        ''
+    ];
+    days.forEach(({ id, label }) => {
+        lines.push('='.repeat(40));
+        lines.push(`  ${label}`);
+        lines.push('='.repeat(40));
+        const container = document.getElementById(id);
+        if (!container) return;
+        container.querySelectorAll('tbody tr').forEach(row => {
+            const cells = row.querySelectorAll('td');
+            if (cells.length < 3) return;
+            const seq = cells[0].textContent.trim();
+            const time = cells[1].textContent.trim();
+            const name = cells[2].querySelector('.song-arrow')
+                ? cells[2].textContent.replace('▶','').replace('▼','').trim()
+                : cells[2].textContent.trim();
+            const song = row.dataset.song || '';
+            if (seq === '—') {
+                lines.push(`  ${time}  ${name}`);
+            } else {
+                lines.push(`  #${seq.padStart(2)}  ${time}  ${name}${song ? '  ♪ ' + song : ''}`);
+            }
+        });
+        lines.push('');
+    });
+    lines.push('—'.repeat(40));
+    lines.push('unsilencefestival.github.io');
+
+    const blob = new Blob([lines.join('\n')], { type: 'text/plain;charset=utf-8' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'UNSILENCE_2026_setlist.txt';
+    a.click();
+    URL.revokeObjectURL(a.href);
+};
+
 window.toggleSong = function(row) {
     var next = row.nextElementSibling;
     if (next && next.dataset.songRow) {
