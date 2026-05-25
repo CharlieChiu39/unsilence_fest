@@ -348,3 +348,42 @@ function matrixLoop(timestamp) {
     requestAnimationFrame(matrixLoop);
 }
 requestAnimationFrame(matrixLoop);
+
+// =========================================
+// 時刻表：頁籤切換 + 曲目 Accordion
+// =========================================
+window.switchDay = function(day) {
+    const d530 = document.getElementById('day-530');
+    const d531 = document.getElementById('day-531');
+    if (!d530 || !d531) return;
+    d530.style.display = day === '530' ? '' : 'none';
+    d531.style.display = day === '531' ? '' : 'none';
+    const btn530 = document.getElementById('tab-btn-530');
+    const btn531 = document.getElementById('tab-btn-531');
+    if (!btn530 || !btn531) return;
+    if (day === '530') {
+        btn530.style.cssText += ';background:var(--btn-bg);color:#000;border-color:#fff;border-right-color:#555;border-bottom-color:#555;';
+        btn531.style.cssText += ';background:#2a2a3a;color:#aaa;border-color:#555;border-right-color:#333;border-bottom-color:#333;';
+    } else {
+        btn531.style.cssText += ';background:var(--btn-bg);color:#000;border-color:#fff;border-right-color:#555;border-bottom-color:#555;';
+        btn530.style.cssText += ';background:#2a2a3a;color:#aaa;border-color:#555;border-right-color:#333;border-bottom-color:#333;';
+    }
+};
+
+window.toggleSong = function(row) {
+    var next = row.nextElementSibling;
+    if (next && next.dataset.songRow) {
+        next.style.display = next.style.display === 'none' ? '' : 'none';
+        var arrow = row.querySelector('.song-arrow');
+        if (arrow) arrow.textContent = next.style.display === '' ? '▼' : '▶';
+        return;
+    }
+    var song = row.dataset.song;
+    if (!song) return;
+    var tr = document.createElement('tr');
+    tr.dataset.songRow = '1';
+    tr.innerHTML = '<td colspan="3" style="padding:3px 6px 6px 18px; border:1px solid var(--win-border); border-top:none; color:var(--highlight-color); font-size:11px;">♪ ' + song + '</td>';
+    row.parentNode.insertBefore(tr, row.nextSibling);
+    var arrow = row.querySelector('.song-arrow');
+    if (arrow) arrow.textContent = '▼';
+};
