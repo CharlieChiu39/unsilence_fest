@@ -388,6 +388,7 @@ window.downloadSetlist = function() {
         const container = document.getElementById(id);
         if (!container) return;
         container.querySelectorAll('tbody tr').forEach(row => {
+            if (row.dataset.songRow) return;
             const cells = row.querySelectorAll('td');
             if (cells.length < 3) return;
             const seq = cells[0].textContent.trim();
@@ -407,12 +408,19 @@ window.downloadSetlist = function() {
     lines.push('—'.repeat(40));
     lines.push('unsilencefestival.github.io');
 
-    const blob = new Blob([lines.join('\n')], { type: 'text/plain;charset=utf-8' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = 'UNSILENCE_2026_setlist.txt';
-    a.click();
-    URL.revokeObjectURL(a.href);
+    const text = lines.join('\n');
+    const file = new File([text], 'UNSILENCE_2026_setlist.txt', { type: 'text/plain' });
+
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        navigator.share({ files: [file], title: '寧靜音樂節 2026 歌單' }).catch(() => {});
+    } else {
+        const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'UNSILENCE_2026_setlist.txt';
+        a.click();
+        URL.revokeObjectURL(a.href);
+    }
 };
 
 window.toggleSong = function(row) {
