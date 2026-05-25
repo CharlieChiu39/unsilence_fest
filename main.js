@@ -269,8 +269,15 @@ async function openApp(windowTitle, fileUrl) {
         let htmlContent = cache[fileUrl];
         if (!htmlContent) { const response = await fetch(fileUrl); if (!response.ok) throw new Error(); htmlContent = await response.text(); cache[fileUrl] = htmlContent; }
         // 若為完整 HTML 文件（含 <body>），只取 body 內容注入，避免結構衝突
-        const bodyMatch = htmlContent.match(/<body[^>]*>([\s\S]*)<\/body>/i);
-        contentArea.innerHTML = bodyMatch ? bodyMatch[1] : htmlContent;
+        let injectContent = htmlContent;
+        if (htmlContent.includes('<body')) {
+            try {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(htmlContent, 'text/html');
+                injectContent = doc.body.innerHTML;
+            } catch(e) { injectContent = htmlContent; }
+        }
+        contentArea.innerHTML = injectContent;
         if (fileUrl === 'timetable.html') {
             setTimeout(() => {
                 const now = new Date(); const currentTime = now.getHours() + (now.getMinutes() / 60);
