@@ -1,0 +1,6 @@
+.claude/
+docs/superpowers/
+AGENTS.md
+*.log
+.DS_Store
+Thumbs.db
