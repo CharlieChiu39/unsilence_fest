@@ -1,4 +1,12 @@
 // =========================================
+// 資安：Frame Buster（防止被惡意 iframe 嵌入造成 clickjacking）
+// =========================================
+if (window.top !== window.self) {
+    try { window.top.location.href = window.self.location.href; }
+    catch (e) { document.body.innerHTML = ''; }
+}
+
+// =========================================
 // 按鈕訊號傳輸干擾 (Signal Glitch)
 // =========================================
 function signalClick(btnElement, windowTitle, fileUrl) {
@@ -284,7 +292,13 @@ async function openApp(windowTitle, fileUrl) {
                 });
             }, 50);
         }
-    } catch (error) { contentArea.innerHTML = `<h3 style='color:red;'>[ 系統錯誤 ] 無法連接到信號源 (${fileUrl})</h3>`; }
+    } catch (error) {
+        // 用 textContent 避免任何潛在的注入風險
+        const h3 = document.createElement('h3');
+        h3.style.color = 'red';
+        h3.textContent = `[ 系統錯誤 ] 無法連接到信號源 (${fileUrl})`;
+        contentArea.replaceChildren(h3);
+    }
 }
 
 function closeApp() {
@@ -295,15 +309,23 @@ function closeApp() {
     appWin.style.top = ''; appWin.style.left = ''; appWin.style.transform = '';
 }
 
-window.scanNode = function(title, text) {
-    const info = document.getElementById('radar-info'); if (!info) return;
-    info.classList.remove('blink'); info.innerHTML = `<strong style="color:var(--highlight-color)">[解析完成] ${title}</strong><br>`;
-    let i = 0; const speed = 30;
-    function typeWriter() { if (i < text.length) { info.innerHTML += text.charAt(i); i++; setTimeout(typeWriter, speed); } }
-    typeWriter();
+// 外部連結警告窗（含 URL 白名單驗證，防止任意網址注入）
+const EXT_LINK_WHITELIST = [
+    'https://www.instagram.com/',
+    'https://instagram.com/',
+    'https://open.spotify.com/',
+    'https://docs.google.com/',
+    'https://forms.gle/'
+];
+window.openExternalLink = function(url) {
+    // 白名單驗證
+    const isAllowed = EXT_LINK_WHITELIST.some(prefix => url.startsWith(prefix));
+    if (!isAllowed) { console.warn('Blocked external URL:', url); return; }
+    if (typeof gtag === 'function') gtag('event', 'external_link_click', { link_url: url });
+    document.getElementById('ext-overlay').style.display = 'block';
+    document.getElementById('ext-modal').style.display = 'block';
+    document.getElementById('ext-confirm-btn').href = url;
 };
-
-window.openExternalLink = function(url) { if (typeof gtag === 'function') gtag('event', 'external_link_click', { link_url: url }); document.getElementById('ext-overlay').style.display = 'block'; document.getElementById('ext-modal').style.display = 'block'; document.getElementById('ext-confirm-btn').href = url; };
 function closeExternalWarning() { document.getElementById('ext-overlay').style.display = 'none'; document.getElementById('ext-modal').style.display = 'none'; }
 
 // =========================================
@@ -452,7 +474,11 @@ window.toggleSong = function(row) {
     if (!song) return;
     var tr = document.createElement('tr');
     tr.dataset.songRow = '1';
-    tr.innerHTML = '<td colspan="3" style="padding:3px 6px 6px 18px; border:1px solid var(--win-border); border-top:none; color:var(--highlight-color); font-size:11px;">♪ ' + song + '</td>';
+    var td = document.createElement('td');
+    td.colSpan = 3;
+    td.style.cssText = 'padding:3px 6px 6px 18px; border:1px solid var(--win-border); border-top:none; color:var(--highlight-color); font-size:11px;';
+    td.textContent = '♪ ' + song; // 用 textContent 避免任何 HTML 注入
+    tr.appendChild(td);
     row.parentNode.insertBefore(tr, row.nextSibling);
     var arrow = row.querySelector('.song-arrow');
     if (arrow) arrow.textContent = '▼';

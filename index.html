@@ -5,6 +5,20 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
+    <!-- 資安：限制 referrer / Content Security Policy（含 frame-ancestors 防 clickjacking） -->
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    <meta http-equiv="Content-Security-Policy" content="
+        default-src 'self';
+        script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com https://ssl.google-analytics.com;
+        style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+        font-src 'self' https://fonts.gstatic.com data:;
+        img-src 'self' data: https://www.google-analytics.com https://www.googletagmanager.com;
+        connect-src 'self' https://www.google-analytics.com https://www.googletagmanager.com https://stats.g.doubleclick.net;
+        frame-ancestors 'none';
+        base-uri 'self';
+        form-action 'self';
+        object-src 'none';
+        upgrade-insecure-requests">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#0a0510">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -327,7 +341,7 @@
             <p>即將離開寧靜 OS，連接至外部網路空間。</p>
             <p style="color:#aa0000; font-weight:bold;">是否授權開啟傳輸協定？</p>
             <div style="margin-top:15px; display:flex; justify-content:space-around;">
-                <a id="ext-confirm-btn" href="#" target="_blank" class="sys-btn yes" onclick="closeExternalWarning()">授權 (Y)</a>
+                <a id="ext-confirm-btn" href="#" target="_blank" rel="noopener noreferrer" class="sys-btn yes" onclick="closeExternalWarning()">授權 (Y)</a>
                 <button class="sys-btn" onclick="closeExternalWarning()">拒絕 (N)</button>
             </div>
         </div>
