@@ -410,7 +410,6 @@ window.switchDay = function(day) {
 };
 
 window.downloadSetlist = async function(btnEl) {
-    // 找到觸發按鈕（支援從 onclick="downloadSetlist(this)" 或無參數呼叫）
     const btn = btnEl || (event && event.currentTarget);
     const originalText = btn ? btn.textContent : '';
     if (btn) { btn.textContent = '生成中...'; btn.disabled = true; }
@@ -418,13 +417,13 @@ window.downloadSetlist = async function(btnEl) {
     try {
         // === 1. 從 DOM 蒐集資料 ===
         const days = [
-            { id: 'day-530', label: '5/30 (六)', dateStr: '2026.05.30' },
-            { id: 'day-531', label: '5/31 (日)', dateStr: '2026.05.31' }
+            { id: 'day-530', label: '5/30 (六)', dateStr: '2026.05.30', dayNo: 1 },
+            { id: 'day-531', label: '5/31 (日)', dateStr: '2026.05.31', dayNo: 2 }
         ];
-        const data = days.map(({ id, label, dateStr }) => {
+        const data = days.map(({ id, label, dateStr, dayNo }) => {
             const acts = [];
             const container = document.getElementById(id);
-            if (!container) return { label, dateStr, acts };
+            if (!container) return { label, dateStr, dayNo, acts };
             container.querySelectorAll('tbody tr').forEach(row => {
                 if (row.dataset.songRow) return;
                 const cells = row.querySelectorAll('td');
@@ -437,153 +436,226 @@ window.downloadSetlist = async function(btnEl) {
                 const song = row.dataset.song || '';
                 acts.push({ seq, time, name, song });
             });
-            return { label, dateStr, acts };
+            return { label, dateStr, dayNo, acts };
         });
 
-        // === 2. 計算畫布大小 ===
+        // === 2. 版面參數（提升 UX）===
         const W = 1080;
-        const ROW_H = 56;
-        const DAY_HEADER_H = 100;
-        const DAY_SPACING = 40;
-        const HEADER_H = 300;
-        const FOOTER_H = 120;
-        const totalActs = data.reduce((s, d) => s + d.acts.length, 0);
-        const H = HEADER_H + data.length * (DAY_HEADER_H + DAY_SPACING) + totalActs * ROW_H + FOOTER_H;
+        const PAD = 36;          // 邊距
+        const ROW_H = 64;        // 列高：有歌時自動延伸
+        const ROW_H_SONG = 86;   // 含曲目的列高
+        const DAY_HEADER_H = 130;
+        const DAY_SPACING = 60;
+        const HEADER_H = 340;
+        const FOOTER_H = 130;
 
-        // === 3. 建立 Canvas ===
+        // 預先計算 H：依「有無曲目」變動列高
+        const totalH = data.reduce((sum, d) => {
+            const rowsH = d.acts.reduce((s, a) => s + (a.song && a.seq !== '—' ? ROW_H_SONG : ROW_H), 0);
+            return sum + DAY_HEADER_H + DAY_SPACING + rowsH;
+        }, 0);
+        const H = HEADER_H + totalH + FOOTER_H;
+
+        // === 3. Canvas ===
         const canvas = document.createElement('canvas');
         canvas.width = W;
         canvas.height = H;
         const ctx = canvas.getContext('2d');
         const FONT_TC = '"Microsoft JhengHei", "PingFang TC", "Noto Sans TC", "Microsoft YaHei", sans-serif';
-        const FONT_MONO = '"Consolas", "Menlo", "Courier New", monospace';
+        const FONT_MONO = '"Consolas", "SF Mono", "Menlo", "Courier New", monospace';
 
-        // === 4. 背景與網格 ===
-        ctx.fillStyle = '#0a0510';
+        // 共用：縮減文字到指定寬度
+        const fitText = (text, maxW, suffix = '…') => {
+            if (ctx.measureText(text).width <= maxW) return text;
+            let lo = 0, hi = text.length;
+            while (lo < hi) {
+                const mid = (lo + hi + 1) >> 1;
+                if (ctx.measureText(text.slice(0, mid) + suffix).width <= maxW) lo = mid;
+                else hi = mid - 1;
+            }
+            return text.slice(0, lo) + suffix;
+        };
+
+        // === 4. 背景：深色 + 漸層光暈 + 細網格 ===
+        const bgGrad = ctx.createLinearGradient(0, 0, 0, H);
+        bgGrad.addColorStop(0, '#0f0518');
+        bgGrad.addColorStop(0.5, '#0a0510');
+        bgGrad.addColorStop(1, '#0f0518');
+        ctx.fillStyle = bgGrad;
         ctx.fillRect(0, 0, W, H);
-        ctx.strokeStyle = 'rgba(157, 0, 255, 0.08)';
+
+        ctx.strokeStyle = 'rgba(157, 0, 255, 0.06)';
         ctx.lineWidth = 1;
-        for (let x = 0; x < W; x += 40) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke(); }
-        for (let y = 0; y < H; y += 40) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); }
+        for (let x = 0; x < W; x += 48) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke(); }
+        for (let y = 0; y < H; y += 48) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); }
 
-        // === 5. 邊框角落（賽博龐克風） ===
+        // 角落點綴
         ctx.fillStyle = '#ff00ff';
-        const cs = 50;
-        ctx.fillRect(0, 0, cs, 6); ctx.fillRect(0, 0, 6, cs);
-        ctx.fillRect(W - cs, 0, cs, 6); ctx.fillRect(W - 6, 0, 6, cs);
-        ctx.fillRect(0, H - 6, cs, 6); ctx.fillRect(0, H - cs, 6, cs);
-        ctx.fillRect(W - cs, H - 6, cs, 6); ctx.fillRect(W - 6, H - cs, 6, cs);
+        const cs = 60;
+        ctx.fillRect(0, 0, cs, 4); ctx.fillRect(0, 0, 4, cs);
+        ctx.fillRect(W - cs, 0, cs, 4); ctx.fillRect(W - 4, 0, 4, cs);
+        ctx.fillRect(0, H - 4, cs, 4); ctx.fillRect(0, H - cs, 4, cs);
+        ctx.fillRect(W - cs, H - 4, cs, 4); ctx.fillRect(W - 4, H - cs, 4, cs);
 
-        // === 6. 主標題區 ===
+        // === 5. 主標題區（更搶眼）===
         ctx.textAlign = 'center';
         ctx.textBaseline = 'alphabetic';
-        // 寧靜音樂節 - 霓虹粉
-        ctx.fillStyle = 'rgba(157, 0, 255, 0.6)';
-        ctx.font = `bold 96px ${FONT_TC}`;
-        ctx.fillText('寧靜音樂節', W / 2 + 4, 110 + 4);
-        ctx.fillStyle = '#ff00ff';
-        ctx.fillText('寧靜音樂節', W / 2, 110);
-        // 英文副標 - 綠色
-        ctx.fillStyle = 'rgba(0, 100, 50, 0.8)';
-        ctx.font = `bold 42px ${FONT_MONO}`;
-        ctx.fillText('UNSILENCE FESTIVAL 2026', W / 2 + 2, 170 + 2);
+
+        // 寧靜音樂節：雙層霓虹
+        ctx.font = `bold 108px ${FONT_TC}`;
+        ctx.fillStyle = 'rgba(0, 255, 255, 0.5)';
+        ctx.fillText('寧靜音樂節', W / 2 - 5, 125);
+        ctx.fillStyle = 'rgba(157, 0, 255, 0.7)';
+        ctx.fillText('寧靜音樂節', W / 2 + 5, 125);
+        ctx.fillStyle = '#ff66dd';
+        ctx.fillText('寧靜音樂節', W / 2, 120);
+
+        // 英文副標
+        ctx.font = `bold 38px ${FONT_MONO}`;
+        ctx.fillStyle = 'rgba(0, 120, 60, 0.5)';
+        ctx.fillText('UNSILENCE FESTIVAL  2026', W / 2 + 2, 178);
         ctx.fillStyle = '#00ff88';
-        ctx.fillText('UNSILENCE FESTIVAL 2026', W / 2, 170);
-        // 分隔線
+        ctx.fillText('UNSILENCE FESTIVAL  2026', W / 2, 176);
+
+        // 雙層分隔線
         ctx.fillStyle = '#ff00ff';
-        ctx.fillRect(200, 200, W - 400, 3);
-        // 副標資訊
+        ctx.fillRect(180, 215, W - 360, 3);
+        ctx.fillStyle = '#00ffff';
+        ctx.fillRect(180, 222, W - 360, 1);
+
+        // 副標
         ctx.fillStyle = '#fff';
-        ctx.font = `26px ${FONT_TC}`;
-        ctx.fillText('完整演出歌單  ▍  嘉義文化創意產業園區 G9', W / 2, 240);
+        ctx.font = `28px ${FONT_TC}`;
+        ctx.fillText('完整演出歌單  ▍  嘉義文化創意產業園區 G9', W / 2, 263);
         ctx.fillStyle = '#aaa';
         ctx.font = `22px ${FONT_TC}`;
-        ctx.fillText('全程免費入場  ▍  搖滾 × 吉他 × 嘻哈', W / 2, 275);
+        ctx.fillText('全程免費入場  ▍  搖滾 × 吉他 × 嘻哈', W / 2, 295);
 
-        // === 7. 繪製每一天 ===
+        // === 6. 繪製每一天 ===
         let y = HEADER_H;
-        data.forEach(({ label, dateStr, acts }) => {
-            // Day header
-            ctx.fillStyle = 'rgba(255, 0, 255, 0.15)';
-            ctx.fillRect(40, y, W - 80, DAY_HEADER_H);
+        data.forEach(({ label, dateStr, dayNo, acts }) => {
+            // Day header（左色條 + 大「DAY N」+ 日期 + 場次數）
+            const dhX = PAD;
+            const dhW = W - PAD * 2;
+            // 背景
+            const dayGrad = ctx.createLinearGradient(dhX, y, dhX, y + DAY_HEADER_H);
+            dayGrad.addColorStop(0, 'rgba(255, 0, 255, 0.25)');
+            dayGrad.addColorStop(1, 'rgba(255, 0, 255, 0.05)');
+            ctx.fillStyle = dayGrad;
+            ctx.fillRect(dhX, y, dhW, DAY_HEADER_H);
+            // 左側色條
             ctx.fillStyle = '#ff00ff';
-            ctx.fillRect(40, y, 8, DAY_HEADER_H);
+            ctx.fillRect(dhX, y, 10, DAY_HEADER_H);
+            // 上下邊線
+            ctx.fillStyle = '#ff00ff';
+            ctx.fillRect(dhX, y, dhW, 2);
+            ctx.fillRect(dhX, y + DAY_HEADER_H - 2, dhW, 2);
+
+            // DAY N（超大）
             ctx.textAlign = 'left';
-            ctx.fillStyle = '#ff00ff';
-            ctx.font = `bold 48px ${FONT_TC}`;
-            ctx.fillText(`DAY ${label.startsWith('5/30') ? '1' : '2'}`, 70, y + 50);
+            ctx.textBaseline = 'alphabetic';
+            ctx.fillStyle = '#ff66dd';
+            ctx.font = `bold 64px ${FONT_TC}`;
+            ctx.fillText(`DAY ${dayNo}`, dhX + 30, y + 70);
+            // 日期 + 中文
             ctx.fillStyle = '#fff';
-            ctx.font = `bold 36px ${FONT_TC}`;
-            ctx.fillText(label, 220, y + 50);
-            ctx.fillStyle = '#aaa';
+            ctx.font = `bold 32px ${FONT_TC}`;
+            ctx.fillText(label, dhX + 230, y + 60);
+            ctx.fillStyle = '#888';
             ctx.font = `22px ${FONT_MONO}`;
-            ctx.fillText(dateStr, 70, y + 85);
+            ctx.fillText(dateStr, dhX + 230, y + 95);
+            // 場次數（右側大字）
             ctx.textAlign = 'right';
             ctx.fillStyle = '#00ffff';
-            ctx.font = `22px ${FONT_MONO}`;
-            ctx.fillText(`${acts.length} acts`, W - 70, y + 85);
-            y += DAY_HEADER_H + 10;
+            ctx.font = `bold 48px ${FONT_MONO}`;
+            ctx.fillText(`${acts.length}`, dhX + dhW - 30, y + 65);
+            ctx.font = `18px ${FONT_TC}`;
+            ctx.fillStyle = '#aaa';
+            ctx.fillText('acts / 場次', dhX + dhW - 30, y + 95);
 
-            // Acts
+            y += DAY_HEADER_H + 16;
+
+            // === Acts ===
+            const colSeqX = PAD + 24;
+            const colTimeX = PAD + 90;
+            const colNameX = PAD + 270;
+            const songIndentX = PAD + 270;
+            const rowMaxW = W - PAD * 2;
+            const nameMaxW = W - PAD * 2 - 280; // 留白給右側
+
             acts.forEach((act, idx) => {
-                // 斑馬紋背景
+                const hasSong = act.song && act.seq !== '—';
+                const isHost = act.seq === '—';
+                const thisH = hasSong ? ROW_H_SONG : ROW_H;
+
+                // 斑馬紋
                 if (idx % 2 === 0) {
-                    ctx.fillStyle = 'rgba(157, 0, 255, 0.08)';
-                    ctx.fillRect(40, y, W - 80, ROW_H);
+                    ctx.fillStyle = 'rgba(157, 0, 255, 0.06)';
+                    ctx.fillRect(PAD, y, rowMaxW, thisH);
                 }
-                // 左側 # 序號
+                // 主持人區段：整列換背景
+                if (isHost) {
+                    ctx.fillStyle = 'rgba(0, 255, 255, 0.08)';
+                    ctx.fillRect(PAD, y, rowMaxW, thisH);
+                    ctx.fillStyle = '#00ffff';
+                    ctx.fillRect(PAD, y, 4, thisH);
+                }
+
+                // 序號（淡色小字，靠左）
                 ctx.textAlign = 'left';
-                ctx.fillStyle = '#666';
-                ctx.font = `bold 20px ${FONT_MONO}`;
-                ctx.fillText(act.seq === '—' ? '   ' : `#${act.seq.padStart(2, '0')}`, 60, y + 36);
-                // 時間（青色）
-                ctx.fillStyle = '#00ffff';
-                ctx.font = `bold 22px ${FONT_MONO}`;
-                ctx.fillText(act.time, 140, y + 36);
-                // 團名（白色粗體）
-                ctx.fillStyle = act.seq === '—' ? '#aaa' : '#fff';
-                ctx.font = act.seq === '—' ? `italic 22px ${FONT_TC}` : `bold 24px ${FONT_TC}`;
-                ctx.fillText(act.name, 310, y + 36);
-                // 曲目（右側粉色，若有）
-                if (act.song && act.seq !== '—') {
-                    ctx.textAlign = 'right';
-                    ctx.fillStyle = '#ff66cc';
-                    ctx.font = `18px ${FONT_TC}`;
-                    // 防止曲名過長
-                    let songText = `♪ ${act.song}`;
-                    const maxW = 380;
-                    if (ctx.measureText(songText).width > maxW) {
-                        while (ctx.measureText(songText + '…').width > maxW && songText.length > 5) {
-                            songText = songText.slice(0, -1);
-                        }
-                        songText += '…';
-                    }
-                    ctx.fillText(songText, W - 60, y + 36);
+                ctx.textBaseline = 'middle';
+                if (!isHost) {
+                    ctx.fillStyle = '#7a4d99';
+                    ctx.font = `bold 18px ${FONT_MONO}`;
+                    ctx.fillText(`#${act.seq.padStart(2, '0')}`, colSeqX, y + (hasSong ? 30 : thisH / 2));
                 }
-                // 列底細線
-                ctx.strokeStyle = 'rgba(157, 0, 255, 0.15)';
+
+                // 時間（青色，monospace，主視覺之一）
+                ctx.fillStyle = isHost ? '#88ddff' : '#00ffff';
+                ctx.font = `bold 24px ${FONT_MONO}`;
+                ctx.fillText(act.time, colTimeX, y + (hasSong ? 30 : thisH / 2));
+
+                // 團名（白色粗體大字 — 主視覺）
+                ctx.fillStyle = isHost ? '#ccffff' : '#ffffff';
+                ctx.font = isHost ? `italic 26px ${FONT_TC}` : `bold 30px ${FONT_TC}`;
+                ctx.fillText(fitText(act.name, nameMaxW), colNameX, y + (hasSong ? 30 : thisH / 2));
+
+                // 曲目（第二行，獨立呈現，避免擠壓）
+                if (hasSong) {
+                    ctx.fillStyle = '#ff88dd';
+                    ctx.font = `italic 22px ${FONT_TC}`;
+                    ctx.fillText(fitText(`♪ ${act.song}`, nameMaxW), songIndentX, y + 64);
+                }
+
+                // 列底分隔
+                ctx.strokeStyle = 'rgba(157, 0, 255, 0.12)';
                 ctx.lineWidth = 1;
                 ctx.beginPath();
-                ctx.moveTo(40, y + ROW_H);
-                ctx.lineTo(W - 40, y + ROW_H);
+                ctx.moveTo(PAD, y + thisH);
+                ctx.lineTo(W - PAD, y + thisH);
                 ctx.stroke();
-                y += ROW_H;
+
+                y += thisH;
             });
             y += DAY_SPACING;
         });
 
-        // === 8. Footer ===
+        // === 7. Footer ===
         ctx.textAlign = 'center';
+        ctx.textBaseline = 'alphabetic';
         ctx.fillStyle = '#ff00ff';
-        ctx.fillRect(200, H - FOOTER_H + 10, W - 400, 2);
+        ctx.fillRect(180, H - FOOTER_H + 18, W - 360, 2);
+        ctx.fillStyle = '#00ffff';
+        ctx.fillRect(180, H - FOOTER_H + 24, W - 360, 1);
+
         ctx.fillStyle = '#00ff88';
-        ctx.font = `bold 32px ${FONT_MONO}`;
-        ctx.fillText('unsilence-fest.com', W / 2, H - FOOTER_H + 60);
+        ctx.font = `bold 34px ${FONT_MONO}`;
+        ctx.fillText('unsilence-fest.com', W / 2, H - FOOTER_H + 70);
         ctx.fillStyle = '#888';
         ctx.font = `20px ${FONT_TC}`;
-        ctx.fillText('長按圖片儲存到相簿 ▍ 完整資訊請見官網', W / 2, H - FOOTER_H + 95);
+        ctx.fillText('長按圖片儲存到相簿  ▍  完整資訊請見官網', W / 2, H - FOOTER_H + 105);
 
-        // === 9. 輸出 PNG 並分享/下載 ===
+        // === 8. 輸出 ===
         const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
         const file = new File([blob], 'UNSILENCE_2026_setlist.png', { type: 'image/png' });
 
