@@ -7,10 +7,15 @@ const runCtx = runCanvas.getContext('2d');
 const gameMsg = document.getElementById('game-msg');
 const scoreBoard = document.getElementById('game-score');
 
-let gameReq, isPlaying = false, score = 0, speed = 8;
+let gameReq, isPlaying = false, score = 0, speed = 8.5;
 let frames = 0, lastTime = 0, accumulator = 0;
 const step = 1000 / 60;
-const TARGET_SCORE = 100;
+const TARGET_SCORE = 150;
+const INITIAL_SPEED = 8.5;
+const SPEED_UP_SCORE_STEP = 30;
+const SPEED_INCREMENT = 0.6;
+const SPAWN_RANDOM_RANGE = 35;
+const SPAWN_BASE_FRAMES = 55;
 let hasWon = false;
 
 const HORIZON_Y = 220; const FLOOR_Y = 220; const GRAVITY = 1.0; const JUMP_POWER = -16;
@@ -86,7 +91,7 @@ function setMsgStyle() {
 }
 
 function resetGame() {
-    isPlaying = false; hasWon = false; score = 0; speed = 8; frames = 0; lastTime = 0; accumulator = 0;
+    isPlaying = false; hasWon = false; score = 0; speed = INITIAL_SPEED; frames = 0; lastTime = 0; accumulator = 0;
     turkey.y = FLOOR_Y; turkey.vy = 0; turkey.isJumping = false; obstacles = [];
     scoreBoard.innerText = `SCORE: ${score}`; scoreBoard.style.display = 'none'; runCanvas.style.display = 'block';
     setMsgStyle(); gameMsg.style.background = 'rgba(0,0,0,0.6)';
@@ -168,7 +173,7 @@ function gameLoop(timestamp) {
         if (turkey.y >= FLOOR_Y) { turkey.y = FLOOR_Y; turkey.isJumping = false; turkey.vy = 0; }
         let canSpawn = true;
         if (obstacles.length > 0 && (runCanvas.width - obstacles[obstacles.length - 1].x < (250 + speed * 10))) canSpawn = false;
-        if (canSpawn && frames % Math.floor(Math.random() * 40 + 60) === 0) obstacles.push({ x: runCanvas.width, y: FLOOR_Y, size: 55, type: Math.random() > 0.4 ? "📺" : "🍍" });
+        if (canSpawn && frames % Math.floor(Math.random() * SPAWN_RANDOM_RANGE + SPAWN_BASE_FRAMES) === 0) obstacles.push({ x: runCanvas.width, y: FLOOR_Y, size: 55, type: Math.random() > 0.4 ? "📺" : "🍍" });
 
         const m = 15;
         for (let i = 0; i < obstacles.length; i++) {
@@ -181,7 +186,7 @@ function gameLoop(timestamp) {
         if (obstacles.length > 0 && obstacles[0].x < -60) {
             obstacles.shift(); score += 10; scoreBoard.innerText = `SCORE: ${score}`;
             if (score >= TARGET_SCORE) { triggerWin(); return; }
-            if (score % 30 === 0) speed += 0.5;
+            if (score % SPEED_UP_SCORE_STEP === 0) speed += SPEED_INCREMENT;
         }
         frames++; accumulator -= step;
     }
@@ -196,5 +201,16 @@ function gameOver() {
 
 function triggerWin() {
     isPlaying = false; hasWon = true; cancelAnimationFrame(gameReq); scoreBoard.style.display = 'none'; runCanvas.style.display = 'none'; setMsgStyle(); gameMsg.style.background = 'rgba(0,0,0,0.9)';
-    gameMsg.innerHTML = `<h2 class="blink" style="margin: 0; color: #00ff00; text-shadow: 2px 2px #000; font-size: clamp(1.2rem, 5vw, 1.8rem);">[ SYSTEM OVERRIDE SUCCESS ]</h2><p style="margin: 5px 0 0 0; font-size: clamp(0.8rem, 3.5vw, 1rem); color: #fff; text-align: center;">你成功駭入了寧靜系統！獲得隱藏折扣碼：</p><div style="background: #ff00ff; color: #fff; padding: 5px 10px; margin: 10px 0; font-weight: bold; font-size: clamp(1.1rem, 5vw, 1.5rem); border: 2px solid #fff; word-break: break-all;">TURKEY_BREACH_2026</div><p style="margin: 0; font-size: clamp(0.7rem, 2.5vw, 0.85rem); color: #aaa; text-align: center;">> 請截圖此畫面，至現場周邊攤位出示以享有優惠 &lt;</p><p class="blink" style="margin: 15px 0 0 0; font-size: clamp(0.8rem, 3vw, 1rem); color: #00ff00;">> 點擊畫面重新開始挑戰 &lt;</p>`;
+    gameMsg.innerHTML = `
+        <h2 class="blink" style="margin:0; color:#00ff00; text-shadow:2px 2px #000; font-size:clamp(1.2rem,5vw,1.8rem);">[ SYSTEM OVERRIDE SUCCESS ]</h2>
+        <p style="margin:6px 0 12px; font-size:clamp(0.8rem,3.5vw,1rem); color:#fff; text-align:center;">火雞成功脫逃！你已入侵寧靜系統</p>
+        <div onclick="event.stopPropagation(); event.preventDefault();" style="display:flex; flex-direction:column; align-items:center; gap:6px;">
+            <button onclick="openExternalLink('https://www.instagram.com/unsilence_fest._')"
+                style="display:flex; align-items:center; gap:8px; padding:8px 20px; border:none; border-radius:6px; background:linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888); color:#fff; font-family:inherit; font-size:clamp(0.9rem,3.5vw,1.1rem); font-weight:bold; cursor:pointer; letter-spacing:1px;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1.5" fill="#fff" stroke="none"/></svg>
+                追蹤 @unsilence_fest._
+            </button>
+            <p style="margin:0; font-size:clamp(0.65rem,2.5vw,0.8rem); color:#aaa; text-align:center;">掌握最新演出資訊 · 5/30–31 嘉義見</p>
+        </div>
+        <p class="blink" style="margin:14px 0 0; font-size:clamp(0.75rem,2.5vw,0.9rem); color:#555;">> 點擊畫面重新開始挑戰 &lt;</p>`;
 }
