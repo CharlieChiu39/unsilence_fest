@@ -305,6 +305,8 @@ body.pineapple-mode #main-app-window .window-content { background: #ffffe6; }
 .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.6); z-index: 9000; }
 .alert-modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 300px; z-index: 9001; }
 
+.seo-info-bar { display: flex; flex-wrap: wrap; gap: 6px 12px; justify-content: center; align-items: center; padding: 6px 16px 32px; font-family: 'DotGothic16', monospace; font-size: 11px; color: #555; pointer-events: none; }
+.seo-info-bar .seo-sep { color: #333; }
 .marquee-container { position: fixed; bottom: 0; left: 0; width: 100vw; background: var(--win-border); color: #fff; padding: 4px 0; z-index: 100; border-top: 2px solid #fff; padding-bottom: env(safe-area-inset-bottom, 4px); }
 .marquee-content { display: inline-block; white-space: nowrap; animation: marquee 20s linear infinite; font-size: 16px; }
 @keyframes marquee { 0% { transform: translateX(100vw); } 100% { transform: translateX(-100%); } }

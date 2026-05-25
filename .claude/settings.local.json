@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(wc -l /c/Users/Acer/Desktop/WEB/*.html)",
+      "Skill(superpowers:using-superpowers)",
+      "Skill(superpowers:using-superpowers:*)",
+      "Skill(superpowers:brainstorming)",
+      "Skill(superpowers:brainstorming:*)"
+    ]
+  }
+}
