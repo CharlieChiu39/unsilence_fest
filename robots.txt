@@ -2,6 +2,5 @@ User-agent: *
 Allow: /
 Disallow: /.claude/
 Disallow: /docs/
-Disallow: /quotation.html
 
 Sitemap: https://unsilence-fest.com/sitemap.xml

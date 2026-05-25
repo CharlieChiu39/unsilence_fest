@@ -44,7 +44,9 @@ body, html {
     margin: 0; padding: 0; height: 100vh; height: 100dvh; width: 100vw;
     background-color: var(--bg-color); color: var(--text-color);
     font-family: 'DotGothic16', sans-serif; overflow: hidden;
-    user-select: none; -webkit-user-select: none; touch-action: none;
+    user-select: none; -webkit-user-select: none;
+    /* touch-action: pan-y 允許垂直 scroll（子頁面內容），但不允許雙指縮放 */
+    touch-action: pan-y;
     cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" style="font-size:24px"><text y="24">🍍</text></svg>'), auto;
 }
 
@@ -60,7 +62,13 @@ body, html {
     user-select: none;
     box-sizing: border-box;
     -webkit-tap-highlight-color: transparent;
-    outline: none;
+}
+
+/* 無障礙：鍵盤焦點仍可見，滑鼠點擊時不顯示 */
+*:focus { outline: none; }
+*:focus-visible {
+    outline: 2px solid var(--highlight-color);
+    outline-offset: 2px;
 }
 
 /* 背景與濾鏡 */
@@ -384,15 +392,17 @@ body.pineapple-mode #main-app-window .window-content { background: #ffffe6; }
     .sidebar-ig svg { width: 24px; height: 24px; }
     .desktop-icon { display: none !important; }
 
-    .nav-links { margin: 5px 0 5px 0; display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+    .nav-links { margin: 5px 0 5px 0; display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
     .nav-links li { margin: 0; }
-    .nav-links a { font-size: 16px; padding: 4px 8px; min-height: 36px; }
-    .mode-toggle { margin-top: 5px; padding: 5px; font-size: 14px; width: auto; display: inline-block; }
+    /* 觸控目標 ≥44px（Apple HIG/WCAG 建議） */
+    .nav-links a { font-size: 16px; padding: 10px 12px; min-height: 44px; }
+    .mode-toggle { margin-top: 5px; padding: 8px 12px; font-size: 14px; width: auto; display: inline-block; min-height: 44px; }
 
-    .teaser-win { width: 160px; display: flex !important; }
-    #win-1 { top: 2vh; left: 2vw; } #win-2 { top: 8vh; left: 15vw; } #win-3 { top: 14vh; left: 30vw; }
-    #win-4 { top: 20vh; left: 5vw; } #win-5 { top: 26vh; left: 25vw; } #win-6 { top: 32vh; left: 45vw; } #win-7 { top: 38vh; left: 10vw; }
-    #win-8 { top: 44vh; left: 28vw; }
+    /* teaser-win 在小螢幕（≤480px）改成不同階梯避免完全重疊 */
+    .teaser-win { width: 150px; display: flex !important; }
+    #win-1 { top: 2vh; left: 2vw; } #win-2 { top: 7vh; left: 38vw; } #win-3 { top: 13vh; left: 8vw; }
+    #win-4 { top: 20vh; left: 42vw; } #win-5 { top: 27vh; left: 4vw; } #win-6 { top: 34vh; left: 40vw; }
+    #win-7 { top: 41vh; left: 10vw; } #win-8 { top: 48vh; left: 38vw; }
 
     /* mobile 省電：關閉 backdrop-filter，改為純色背景 */
     .window { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
@@ -404,8 +414,14 @@ body.pineapple-mode #main-app-window .window-content { background: #ffffe6; }
     }
     #main-app-window .window-content, #game-window .window-content { overflow-y: auto; max-height: 65dvh; }
     .desktop-icon { bottom: calc(40px + env(safe-area-inset-bottom, 20px)); right: 20px; }
-    #game-window .window-content { aspect-ratio: auto !important; min-height: 320px !important; }
-    #run-canvas { object-fit: contain !important; width: 100% !important; }
+    /* mobile 遊戲視窗：放大顯示比例，火雞才看得清楚 */
+    #game-window .window-content { aspect-ratio: 4/3 !important; min-height: 400px !important; padding: 0 !important; }
+    #run-canvas {
+        width: 100% !important;
+        height: 100% !important;
+        object-fit: cover !important;
+        display: block;
+    }
 }
 
 .blink { animation: blinker 2s linear infinite; }

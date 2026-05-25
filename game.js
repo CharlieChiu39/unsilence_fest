@@ -109,7 +109,10 @@ window.addEventListener('keydown', (e) => { if (e.code === 'Space' && gameWinUI.
 // 防反白與手勢阻絕
 const gameContentArea = gameWinUI.querySelector('.window-content');
 gameContentArea.addEventListener('pointerdown', (e) => {
-    if (e.target.classList.contains('close-btn') || e.target.closest('.window-header')) return;
+    // 排除：關閉鈕、window-header（拖曳）、按鈕/連結（如通關畫面的 IG 按鈕）
+    if (e.target.classList.contains('close-btn')) return;
+    if (e.target.closest('.window-header')) return;
+    if (e.target.closest('button, a')) return;
     if (e.cancelable) e.preventDefault();
     jump();
 });

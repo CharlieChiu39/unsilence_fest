@@ -2,9 +2,13 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="0">
+    <!-- 預連線到 Google Fonts，加速字型載入 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- 預載入主要子頁面，掃 QR 進站立刻可點 -->
+    <link rel="prefetch" href="lineup.html">
+    <link rel="prefetch" href="timetable.html">
+    <link rel="prefetch" href="map.html">
     <!-- 資安：限制 referrer / Content Security Policy（含 frame-ancestors 防 clickjacking） -->
     <meta name="referrer" content="strict-origin-when-cross-origin">
     <meta http-equiv="Content-Security-Policy" content="
@@ -19,7 +23,7 @@
         form-action 'self';
         object-src 'none';
         upgrade-insecure-requests">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="theme-color" content="#0a0510">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="description" content="2026 寧靜音樂節 UNSILENCE FESTIVAL｜嘉義音樂祭，5/30-5/31 嘉義文化創意產業園區，全程免費入場。搖滾 × 吉他 × 嘻哈。">
@@ -54,8 +58,8 @@
       "@type": "MusicEvent",
       "name": "寧靜音樂節 UNSILENCE FESTIVAL 2026",
       "alternateName": ["UNSILENCE FESTIVAL", "寧靜音樂祭", "Unsilence Fest"],
-      "startDate": "2026-05-30T13:00:00+08:00",
-      "endDate": "2026-05-31T22:00:00+08:00",
+      "startDate": "2026-05-30T12:30:00+08:00",
+      "endDate": "2026-05-31T20:05:00+08:00",
       "eventStatus": "https://schema.org/EventScheduled",
       "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
       "url": "https://unsilence-fest.com/",
@@ -124,8 +128,8 @@
         {
           "@type": "MusicEvent",
           "name": "寧靜音樂節 Day 1",
-          "startDate": "2026-05-30T13:00:00+08:00",
-          "endDate": "2026-05-30T22:00:00+08:00",
+          "startDate": "2026-05-30T12:30:00+08:00",
+          "endDate": "2026-05-30T20:00:00+08:00",
           "location": {
             "@type": "Place",
             "name": "嘉義文化創意產業園區",
@@ -149,8 +153,8 @@
         {
           "@type": "MusicEvent",
           "name": "寧靜音樂節 Day 2",
-          "startDate": "2026-05-31T13:00:00+08:00",
-          "endDate": "2026-05-31T22:00:00+08:00",
+          "startDate": "2026-05-31T12:30:00+08:00",
+          "endDate": "2026-05-31T20:05:00+08:00",
           "location": {
             "@type": "Place",
             "name": "嘉義文化創意產業園區",
@@ -286,20 +290,20 @@
             </div>
 
             <ul class="nav-links">
-                <li><a data-text="> NEWS" onclick="signalClick(this, 'NEWS_ARCHIVE.exe', 'news.html')">> NEWS</a></li>
-                <li><a data-text="> LIVE_陣容" onclick="signalClick(this, 'LIVE_DATA.sys', 'lineup.html')">> LIVE_陣容</a></li>
-                <li><a data-text="> RELEASE_時刻表" onclick="signalClick(this, 'TIMETABLE.exe', 'timetable.html')">> RELEASE_時刻表</a></li>
-                <li><a data-text="> MAP_地圖" onclick="signalClick(this, 'MAP_NAVIGATOR.sys', 'map.html')">> MAP_地圖</a></li>
-                <li><a data-text="> STORE_周邊" onclick="signalClick(this, 'STORE_DATA.pkg', 'goods.html')">> STORE_周邊</a></li>
-                <li><a data-text="> INFO_須知" onclick="signalClick(this, 'SAFETY_PROTOCOL.txt', 'guidelines.html')">> INFO_須知</a></li>
+                <li><a href="news.html" data-text="> NEWS" onclick="event.preventDefault(); signalClick(this, 'NEWS_ARCHIVE.exe', 'news.html')">> NEWS</a></li>
+                <li><a href="lineup.html" data-text="> LIVE_陣容" onclick="event.preventDefault(); signalClick(this, 'LIVE_DATA.sys', 'lineup.html')">> LIVE_陣容</a></li>
+                <li><a href="timetable.html" data-text="> RELEASE_時刻表" onclick="event.preventDefault(); signalClick(this, 'TIMETABLE.exe', 'timetable.html')">> RELEASE_時刻表</a></li>
+                <li><a href="map.html" data-text="> MAP_地圖" onclick="event.preventDefault(); signalClick(this, 'MAP_NAVIGATOR.sys', 'map.html')">> MAP_地圖</a></li>
+                <li><a href="goods.html" data-text="> STORE_周邊" onclick="event.preventDefault(); signalClick(this, 'STORE_DATA.pkg', 'goods.html')">> STORE_周邊</a></li>
+                <li><a href="guidelines.html" data-text="> INFO_須知" onclick="event.preventDefault(); signalClick(this, 'SAFETY_PROTOCOL.txt', 'guidelines.html')">> INFO_須知</a></li>
             </ul>
 
             <div class="sidebar-bottom">
-                <a class="sidebar-bottom-link" data-text="> CREDITS_名單" onclick="signalClick(this, 'CREDITS.txt', 'credits.html')" style="color:var(--highlight-color)">> CREDITS_名單</a>
+                <a href="credits.html" class="sidebar-bottom-link" data-text="> CREDITS_名單" onclick="event.preventDefault(); signalClick(this, 'CREDITS.txt', 'credits.html')" style="color:var(--highlight-color)">> CREDITS_名單</a>
                 <div class="sidebar-bottom-icons">
                     <div id="secret-turkey" data-tooltip="> SYSTEM BREACH ?" onclick="if(typeof openGame === 'function'){ if(typeof gtag==='function') gtag('event','game_open'); openGame(); }" title="SYSTEM BREACH">🦃</div>
                     <div id="share-btn" class="sidebar-ig" data-tooltip="> SHARE_訊號" onclick="shareWebsite()" title="分享活動"><svg viewBox="0 0 24 24" fill="none" stroke="#0f0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></div>
-                    <div class="sidebar-ig" data-tooltip="> FOLLOW_US" onclick="openExternalLink('https://www.instagram.com/unsilence_fest._?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><defs><linearGradient id="ig-grad-s" x1="0%" y1="100%" x2="100%" y2="0%"><stop offset="0%" stop-color="#f09433"/><stop offset="25%" stop-color="#e6683c"/><stop offset="50%" stop-color="#dc2743"/><stop offset="75%" stop-color="#cc2366"/><stop offset="100%" stop-color="#bc1888"/></linearGradient></defs><rect x="2" y="2" width="20" height="20" rx="5" ry="5" stroke="url(#ig-grad-s)"/><circle cx="12" cy="12" r="5" stroke="url(#ig-grad-s)"/><circle cx="17.5" cy="6.5" r="1.5" fill="url(#ig-grad-s)" stroke="none"/></svg></div>
+                    <div class="sidebar-ig" data-tooltip="> FOLLOW_US" onclick="openExternalLink('https://www.instagram.com/unsilence_fest._')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><defs><linearGradient id="ig-grad-s" x1="0%" y1="100%" x2="100%" y2="0%"><stop offset="0%" stop-color="#f09433"/><stop offset="25%" stop-color="#e6683c"/><stop offset="50%" stop-color="#dc2743"/><stop offset="75%" stop-color="#cc2366"/><stop offset="100%" stop-color="#bc1888"/></linearGradient></defs><rect x="2" y="2" width="20" height="20" rx="5" ry="5" stroke="url(#ig-grad-s)"/><circle cx="12" cy="12" r="5" stroke="url(#ig-grad-s)"/><circle cx="17.5" cy="6.5" r="1.5" fill="url(#ig-grad-s)" stroke="none"/></svg></div>
                 </div>
             </div>
 
@@ -330,7 +334,7 @@
                 </div>
             </div>
 
-            <div class="desktop-icon blink" onclick="openExternalLink('https://www.instagram.com/unsilence_fest._?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==')"><div class="icon-img"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><defs><linearGradient id="ig-grad-d" x1="0%" y1="100%" x2="100%" y2="0%"><stop offset="0%" stop-color="#f09433"/><stop offset="25%" stop-color="#e6683c"/><stop offset="50%" stop-color="#dc2743"/><stop offset="75%" stop-color="#cc2366"/><stop offset="100%" stop-color="#bc1888"/></linearGradient></defs><rect x="2" y="2" width="20" height="20" rx="5" ry="5" stroke="url(#ig-grad-d)"/><circle cx="12" cy="12" r="5" stroke="url(#ig-grad-d)"/><circle cx="17.5" cy="6.5" r="1.5" fill="url(#ig-grad-d)" stroke="none"/></svg></div><div>IG_LINK.url</div></div>
+            <div class="desktop-icon blink" onclick="openExternalLink('https://www.instagram.com/unsilence_fest._')"><div class="icon-img"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><defs><linearGradient id="ig-grad-d" x1="0%" y1="100%" x2="100%" y2="0%"><stop offset="0%" stop-color="#f09433"/><stop offset="25%" stop-color="#e6683c"/><stop offset="50%" stop-color="#dc2743"/><stop offset="75%" stop-color="#cc2366"/><stop offset="100%" stop-color="#bc1888"/></linearGradient></defs><rect x="2" y="2" width="20" height="20" rx="5" ry="5" stroke="url(#ig-grad-d)"/><circle cx="12" cy="12" r="5" stroke="url(#ig-grad-d)"/><circle cx="17.5" cy="6.5" r="1.5" fill="url(#ig-grad-d)" stroke="none"/></svg></div><div>IG_LINK.url</div></div>
         </main>
     </div>
 
