@@ -409,56 +409,201 @@ window.switchDay = function(day) {
     }
 };
 
-window.downloadSetlist = function() {
-    const days = [
-        { id: 'day-530', label: '5/30 (六)' },
-        { id: 'day-531', label: '5/31 (日)' }
-    ];
-    let lines = [
-        '寧靜音樂節 UNSILENCE FESTIVAL 2026',
-        '完整演出時刻表 + 曲目',
-        '嘉義文化創意產業園區｜全程免費入場',
-        ''
-    ];
-    days.forEach(({ id, label }) => {
-        lines.push('='.repeat(40));
-        lines.push(`  ${label}`);
-        lines.push('='.repeat(40));
-        const container = document.getElementById(id);
-        if (!container) return;
-        container.querySelectorAll('tbody tr').forEach(row => {
-            if (row.dataset.songRow) return;
-            const cells = row.querySelectorAll('td');
-            if (cells.length < 3) return;
-            const seq = cells[0].textContent.trim();
-            const time = cells[1].textContent.trim();
-            const name = cells[2].querySelector('.song-arrow')
-                ? cells[2].textContent.replace('▶','').replace('▼','').trim()
-                : cells[2].textContent.trim();
-            const song = row.dataset.song || '';
-            if (seq === '—') {
-                lines.push(`  ${time}  ${name}`);
-            } else {
-                lines.push(`  #${seq.padStart(2)}  ${time}  ${name}${song ? '  ♪ ' + song : ''}`);
-            }
+window.downloadSetlist = async function(btnEl) {
+    // 找到觸發按鈕（支援從 onclick="downloadSetlist(this)" 或無參數呼叫）
+    const btn = btnEl || (event && event.currentTarget);
+    const originalText = btn ? btn.textContent : '';
+    if (btn) { btn.textContent = '生成中...'; btn.disabled = true; }
+
+    try {
+        // === 1. 從 DOM 蒐集資料 ===
+        const days = [
+            { id: 'day-530', label: '5/30 (六)', dateStr: '2026.05.30' },
+            { id: 'day-531', label: '5/31 (日)', dateStr: '2026.05.31' }
+        ];
+        const data = days.map(({ id, label, dateStr }) => {
+            const acts = [];
+            const container = document.getElementById(id);
+            if (!container) return { label, dateStr, acts };
+            container.querySelectorAll('tbody tr').forEach(row => {
+                if (row.dataset.songRow) return;
+                const cells = row.querySelectorAll('td');
+                if (cells.length < 3) return;
+                const seq = cells[0].textContent.trim();
+                const time = cells[1].textContent.trim();
+                const name = cells[2].querySelector('.song-arrow')
+                    ? cells[2].textContent.replace('▶', '').replace('▼', '').trim()
+                    : cells[2].textContent.trim();
+                const song = row.dataset.song || '';
+                acts.push({ seq, time, name, song });
+            });
+            return { label, dateStr, acts };
         });
-        lines.push('');
-    });
-    lines.push('—'.repeat(40));
-    lines.push('https://unsilence-fest.com');
 
-    const text = lines.join('\n');
-    const file = new File([text], 'UNSILENCE_2026_setlist.txt', { type: 'text/plain' });
+        // === 2. 計算畫布大小 ===
+        const W = 1080;
+        const ROW_H = 56;
+        const DAY_HEADER_H = 100;
+        const DAY_SPACING = 40;
+        const HEADER_H = 300;
+        const FOOTER_H = 120;
+        const totalActs = data.reduce((s, d) => s + d.acts.length, 0);
+        const H = HEADER_H + data.length * (DAY_HEADER_H + DAY_SPACING) + totalActs * ROW_H + FOOTER_H;
 
-    if (navigator.canShare && navigator.canShare({ files: [file] })) {
-        navigator.share({ files: [file], title: '寧靜音樂節 2026 歌單' }).catch(() => {});
-    } else {
-        const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = 'UNSILENCE_2026_setlist.txt';
-        a.click();
-        URL.revokeObjectURL(a.href);
+        // === 3. 建立 Canvas ===
+        const canvas = document.createElement('canvas');
+        canvas.width = W;
+        canvas.height = H;
+        const ctx = canvas.getContext('2d');
+        const FONT_TC = '"Microsoft JhengHei", "PingFang TC", "Noto Sans TC", "Microsoft YaHei", sans-serif';
+        const FONT_MONO = '"Consolas", "Menlo", "Courier New", monospace';
+
+        // === 4. 背景與網格 ===
+        ctx.fillStyle = '#0a0510';
+        ctx.fillRect(0, 0, W, H);
+        ctx.strokeStyle = 'rgba(157, 0, 255, 0.08)';
+        ctx.lineWidth = 1;
+        for (let x = 0; x < W; x += 40) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke(); }
+        for (let y = 0; y < H; y += 40) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); }
+
+        // === 5. 邊框角落（賽博龐克風） ===
+        ctx.fillStyle = '#ff00ff';
+        const cs = 50;
+        ctx.fillRect(0, 0, cs, 6); ctx.fillRect(0, 0, 6, cs);
+        ctx.fillRect(W - cs, 0, cs, 6); ctx.fillRect(W - 6, 0, 6, cs);
+        ctx.fillRect(0, H - 6, cs, 6); ctx.fillRect(0, H - cs, 6, cs);
+        ctx.fillRect(W - cs, H - 6, cs, 6); ctx.fillRect(W - 6, H - cs, 6, cs);
+
+        // === 6. 主標題區 ===
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'alphabetic';
+        // 寧靜音樂節 - 霓虹粉
+        ctx.fillStyle = 'rgba(157, 0, 255, 0.6)';
+        ctx.font = `bold 96px ${FONT_TC}`;
+        ctx.fillText('寧靜音樂節', W / 2 + 4, 110 + 4);
+        ctx.fillStyle = '#ff00ff';
+        ctx.fillText('寧靜音樂節', W / 2, 110);
+        // 英文副標 - 綠色
+        ctx.fillStyle = 'rgba(0, 100, 50, 0.8)';
+        ctx.font = `bold 42px ${FONT_MONO}`;
+        ctx.fillText('UNSILENCE FESTIVAL 2026', W / 2 + 2, 170 + 2);
+        ctx.fillStyle = '#00ff88';
+        ctx.fillText('UNSILENCE FESTIVAL 2026', W / 2, 170);
+        // 分隔線
+        ctx.fillStyle = '#ff00ff';
+        ctx.fillRect(200, 200, W - 400, 3);
+        // 副標資訊
+        ctx.fillStyle = '#fff';
+        ctx.font = `26px ${FONT_TC}`;
+        ctx.fillText('完整演出歌單  ▍  嘉義文化創意產業園區 G9', W / 2, 240);
+        ctx.fillStyle = '#aaa';
+        ctx.font = `22px ${FONT_TC}`;
+        ctx.fillText('全程免費入場  ▍  搖滾 × 吉他 × 嘻哈', W / 2, 275);
+
+        // === 7. 繪製每一天 ===
+        let y = HEADER_H;
+        data.forEach(({ label, dateStr, acts }) => {
+            // Day header
+            ctx.fillStyle = 'rgba(255, 0, 255, 0.15)';
+            ctx.fillRect(40, y, W - 80, DAY_HEADER_H);
+            ctx.fillStyle = '#ff00ff';
+            ctx.fillRect(40, y, 8, DAY_HEADER_H);
+            ctx.textAlign = 'left';
+            ctx.fillStyle = '#ff00ff';
+            ctx.font = `bold 48px ${FONT_TC}`;
+            ctx.fillText(`DAY ${label.startsWith('5/30') ? '1' : '2'}`, 70, y + 50);
+            ctx.fillStyle = '#fff';
+            ctx.font = `bold 36px ${FONT_TC}`;
+            ctx.fillText(label, 220, y + 50);
+            ctx.fillStyle = '#aaa';
+            ctx.font = `22px ${FONT_MONO}`;
+            ctx.fillText(dateStr, 70, y + 85);
+            ctx.textAlign = 'right';
+            ctx.fillStyle = '#00ffff';
+            ctx.font = `22px ${FONT_MONO}`;
+            ctx.fillText(`${acts.length} acts`, W - 70, y + 85);
+            y += DAY_HEADER_H + 10;
+
+            // Acts
+            acts.forEach((act, idx) => {
+                // 斑馬紋背景
+                if (idx % 2 === 0) {
+                    ctx.fillStyle = 'rgba(157, 0, 255, 0.08)';
+                    ctx.fillRect(40, y, W - 80, ROW_H);
+                }
+                // 左側 # 序號
+                ctx.textAlign = 'left';
+                ctx.fillStyle = '#666';
+                ctx.font = `bold 20px ${FONT_MONO}`;
+                ctx.fillText(act.seq === '—' ? '   ' : `#${act.seq.padStart(2, '0')}`, 60, y + 36);
+                // 時間（青色）
+                ctx.fillStyle = '#00ffff';
+                ctx.font = `bold 22px ${FONT_MONO}`;
+                ctx.fillText(act.time, 140, y + 36);
+                // 團名（白色粗體）
+                ctx.fillStyle = act.seq === '—' ? '#aaa' : '#fff';
+                ctx.font = act.seq === '—' ? `italic 22px ${FONT_TC}` : `bold 24px ${FONT_TC}`;
+                ctx.fillText(act.name, 310, y + 36);
+                // 曲目（右側粉色，若有）
+                if (act.song && act.seq !== '—') {
+                    ctx.textAlign = 'right';
+                    ctx.fillStyle = '#ff66cc';
+                    ctx.font = `18px ${FONT_TC}`;
+                    // 防止曲名過長
+                    let songText = `♪ ${act.song}`;
+                    const maxW = 380;
+                    if (ctx.measureText(songText).width > maxW) {
+                        while (ctx.measureText(songText + '…').width > maxW && songText.length > 5) {
+                            songText = songText.slice(0, -1);
+                        }
+                        songText += '…';
+                    }
+                    ctx.fillText(songText, W - 60, y + 36);
+                }
+                // 列底細線
+                ctx.strokeStyle = 'rgba(157, 0, 255, 0.15)';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(40, y + ROW_H);
+                ctx.lineTo(W - 40, y + ROW_H);
+                ctx.stroke();
+                y += ROW_H;
+            });
+            y += DAY_SPACING;
+        });
+
+        // === 8. Footer ===
+        ctx.textAlign = 'center';
+        ctx.fillStyle = '#ff00ff';
+        ctx.fillRect(200, H - FOOTER_H + 10, W - 400, 2);
+        ctx.fillStyle = '#00ff88';
+        ctx.font = `bold 32px ${FONT_MONO}`;
+        ctx.fillText('unsilence-fest.com', W / 2, H - FOOTER_H + 60);
+        ctx.fillStyle = '#888';
+        ctx.font = `20px ${FONT_TC}`;
+        ctx.fillText('長按圖片儲存到相簿 ▍ 完整資訊請見官網', W / 2, H - FOOTER_H + 95);
+
+        // === 9. 輸出 PNG 並分享/下載 ===
+        const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+        const file = new File([blob], 'UNSILENCE_2026_setlist.png', { type: 'image/png' });
+
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+            try {
+                await navigator.share({ files: [file], title: '寧靜音樂節 2026 歌單' });
+            } catch (e) { /* user cancelled */ }
+        } else {
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'UNSILENCE_2026_setlist.png';
+            a.click();
+            setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+        }
+        if (typeof gtag === 'function') gtag('event', 'setlist_download', { format: 'png' });
+    } catch (e) {
+        console.error('歌單生成失敗:', e);
+        alert('歌單生成失敗，請重試');
+    } finally {
+        if (btn) { btn.textContent = originalText; btn.disabled = false; }
     }
 };
 
