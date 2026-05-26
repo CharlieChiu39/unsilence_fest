@@ -228,12 +228,25 @@ function focusWindow(win) { windows.forEach(w => w.classList.remove('focused'));
 let currentDragging = null;
 let dragOffsetX, dragOffsetY, dragParentX, dragParentY;
 
+function isMobileViewport() {
+    return window.matchMedia('(max-width: 800px)').matches;
+}
+
+function isIOSWebKit() {
+    return /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+        (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+}
+
 windows.forEach(win => {
     const header = win.querySelector('.window-header');
     win.addEventListener('pointerdown', () => focusWindow(win));
     header.addEventListener('pointerdown', (e) => {
         // 用 closest 比 classList.contains 更穩，能涵蓋觸控落在子元素的情況
         if (e.target.closest('.close-btn')) return;
+        if (e.pointerType === 'touch' && isMobileViewport() && isIOSWebKit()) {
+            focusWindow(win);
+            return;
+        }
         currentDragging = win;
         focusWindow(win);
         const rect = win.getBoundingClientRect(); const parentRect = win.offsetParent.getBoundingClientRect();
@@ -260,8 +273,11 @@ document.addEventListener('pointermove', (e) => {
     const newTop = e.clientY - dragOffsetY - dragParentY;
     // 確保視窗至少 100px 在可視範圍內（防止用戶把視窗拖到看不到）
     const MIN_VISIBLE = 100;
-    const maxLeft = window.innerWidth - MIN_VISIBLE;
-    const maxTop = window.innerHeight - MIN_VISIBLE;
+    const viewport = window.visualViewport;
+    const viewportWidth = viewport ? viewport.width : window.innerWidth;
+    const viewportHeight = viewport ? viewport.height : window.innerHeight;
+    const maxLeft = viewportWidth - MIN_VISIBLE;
+    const maxTop = viewportHeight - MIN_VISIBLE;
     const minTop = -dragParentY;
     const minLeft = -currentDragging.offsetWidth + MIN_VISIBLE;
     currentDragging.style.left = `${Math.max(minLeft, Math.min(newLeft, maxLeft))}px`;
@@ -354,7 +370,7 @@ function closeApp() {
     const content = document.getElementById('app-dynamic-content');
     if (content) content.innerHTML = '';
     cascadeX = 60; cascadeY = 60;
-    appWin.style.top = ''; appWin.style.left = ''; appWin.style.transform = '';
+    appWin.style.top = ''; appWin.style.left = ''; appWin.style.bottom = ''; appWin.style.right = ''; appWin.style.transform = '';
 }
 
 // 外部連結警告窗（含 URL 白名單驗證，防止任意網址注入）
@@ -596,7 +612,13 @@ window.openGallery = function(productKey) {
 };
 
 window.closeGallery = function() {
-    document.getElementById('gallery-window').style.display = 'none';
+    const win = document.getElementById('gallery-window');
+    win.style.display = 'none';
+    win.style.top = '';
+    win.style.left = '';
+    win.style.bottom = '';
+    win.style.right = '';
+    win.style.transform = '';
 };
 
 // =========================================
@@ -604,8 +626,19 @@ window.closeGallery = function() {
 // =========================================
 const canvas = document.getElementById('matrix-bg'); const ctx = canvas.getContext('2d');
 let cw, ch; const fontSize = 18; let columns = []; const noiseChars = 'ｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄﾅﾆﾇﾈﾉﾊﾋﾌﾍﾎﾏﾐﾑﾒﾓﾔﾕﾖﾗﾘﾙﾚﾛﾜﾝ0123456789寧靜音樂節'.split(''); const pineappleChars = ['🍍'];
-function initCanvas() { cw = window.innerWidth; ch = window.innerHeight; canvas.width = cw; canvas.height = ch; const colCount = Math.floor(cw / fontSize) + 1; columns = []; for (let i = 0; i < colCount; i++) { columns[i] = Math.random() * -100; } }
-window.addEventListener('resize', initCanvas); initCanvas();
+function initCanvas() {
+    const viewport = window.visualViewport;
+    cw = Math.ceil(viewport ? viewport.width : window.innerWidth);
+    ch = Math.ceil(viewport ? viewport.height : window.innerHeight);
+    canvas.width = cw;
+    canvas.height = ch;
+    const colCount = Math.floor(cw / fontSize) + 1;
+    columns = [];
+    for (let i = 0; i < colCount; i++) { columns[i] = Math.random() * -100; }
+}
+window.addEventListener('resize', initCanvas);
+if (window.visualViewport) window.visualViewport.addEventListener('resize', initCanvas);
+initCanvas();
 function drawMatrix() { if (document.body.classList.contains('tranquil-mode')) { ctx.fillStyle = 'rgba(17, 17, 17, 0.15)'; ctx.fillRect(0, 0, cw, ch); return; } ctx.fillStyle = document.body.classList.contains('pineapple-mode') ? 'rgba(26, 26, 0, 0.15)' : 'rgba(10, 5, 16, 0.15)'; ctx.fillRect(0, 0, cw, ch); ctx.font = `${fontSize}px 'DotGothic16', monospace`; ctx.textBaseline = 'top'; ctx.fillStyle = document.body.classList.contains('pineapple-mode') ? '#ffcc00' : '#0f0'; const chars = document.body.classList.contains('pineapple-mode') ? pineappleChars : noiseChars; for (let i = 0; i < columns.length; i++) { const char = chars[Math.floor(Math.random() * chars.length)]; const x = i * fontSize; const y = columns[i] * fontSize; ctx.fillText(char, x, y); if (y > ch && Math.random() > 0.975) { columns[i] = 0; } else { columns[i]++; } } }
 
 // mobile 降頻：手機從 20fps 改為 10fps（省電 + 減少 jank）
@@ -898,8 +931,13 @@ window.downloadSetlist = async function(btnEl) {
             const a = document.createElement('a');
             a.href = URL.createObjectURL(blob);
             a.download = 'UNSILENCE_2026_setlist.png';
+            a.style.display = 'none';
+            document.body.appendChild(a);
             a.click();
-            setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+            setTimeout(() => {
+                URL.revokeObjectURL(a.href);
+                a.remove();
+            }, 1000);
         }
         if (typeof gtag === 'function') gtag('event', 'setlist_download', { format: 'png' });
     } catch (e) {

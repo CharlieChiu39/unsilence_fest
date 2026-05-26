@@ -81,6 +81,8 @@ function closeGame() {
     // ✨ 確保手機版拖曳後關閉，下次開啟能回到完美的置中預設位置
     gameWinUI.style.top = ''; 
     gameWinUI.style.left = ''; 
+    gameWinUI.style.bottom = '';
+    gameWinUI.style.right = '';
     gameWinUI.style.transform = '';
 }
 
