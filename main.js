@@ -505,6 +505,12 @@ function galleryFanAngles(n) {
     return Array.from({ length: n }, (_, i) => -max + (2 * max / (n - 1)) * i);
 }
 
+function galleryFanOffsets(n) {
+    if (n === 1) return [0];
+    const step = 55;
+    return Array.from({ length: n }, (_, i) => Math.round(-step * (n - 1) / 2 + step * i));
+}
+
 function gallerySelectCard(idx) {
     if (idx === galleryIdx) return;
     galleryIdx = idx;
@@ -550,16 +556,18 @@ window.openGallery = function(productKey) {
     const fanEl = document.getElementById('gallery-fan');
     fanEl.innerHTML = '';
     const angles = galleryFanAngles(data.images.length);
+    const offsets = galleryFanOffsets(data.images.length);
     data.images.forEach((img, i) => {
         const card = document.createElement('div');
         card.className = 'gallery-card' + (i === 0 ? ' selected' : '');
         card.dataset.idx = i;
         card.dataset.baseZ = i + 1;
         card.style.setProperty('--fan-angle', angles[i] + 'deg');
+        card.style.setProperty('--fan-x', offsets[i] + 'px');
         card.style.zIndex = i === 0 ? 100 : i + 1;
         // A: 扇形展開動畫，從疊合狀態 stagger 展開
         card.style.opacity = '0';
-        card.style.transform = 'rotate(0deg) scale(0.8)';
+        card.style.transform = 'translateX(0) rotate(0deg) scale(0.8)';
         card.style.transition = 'none';
         card.style.willChange = 'transform, opacity';
         card.innerHTML = `<img src="images/goods/${img}" alt="IMG_${pad(i)}" loading="lazy"><span class="card-label">IMG_${pad(i)}</span>`;

@@ -1,6 +1,9 @@
 (() => {
+    const GLYPHS = ['†', '░', '⊗', '✕', '×', '✗'];
+
     function closeWindow(win) {
         if (!win) return;
+        win.classList.remove('window-closing');
 
         if (win.classList.contains('alert-modal')) {
             if (typeof window.closeExternalWarning === 'function') {
@@ -14,18 +17,41 @@
         }
 
         if (win.id === 'main-app-window') {
-            win.style.display = 'none';
-            const content = document.getElementById('app-dynamic-content');
-            if (content) content.innerHTML = '';
+            if (typeof window.closeApp === 'function') window.closeApp();
+            else { win.style.display = 'none'; const c = document.getElementById('app-dynamic-content'); if (c) c.innerHTML = ''; }
             return;
         }
 
-        if (win.id === 'game-window' && typeof window.closeGame === 'function') {
-            window.closeGame();
+        if (win.id === 'gallery-window') {
+            if (typeof window.closeGallery === 'function') window.closeGallery();
+            else win.style.display = 'none';
+            return;
+        }
+
+        if (win.id === 'game-window') {
+            if (typeof window.closeGame === 'function') window.closeGame();
+            else win.style.display = 'none';
             return;
         }
 
         win.style.display = 'none';
+    }
+
+    function playCloseEffect(btn, win, onDone) {
+        // B: X glitch 閃爍
+        let t = 0;
+        const iv = setInterval(() => {
+            btn.textContent = GLYPHS[t++ % GLYPHS.length];
+            if (t >= 5) {
+                clearInterval(iv);
+                btn.textContent = 'X';
+                onDone();
+            }
+        }, 40); // 5 × 40ms = 200ms
+
+        // D: 視窗淡出 + 亮閃
+        win.classList.add('window-closing');
+        win.addEventListener('animationend', () => win.classList.remove('window-closing'), { once: true });
     }
 
     function handleClose(event) {
@@ -35,9 +61,19 @@
         const win = btn.closest('.window');
         if (!win) return;
 
+        // 所有 phase 都攔截，但只在 pointerdown 時啟動特效（避免三次觸發）
         event.preventDefault();
         event.stopPropagation();
-        closeWindow(win);
+        if (event.type !== 'pointerdown') return;
+
+        // 防止重複觸發
+        if (btn.dataset.closing) return;
+        btn.dataset.closing = '1';
+
+        playCloseEffect(btn, win, () => {
+            delete btn.dataset.closing;
+            closeWindow(win);
+        });
     }
 
     document.addEventListener('pointerdown', handleClose, true);
