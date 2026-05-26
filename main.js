@@ -216,7 +216,8 @@ windows.forEach(win => {
     const header = win.querySelector('.window-header');
     win.addEventListener('pointerdown', () => focusWindow(win));
     header.addEventListener('pointerdown', (e) => {
-        if (e.target.classList.contains('close-btn')) return;
+        // 用 closest 比 classList.contains 更穩，能涵蓋觸控落在子元素的情況
+        if (e.target.closest('.close-btn')) return;
         currentDragging = win;
         focusWindow(win);
         const rect = win.getBoundingClientRect(); const parentRect = win.offsetParent.getBoundingClientRect();
@@ -226,7 +227,20 @@ windows.forEach(win => {
         dragOffsetX = e.clientX - rect.left; dragOffsetY = e.clientY - rect.top;
         if (e.pointerType === 'touch') win.style.touchAction = 'none';
     });
-    if (win.classList.contains('teaser-win')) win.querySelector('.close-btn').onclick = () => win.style.display = 'none';
+    // teaser-win 關閉鈕：手機相容寫法（雙重保險）
+    if (win.classList.contains('teaser-win')) {
+        const closeBtn = win.querySelector('.close-btn');
+        // 阻止 pointerdown 冒泡到 header（避免被當作拖曳）
+        closeBtn.addEventListener('pointerdown', (e) => {
+            e.stopPropagation();
+        });
+        // click + pointerup 雙保險，確保手機觸控可靠
+        const closeWin = (e) => {
+            e.stopPropagation();
+            win.style.display = 'none';
+        };
+        closeBtn.addEventListener('click', closeWin);
+    }
 });
 
 // 單一全域監聽器（取代每個視窗各綁一組）
