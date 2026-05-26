@@ -110,7 +110,7 @@ window.addEventListener('keydown', (e) => { if (e.code === 'Space' && gameWinUI.
 const gameContentArea = gameWinUI.querySelector('.window-content');
 gameContentArea.addEventListener('pointerdown', (e) => {
     // 排除：關閉鈕、window-header（拖曳）、按鈕/連結（如通關畫面的 IG 按鈕）
-    if (e.target.classList.contains('close-btn')) return;
+    if (e.target.closest('.close-btn')) return;
     if (e.target.closest('.window-header')) return;
     if (e.target.closest('button, a')) return;
     if (e.cancelable) e.preventDefault();

@@ -326,7 +326,10 @@ body.pineapple-mode #main-app-window .window-content { background: #ffffe6; }
 /* timetable */
 .current-slot { background: var(--highlight-color); color: #000; font-weight: bold; }
 .current-slot td { border-color: #000 !important; }
-.now-tag { animation: blinker 2s linear infinite; display: inline-block; margin-left: 5px; font-size: 12px; }
+.now-tag { animation: blinker 2s linear infinite; display: inline-block; margin-left: 5px; font-size: 12px; color: #ff0000; font-weight: bold; }
+/* timetable 頁籤狀態（從 inline cssText 改為 class，避免累加） */
+.tab-active { background: var(--btn-bg) !important; color: #000 !important; border-color: #fff !important; border-right-color: #555 !important; border-bottom-color: #555 !important; }
+.tab-inactive { background: #2a2a3a !important; color: #aaa !important; border-color: #555 !important; border-right-color: #333 !important; border-bottom-color: #333 !important; }
 
 /* map */
 #radar-map {

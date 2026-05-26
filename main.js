@@ -101,6 +101,8 @@ const createShatter = (x, y) => {
 // 雙平台統一監聽：點擊爆炸與滑動星塵
 document.addEventListener('pointerdown', (e) => {
     if (e.target.id === 'secret-turkey') return;
+    // 遊戲視窗內由 game.js 自己處理，不再觸發 shatter（避免與 jump 雙重觸發）
+    if (e.target.closest('#game-window')) return;
 
     if (e.target.closest('.window')) {
         if (!e.target.closest('.window-header') && !e.target.closest('.close-btn')) {
@@ -126,19 +128,27 @@ document.addEventListener('pointermove', (e) => {
 // =========================================
 const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*寧靜音樂節";
 
+const glitchTimers = new WeakMap();
 function triggerGlitch(el, originalText) {
+    if (!originalText) return; // #6 防呆：dataset.text 可能不存在
     let iterations = 0;
-    clearInterval(el.dataset.interval);
-    el.dataset.interval = setInterval(() => {
+    // 清除前一輪 interval（如果有）
+    const prev = glitchTimers.get(el);
+    if (prev) clearInterval(prev);
+    const id = setInterval(() => {
         el.textContent = originalText.split("").map((letter, index) => {
             if (index < iterations || letter === " ") {
                 return originalText[index];
             }
             return letters[Math.floor(Math.random() * letters.length)];
         }).join("");
-        if (iterations >= originalText.length) clearInterval(el.dataset.interval);
+        if (iterations >= originalText.length) {
+            clearInterval(id);
+            glitchTimers.delete(el);
+        }
         iterations += 1;
     }, 30);
+    glitchTimers.set(el, id);
 }
 
 // 綁定 Logo 特效
@@ -173,7 +183,13 @@ function showBios() {
     if (lineIdx < biosLines.length) { biosText.innerHTML += biosLines[lineIdx] + "<br>"; lineIdx++; setTimeout(showBios, 150); }
     else { setTimeout(() => { const biosScreen = document.getElementById('bios-screen'); biosScreen.style.transition = "opacity 0.6s ease"; biosScreen.style.opacity = "0"; setTimeout(() => { biosScreen.style.display = 'none'; preloadApps(); }, 600); }, 500); }
 }
-window.onload = () => { setTimeout(showBios, 1200); setTimeout(() => { document.getElementById('crt-boot').remove(); }, 2500); };
+window.addEventListener('load', () => {
+    setTimeout(showBios, 1200);
+    setTimeout(() => {
+        const boot = document.getElementById('crt-boot');
+        if (boot) boot.remove();
+    }, 2500);
+});
 
 // =========================================
 // 預載系統（含超時與優先級）
@@ -227,19 +243,17 @@ windows.forEach(win => {
         dragOffsetX = e.clientX - rect.left; dragOffsetY = e.clientY - rect.top;
         if (e.pointerType === 'touch') win.style.touchAction = 'none';
     });
-    // teaser-win 關閉鈕：手機相容寫法（雙重保險）
-    if (win.classList.contains('teaser-win')) {
-        const closeBtn = win.querySelector('.close-btn');
-        // 阻止 pointerdown 冒泡到 header（避免被當作拖曳）
-        closeBtn.addEventListener('pointerdown', (e) => {
-            e.stopPropagation();
-        });
-        // click + pointerup 雙保險，確保手機觸控可靠
-        const closeWin = (e) => {
-            e.stopPropagation();
-            win.style.display = 'none';
-        };
-        closeBtn.addEventListener('click', closeWin);
+    // 所有視窗的關閉鈕：阻止 pointerdown 冒泡到 header（手機相容性）
+    const closeBtn = win.querySelector('.close-btn');
+    if (closeBtn) {
+        closeBtn.addEventListener('pointerdown', (e) => e.stopPropagation());
+        // teaser-win 沒有 inline onclick，這裡幫它綁
+        if (win.classList.contains('teaser-win')) {
+            closeBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                win.style.display = 'none';
+            });
+        }
     }
 });
 
@@ -250,10 +264,13 @@ document.addEventListener('pointermove', (e) => {
     // 邊界檢查（允許拖到 sidebar 上方）
     const newLeft = e.clientX - dragOffsetX - dragParentX;
     const newTop = e.clientY - dragOffsetY - dragParentY;
-    const maxLeft = window.innerWidth - 60;
-    const maxTop = window.innerHeight - 40;
-    const minTop = -dragParentY; // 允許拖到視窗頂端（覆蓋 sidebar）
-    currentDragging.style.left = `${Math.max(-currentDragging.offsetWidth + 60, Math.min(newLeft, maxLeft))}px`;
+    // 確保視窗至少 100px 在可視範圍內（防止用戶把視窗拖到看不到）
+    const MIN_VISIBLE = 100;
+    const maxLeft = window.innerWidth - MIN_VISIBLE;
+    const maxTop = window.innerHeight - MIN_VISIBLE;
+    const minTop = -dragParentY;
+    const minLeft = -currentDragging.offsetWidth + MIN_VISIBLE;
+    currentDragging.style.left = `${Math.max(minLeft, Math.min(newLeft, maxLeft))}px`;
     currentDragging.style.top = `${Math.max(minTop, Math.min(newTop, maxTop))}px`;
 }, { passive: false });
 
@@ -297,12 +314,33 @@ async function openApp(windowTitle, fileUrl) {
         contentArea.innerHTML = htmlContent;
         if (fileUrl === 'timetable.html') {
             setTimeout(() => {
-                const now = new Date(); const currentTime = now.getHours() + (now.getMinutes() / 60);
-                const rows = document.querySelectorAll('#timetable tbody tr');
+                const now = new Date();
+                // 只有 5/30 或 5/31 才標 [NOW]
+                const m = now.getMonth() + 1, d = now.getDate();
+                if (!((m === 5 && d === 30) || (m === 5 && d === 31))) return;
+                const currentTime = now.getHours() + (now.getMinutes() / 60);
+                const dayId = d === 30 ? 'day-530' : 'day-531';
+                const rows = document.querySelectorAll('#' + dayId + ' tbody tr');
                 rows.forEach(row => {
-                    const startArr = row.dataset.start.split(':'); const endArr = row.dataset.end.split(':');
-                    const start = parseInt(startArr[0]) + (parseInt(startArr[1]) / 60); const end = parseInt(endArr[0]) + (parseInt(endArr[1]) / 60);
-                    if (currentTime >= start && currentTime < end) { row.classList.add('current-slot'); row.querySelector('td').innerHTML += '<span class="now-tag">[NOW]</span>'; }
+                    if (row.dataset.songRow) return;
+                    const cells = row.querySelectorAll('td');
+                    if (cells.length < 3) return;
+                    // 從時間欄字串解析（格式：「12:30 – 12:35」）
+                    const timeStr = cells[1].textContent.trim();
+                    const match = timeStr.match(/(\d{1,2}):(\d{2})\s*[–\-—~]\s*(\d{1,2}):(\d{2})/);
+                    if (!match) return;
+                    const start = parseInt(match[1]) + parseInt(match[2]) / 60;
+                    const end = parseInt(match[3]) + parseInt(match[4]) / 60;
+                    if (currentTime >= start && currentTime < end) {
+                        row.classList.add('current-slot');
+                        // 用 DOM API 安全附加，避免 innerHTML 重複附加
+                        if (!row.querySelector('.now-tag')) {
+                            const tag = document.createElement('span');
+                            tag.className = 'now-tag';
+                            tag.textContent = '[NOW]';
+                            cells[0].appendChild(tag);
+                        }
+                    }
                 });
             }, 50);
         }
@@ -414,17 +452,15 @@ window.switchDay = function(day) {
     const btn530 = document.getElementById('tab-btn-530');
     const btn531 = document.getElementById('tab-btn-531');
     if (!btn530 || !btn531) return;
-    if (day === '530') {
-        btn530.style.cssText += ';background:var(--btn-bg);color:#000;border-color:#fff;border-right-color:#555;border-bottom-color:#555;';
-        btn531.style.cssText += ';background:#2a2a3a;color:#aaa;border-color:#555;border-right-color:#333;border-bottom-color:#333;';
-    } else {
-        btn531.style.cssText += ';background:var(--btn-bg);color:#000;border-color:#fff;border-right-color:#555;border-bottom-color:#555;';
-        btn530.style.cssText += ';background:#2a2a3a;color:#aaa;border-color:#555;border-right-color:#333;border-bottom-color:#333;';
-    }
+    // 用 class 切換，避免 cssText 無限累加
+    btn530.classList.toggle('tab-active', day === '530');
+    btn530.classList.toggle('tab-inactive', day !== '530');
+    btn531.classList.toggle('tab-active', day === '531');
+    btn531.classList.toggle('tab-inactive', day !== '531');
 };
 
 window.downloadSetlist = async function(btnEl) {
-    const btn = btnEl || (event && event.currentTarget);
+    const btn = btnEl instanceof HTMLElement ? btnEl : null;
     const originalText = btn ? btn.textContent : '';
     if (btn) { btn.textContent = '生成中...'; btn.disabled = true; }
 
