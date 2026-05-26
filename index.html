@@ -315,14 +315,14 @@
         </nav>
 
         <main class="main-content">
-            <div class="window teaser-win" id="win-1"><div class="window-header"><span class="title">💾 NEWS.exe</span><span class="close-btn">X</span></div><div class="window-content"><p>官網系統啟動</p><button class="sys-btn yes" onclick="signalClick(this, 'NEWS_ARCHIVE.exe', 'news.html')">讀取(Y)</button></div></div>
-            <div class="window teaser-win" id="win-2"><div class="window-header"><span class="title">🎵 LIVE.txt</span><span class="close-btn">X</span></div><div class="window-content"><p>演出陣容解禁</p><button class="sys-btn yes" onclick="signalClick(this, 'LIVE_DATA.sys', 'lineup.html')">查看(Y)</button></div></div>
-            <div class="window teaser-win" id="win-3"><div class="window-header"><span class="title">⏳ TIME.exe</span><span class="close-btn">X</span></div><div class="window-content"><p>讀取時間軸</p><button class="sys-btn yes" onclick="signalClick(this, 'TIMETABLE.exe', 'timetable.html')">展開(Y)</button></div></div>
-            <div class="window teaser-win" id="win-4"><div class="window-header"><span class="title">🗺️ MAP.sys</span><span class="close-btn">X</span></div><div class="window-content"><p>座標確認(G9)</p><button class="sys-btn yes" onclick="signalClick(this, 'MAP_NAVIGATOR.sys', 'map.html')">掃描(Y)</button></div></div>
-            <div class="window teaser-win" id="win-5"><div class="window-header"><span class="title">🛍️ STORE.pkg</span><span class="close-btn">X</span></div><div class="window-content"><p>周邊商品開賣中</p><button class="sys-btn yes" onclick="signalClick(this, 'STORE_DATA.pkg', 'goods.html')">查看(Y)</button></div></div>
-            <div class="window teaser-win" id="win-6"><div class="window-header"><span class="title">⚠️ INFO.txt</span><span class="close-btn">X</span></div><div class="window-content"><p>安全規範須知</p><button class="sys-btn yes" onclick="signalClick(this, 'SAFETY_PROTOCOL.txt', 'guidelines.html')">確認(Y)</button></div></div>
-            <div class="window teaser-win" id="win-7"><div class="window-header"><span class="title">📜 CREDITS.txt</span><span class="close-btn">X</span></div><div class="window-content"><p>系統製作群解密</p><button class="sys-btn yes" onclick="signalClick(this, 'CREDITS.txt', 'credits.html')">解密(Y)</button></div></div>
-            <div class="window teaser-win" id="win-8"><div class="window-header"><span class="title">📡 SIGNAL.ig</span><span class="close-btn">X</span></div><div class="window-content"><p>追蹤官方頻道</p><button class="sys-btn yes" onclick="openExternalLink('https://www.instagram.com/unsilence_fest._')">追蹤(Y)</button></div></div>
+            <div class="window teaser-win" id="win-1"><div class="window-header"><span class="title">💾 NEWS.exe</span><span class="close-btn" onclick="this.closest('.window').style.display='none'">X</span></div><div class="window-content"><p>官網系統啟動</p><button class="sys-btn yes" onclick="signalClick(this, 'NEWS_ARCHIVE.exe', 'news.html')">讀取(Y)</button></div></div>
+            <div class="window teaser-win" id="win-2"><div class="window-header"><span class="title">🎵 LIVE.txt</span><span class="close-btn" onclick="this.closest('.window').style.display='none'">X</span></div><div class="window-content"><p>演出陣容解禁</p><button class="sys-btn yes" onclick="signalClick(this, 'LIVE_DATA.sys', 'lineup.html')">查看(Y)</button></div></div>
+            <div class="window teaser-win" id="win-3"><div class="window-header"><span class="title">⏳ TIME.exe</span><span class="close-btn" onclick="this.closest('.window').style.display='none'">X</span></div><div class="window-content"><p>讀取時間軸</p><button class="sys-btn yes" onclick="signalClick(this, 'TIMETABLE.exe', 'timetable.html')">展開(Y)</button></div></div>
+            <div class="window teaser-win" id="win-4"><div class="window-header"><span class="title">🗺️ MAP.sys</span><span class="close-btn" onclick="this.closest('.window').style.display='none'">X</span></div><div class="window-content"><p>座標確認(G9)</p><button class="sys-btn yes" onclick="signalClick(this, 'MAP_NAVIGATOR.sys', 'map.html')">掃描(Y)</button></div></div>
+            <div class="window teaser-win" id="win-5"><div class="window-header"><span class="title">🛍️ STORE.pkg</span><span class="close-btn" onclick="this.closest('.window').style.display='none'">X</span></div><div class="window-content"><p>周邊商品開賣中</p><button class="sys-btn yes" onclick="signalClick(this, 'STORE_DATA.pkg', 'goods.html')">查看(Y)</button></div></div>
+            <div class="window teaser-win" id="win-6"><div class="window-header"><span class="title">⚠️ INFO.txt</span><span class="close-btn" onclick="this.closest('.window').style.display='none'">X</span></div><div class="window-content"><p>安全規範須知</p><button class="sys-btn yes" onclick="signalClick(this, 'SAFETY_PROTOCOL.txt', 'guidelines.html')">確認(Y)</button></div></div>
+            <div class="window teaser-win" id="win-7"><div class="window-header"><span class="title">📜 CREDITS.txt</span><span class="close-btn" onclick="this.closest('.window').style.display='none'">X</span></div><div class="window-content"><p>系統製作群解密</p><button class="sys-btn yes" onclick="signalClick(this, 'CREDITS.txt', 'credits.html')">解密(Y)</button></div></div>
+            <div class="window teaser-win" id="win-8"><div class="window-header"><span class="title">📡 SIGNAL.ig</span><span class="close-btn" onclick="this.closest('.window').style.display='none'">X</span></div><div class="window-content"><p>追蹤官方頻道</p><button class="sys-btn yes" onclick="openExternalLink('https://www.instagram.com/unsilence_fest._')">追蹤(Y)</button></div></div>
 
             <div class="window" id="main-app-window"><div class="window-header"><span class="title" id="app-window-title">SYSTEM_APP.exe</span><span class="close-btn" onclick="closeApp()">X</span></div><div class="window-content" id="app-dynamic-content"></div></div>
 
@@ -371,7 +371,7 @@
     </section>
     <div class="marquee-container" aria-hidden="true"><div class="marquee-content">/// 2026.05.30-31 寧靜音樂節 /// 嘉義文化園區 /// 主辦單位：中正大學 /// 全程免費入場 /// 🍍 游標異常干擾中 ///</div></div>
 
-    <script src="main.js?v=20260526f"></script>
-    <script src="game.js?v=20260526f"></script>
+    <script src="main.js?v=20260526g"></script>
+    <script src="game.js?v=20260526g"></script>
 </body>
 </html>

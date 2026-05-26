@@ -243,27 +243,11 @@ windows.forEach(win => {
         dragOffsetX = e.clientX - rect.left; dragOffsetY = e.clientY - rect.top;
         if (e.pointerType === 'touch') win.style.touchAction = 'none';
     });
-    // 所有視窗的關閉鈕：手機相容性處理
+    // 所有視窗的關閉鈕：阻止 pointerdown 冒泡（避免被當作拖曳起點）
+    // teaser-win 的 onclick 直接寫在 HTML 標籤上（更可靠），main-app/game 也是
     const closeBtn = win.querySelector('.close-btn');
     if (closeBtn) {
-        // pointerdown：阻止冒泡（避免被當作拖曳起點）
-        closeBtn.addEventListener('pointerdown', (e) => {
-            e.stopPropagation();
-        });
-        // teaser-win：三重保險（pointerup + click + touchend），任一觸發都關閉
-        if (win.classList.contains('teaser-win')) {
-            let closing = false;
-            const closeNow = (e) => {
-                if (closing) return;
-                closing = true;
-                if (e) e.stopPropagation();
-                win.style.display = 'none';
-                setTimeout(() => { closing = false; }, 100);
-            };
-            closeBtn.addEventListener('click', closeNow);
-            closeBtn.addEventListener('pointerup', closeNow);
-            closeBtn.addEventListener('touchend', (e) => { e.preventDefault(); closeNow(e); });
-        }
+        closeBtn.addEventListener('pointerdown', (e) => e.stopPropagation());
     }
 });
 
