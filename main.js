@@ -486,6 +486,112 @@ if (modeToggleBtn) {
 }
 
 // =========================================
+// Gallery 相簿（商品形象照扇形瀏覽）
+// =========================================
+const GALLERY_DATA = {
+    guitar:    { name: '壓克力吊飾・吉他款', images: ['吉他壓克力形象照1.jpg', '吉他壓克力形象照2.jpg'] },
+    cat:       { name: '壓克力吊飾・貓咪款', images: ['貓咪壓克力形象照.jpg'] },
+    towel:     { name: '毛巾',               images: ['毛巾形象照1.jpg', '毛巾形象照2.jpg', '毛巾形象照3.jpg', '毛巾形象照4.jpg'] },
+    cupsleeve: { name: '杯套',               images: ['杯套形象照1.jpg', '杯套形象照2.jpg'] },
+    lighter:   { name: '打火機',             images: ['打火機形象照1.jpg', '打火機形象照2.jpg'] }
+};
+
+let galleryProduct = null;
+let galleryIdx = 0;
+
+function galleryFanAngles(n) {
+    if (n === 1) return [0];
+    const max = n <= 2 ? 15 : n <= 3 ? 22 : 30;
+    return Array.from({ length: n }, (_, i) => -max + (2 * max / (n - 1)) * i);
+}
+
+function gallerySelectCard(idx) {
+    if (idx === galleryIdx) return;
+    galleryIdx = idx;
+    const images = galleryProduct.images;
+    const pad = n => String(n + 1).padStart(2, '0');
+
+    // B: glitch flash，src 延遲 80ms 在閃爍中途更新
+    const mainImg = document.getElementById('gallery-main-img');
+    mainImg.classList.remove('gallery-glitch');
+    void mainImg.offsetWidth;
+    mainImg.classList.add('gallery-glitch');
+    mainImg.addEventListener('animationend', () => mainImg.classList.remove('gallery-glitch'), { once: true });
+    setTimeout(() => { mainImg.src = 'images/goods/' + images[idx]; }, 80);
+
+    // C: 掃描線擦過
+    const scanEl = document.getElementById('gallery-scan');
+    scanEl.classList.remove('scanning');
+    void scanEl.offsetWidth;
+    scanEl.classList.add('scanning');
+    scanEl.addEventListener('animationend', () => scanEl.classList.remove('scanning'), { once: true });
+
+    document.getElementById('gallery-info').textContent = `> IMG_${pad(idx)} / ${pad(images.length - 1)} · ${galleryProduct.name}`;
+    document.querySelectorAll('.gallery-card').forEach(card => {
+        const sel = parseInt(card.dataset.idx) === idx;
+        card.classList.toggle('selected', sel);
+        card.style.zIndex = sel ? 100 : card.dataset.baseZ;
+    });
+}
+
+window.openGallery = function(productKey) {
+    const data = GALLERY_DATA[productKey];
+    if (!data) return;
+    galleryProduct = data;
+    galleryIdx = 0;
+
+    const win = document.getElementById('gallery-window');
+    const pad = n => String(n + 1).padStart(2, '0');
+    document.getElementById('gallery-title').textContent = `📷 GALLERY_${productKey.toUpperCase()}.img`;
+    document.getElementById('gallery-main-img').src = 'images/goods/' + data.images[0];
+    document.getElementById('gallery-main-img').alt = data.name;
+    document.getElementById('gallery-info').textContent = `> IMG_${pad(0)} / ${pad(data.images.length - 1)} · ${data.name}`;
+
+    const fanEl = document.getElementById('gallery-fan');
+    fanEl.innerHTML = '';
+    const angles = galleryFanAngles(data.images.length);
+    data.images.forEach((img, i) => {
+        const card = document.createElement('div');
+        card.className = 'gallery-card' + (i === 0 ? ' selected' : '');
+        card.dataset.idx = i;
+        card.dataset.baseZ = i + 1;
+        card.style.setProperty('--fan-angle', angles[i] + 'deg');
+        card.style.zIndex = i === 0 ? 100 : i + 1;
+        // A: 扇形展開動畫，從疊合狀態 stagger 展開
+        card.style.opacity = '0';
+        card.style.transform = 'rotate(0deg) scale(0.8)';
+        card.style.transition = 'none';
+        card.style.willChange = 'transform, opacity';
+        card.innerHTML = `<img src="images/goods/${img}" alt="IMG_${pad(i)}" loading="lazy"><span class="card-label">IMG_${pad(i)}</span>`;
+        card.addEventListener('click', () => gallerySelectCard(i));
+        fanEl.appendChild(card);
+        setTimeout(() => {
+            card.style.transition = 'transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.25s ease, border-color 0.2s, box-shadow 0.25s ease';
+            requestAnimationFrame(() => {
+                card.style.opacity = '1';
+                card.style.transform = '';
+            });
+            card.addEventListener('transitionend', function cleanup(e) {
+                if (e.propertyName === 'transform') {
+                    card.style.transition = '';
+                    card.style.willChange = '';
+                    card.removeEventListener('transitionend', cleanup);
+                }
+            });
+        }, i * 70);
+    });
+
+    win.style.display = 'flex';
+    focusWindow(win);
+    const pos = getSmartPosition();
+    if (!pos.isMobile) { win.style.top = pos.top; win.style.left = pos.left; }
+};
+
+window.closeGallery = function() {
+    document.getElementById('gallery-window').style.display = 'none';
+};
+
+// =========================================
 // 矩陣背景（改用 requestAnimationFrame）
 // =========================================
 const canvas = document.getElementById('matrix-bg'); const ctx = canvas.getContext('2d');

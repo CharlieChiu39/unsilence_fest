@@ -452,6 +452,191 @@ body.pineapple-mode #main-app-window .window-content { background: #ffffe6; }
 @keyframes blinker { 50% { opacity: 0; } }
 
 /* =========================================
+   Gallery 相簿
+   ========================================= */
+#gallery-window .window-content {
+    padding: 15px;
+    background: rgba(10, 5, 20, 0.95);
+    overflow: visible;
+    text-align: left;
+}
+
+#gallery-info {
+    font-size: 11px;
+    color: #aaa;
+    margin: 6px 0 0;
+    font-family: 'DotGothic16', monospace;
+}
+
+#gallery-fan-wrapper {
+    position: relative;
+    height: 170px;
+    margin-top: 18px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    overflow: visible;
+}
+
+#gallery-fan {
+    position: relative;
+    width: 100px;
+    height: 165px;
+}
+
+.gallery-card {
+    position: absolute;
+    width: 85px;
+    height: 115px;
+    bottom: 0;
+    left: 50%;
+    margin-left: -42px;
+    cursor: pointer;
+    transform-origin: center bottom;
+    transform: rotate(var(--fan-angle, 0deg));
+    transition: transform 0.25s ease, border-color 0.2s, box-shadow 0.25s ease;
+    border: 2px solid #fff;
+    border-right-color: #555;
+    border-bottom-color: #555;
+    background: #000;
+    overflow: hidden;
+}
+
+.gallery-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.gallery-card .card-label {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 2px 0;
+    text-align: center;
+    font-size: 9px;
+    color: #0f0;
+    background: rgba(0, 0, 0, 0.75);
+    font-family: 'DotGothic16', monospace;
+    pointer-events: none;
+}
+
+.gallery-card.selected {
+    transform: translateY(-50px) rotate(0deg) !important;
+    z-index: 100 !important;
+    border-color: var(--highlight-color);
+    border-right-color: var(--highlight-color);
+    border-bottom-color: var(--highlight-color);
+}
+
+.gallery-card:not(.selected):hover {
+    transform: rotate(var(--fan-angle, 0deg)) translateY(-14px) !important;
+    box-shadow: 0 0 12px var(--highlight-color), 0 0 25px rgba(157, 0, 255, 0.35);
+}
+
+/* B: 主圖 glitch 閃爍 */
+@keyframes galleryGlitch {
+    0%, 100% { transform: none; opacity: 1; }
+    20%       { transform: translateX(-5px); opacity: 0.7; }
+    40%       { transform: translateX(4px);  opacity: 0.85; }
+    60%       { transform: translateX(-3px); opacity: 0.72; }
+    80%       { transform: translateX(2px);  opacity: 0.9; }
+}
+.gallery-glitch { animation: galleryGlitch 0.2s linear; }
+
+/* C: 掃描線擦過 */
+#gallery-main-view {
+    position: relative;
+    overflow: hidden;
+}
+#gallery-scan {
+    position: absolute;
+    top: -4px;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(to right, transparent, #0f0 30%, #fff 50%, #0f0 70%, transparent);
+    opacity: 0;
+    pointer-events: none;
+    will-change: transform, opacity;
+    z-index: 3;
+}
+@keyframes galleryScan {
+    0%   { opacity: 0.9; transform: translateY(0); }
+    80%  { opacity: 0.6; transform: translateY(200px); }
+    100% { opacity: 0;   transform: translateY(215px); }
+}
+#gallery-scan.scanning { animation: galleryScan 0.35s ease-in-out forwards; }
+
+/* E: CRT 掃描線常駐疊層 + 閃爍 */
+#gallery-main-view::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+        to bottom,
+        transparent 0,
+        transparent 2px,
+        rgba(0, 0, 0, 0.07) 2px,
+        rgba(0, 0, 0, 0.07) 3px
+    );
+    pointer-events: none;
+    animation: crtFlicker 3.5s steps(1) infinite;
+    will-change: opacity;
+    z-index: 2;
+}
+@keyframes crtFlicker {
+    0%, 95%, 100% { opacity: 1; }
+    96%            { opacity: 0.85; }
+    97%            { opacity: 0.96; }
+    98%            { opacity: 0.78; }
+    99%            { opacity: 0.93; }
+}
+
+/* 縮圖可點擊提示 */
+.goods-thumb {
+    cursor: pointer;
+    position: relative;
+}
+
+.goods-thumb .gallery-hint {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 3px 0;
+    text-align: center;
+    font-size: 10px;
+    color: #fff;
+    background: rgba(157, 0, 255, 0.7);
+    font-family: 'DotGothic16', monospace;
+    opacity: 0;
+    transition: opacity 0.15s;
+    pointer-events: none;
+}
+
+.goods-thumb:hover .gallery-hint {
+    opacity: 1;
+}
+
+@media (max-width: 800px) {
+    #gallery-window {
+        position: absolute;
+        top: 50% !important;
+        left: 50% !important;
+        transform: translate(-50%, -50%) !important;
+        width: 92vw !important;
+        max-height: 75dvh !important;
+    }
+    #gallery-window .window-content {
+        overflow-y: auto;
+        max-height: 65dvh;
+    }
+}
+
+/* =========================================
    prefers-reduced-motion
    ========================================= */
 @media (prefers-reduced-motion: reduce) {
