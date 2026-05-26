@@ -243,16 +243,29 @@ windows.forEach(win => {
         dragOffsetX = e.clientX - rect.left; dragOffsetY = e.clientY - rect.top;
         if (e.pointerType === 'touch') win.style.touchAction = 'none';
     });
-    // 所有視窗的關閉鈕：阻止 pointerdown 冒泡到 header（手機相容性）
+    // 所有視窗的關閉鈕：手機相容性處理
     const closeBtn = win.querySelector('.close-btn');
     if (closeBtn) {
-        closeBtn.addEventListener('pointerdown', (e) => e.stopPropagation());
-        // teaser-win 沒有 inline onclick，這裡幫它綁
+        let pointerDownPos = null;
+        // pointerdown：記錄位置 + 阻止冒泡到 header（避免被當拖曳）
+        closeBtn.addEventListener('pointerdown', (e) => {
+            e.stopPropagation();
+            pointerDownPos = { x: e.clientX, y: e.clientY };
+        });
+        // teaser-win 用 pointerup 觸發關閉（比 click 在手機上更可靠）
         if (win.classList.contains('teaser-win')) {
-            closeBtn.addEventListener('click', (e) => {
+            const closeHandler = (e) => {
                 e.stopPropagation();
+                // 確認是「點擊」而非滑動：位移 < 10px 才算
+                if (pointerDownPos) {
+                    const dx = Math.abs(e.clientX - pointerDownPos.x);
+                    const dy = Math.abs(e.clientY - pointerDownPos.y);
+                    if (dx > 10 || dy > 10) { pointerDownPos = null; return; }
+                }
+                pointerDownPos = null;
                 win.style.display = 'none';
-            });
+            };
+            closeBtn.addEventListener('pointerup', closeHandler);
         }
     }
 });
