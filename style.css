@@ -285,7 +285,6 @@ body, html {
 .window-header:active { cursor: grabbing; }
 
 .close-btn { position: relative; background: var(--win-bg); color: #000; border: 1px solid #fff; border-right-color: #555; border-bottom-color: #555; padding: 2px 8px; cursor: pointer; font-size: 12px; font-weight: bold; min-width: 28px; min-height: 28px; display: flex; align-items: center; justify-content: center; touch-action: manipulation; }
-.close-btn::after { content: ''; position: absolute; top: -10px; left: -10px; right: -10px; bottom: -10px; }
 .close-btn:active { border: 1px solid #555; border-right-color: #fff; border-bottom-color: #fff; }
 
 .window-content { padding: 12px; font-size: 14px; flex-grow: 1; overflow-y: auto; text-align: center; user-select: text; -webkit-user-select: text; }
@@ -312,6 +311,28 @@ body.pineapple-mode #main-app-window .window-content { background: #ffffe6; }
 
 .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.6); z-index: 9000; }
 .alert-modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 300px; z-index: 9001; }
+
+#share-toast {
+    position: fixed;
+    left: 50%;
+    bottom: calc(42px + env(safe-area-inset-bottom, 0px));
+    transform: translate(-50%, 12px);
+    z-index: 10020;
+    background: #000;
+    color: var(--highlight-color);
+    border: 2px solid var(--highlight-color);
+    box-shadow: 4px 4px 0 #000;
+    padding: 8px 14px;
+    font-family: 'DotGothic16', monospace;
+    font-size: 14px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.16s ease, transform 0.16s ease;
+}
+#share-toast.visible {
+    opacity: 1;
+    transform: translate(-50%, 0);
+}
 
 .seo-info-bar { display: flex; flex-wrap: wrap; gap: 6px 12px; justify-content: center; align-items: center; padding: 6px 16px 32px; font-family: 'DotGothic16', monospace; font-size: 11px; color: #555; pointer-events: none; }
 .seo-info-bar .seo-sep { color: #333; }
@@ -402,7 +423,7 @@ body.pineapple-mode #main-app-window .window-content { background: #ffffe6; }
     .mode-toggle { margin-top: 5px; padding: 8px 12px; font-size: 14px; width: auto; display: inline-block; min-height: 44px; }
 
     /* teaser-win 在小螢幕（≤480px）改成不同階梯避免完全重疊 */
-    .teaser-win { width: 150px; display: flex !important; }
+    .teaser-win { width: 150px; }
     #win-1 { top: 2vh; left: 2vw; } #win-2 { top: 7vh; left: 38vw; } #win-3 { top: 13vh; left: 8vw; }
     #win-4 { top: 20vh; left: 42vw; } #win-5 { top: 27vh; left: 4vw; } #win-6 { top: 34vh; left: 40vw; }
     #win-7 { top: 41vh; left: 10vw; } #win-8 { top: 48vh; left: 38vw; }

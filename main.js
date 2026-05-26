@@ -349,8 +349,10 @@ async function openApp(windowTitle, fileUrl) {
 
 function closeApp() {
     const appWin = document.getElementById('main-app-window');
+    if (!appWin) return;
     appWin.style.display = 'none';
-    document.getElementById('app-dynamic-content').innerHTML = '';
+    const content = document.getElementById('app-dynamic-content');
+    if (content) content.innerHTML = '';
     cascadeX = 60; cascadeY = 60;
     appWin.style.top = ''; appWin.style.left = ''; appWin.style.transform = '';
 }
@@ -364,35 +366,103 @@ const EXT_LINK_WHITELIST = [
     'https://forms.gle/'
 ];
 window.openExternalLink = function(url) {
-    // 白名單驗證
     const isAllowed = EXT_LINK_WHITELIST.some(prefix => url.startsWith(prefix));
     if (!isAllowed) { console.warn('Blocked external URL:', url); return; }
     if (typeof gtag === 'function') gtag('event', 'external_link_click', { link_url: url });
-    document.getElementById('ext-overlay').style.display = 'block';
-    document.getElementById('ext-modal').style.display = 'block';
-    document.getElementById('ext-confirm-btn').href = url;
+    const overlay = document.getElementById('ext-overlay');
+    const modal = document.getElementById('ext-modal');
+    const confirm = document.getElementById('ext-confirm-btn');
+    if (overlay) overlay.style.display = 'block';
+    if (modal) modal.style.display = 'block';
+    if (confirm) confirm.href = url;
 };
-function closeExternalWarning() { document.getElementById('ext-overlay').style.display = 'none'; document.getElementById('ext-modal').style.display = 'none'; }
+function closeExternalWarning() {
+    const overlay = document.getElementById('ext-overlay');
+    const modal = document.getElementById('ext-modal');
+    if (overlay) overlay.style.display = 'none';
+    if (modal) modal.style.display = 'none';
+}
 
 // =========================================
-// 分享按鈕 (Web Share API)
+// 分享按鈕 (Web Share API + clipboard fallback)
 // =========================================
-window.shareWebsite = function() {
+const SHARE_URL = 'https://unsilence-fest.com/';
+
+function showShareFeedback(message) {
+    const btn = document.getElementById('share-btn');
+    if (btn) {
+        const origTooltip = btn.dataset.origTooltip || btn.getAttribute('data-tooltip') || '> SHARE_訊號';
+        btn.dataset.origTooltip = origTooltip;
+        btn.setAttribute('data-tooltip', message);
+        btn.setAttribute('title', message.replace(/^>\s*/, ''));
+        clearTimeout(btn._shareFeedbackTimer);
+        btn._shareFeedbackTimer = setTimeout(() => {
+            btn.setAttribute('data-tooltip', origTooltip);
+            btn.setAttribute('title', '分享活動');
+        }, 2200);
+    }
+
+    let toast = document.getElementById('share-toast');
+    if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'share-toast';
+        toast.setAttribute('role', 'status');
+        toast.setAttribute('aria-live', 'polite');
+        document.body.appendChild(toast);
+    }
+    toast.textContent = message;
+    toast.classList.add('visible');
+    clearTimeout(toast._hideTimer);
+    toast._hideTimer = setTimeout(() => toast.classList.remove('visible'), 2200);
+}
+
+async function copyShareUrl() {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(SHARE_URL);
+        return;
+    }
+
+    const textarea = document.createElement('textarea');
+    textarea.value = SHARE_URL;
+    textarea.setAttribute('readonly', '');
+    textarea.style.position = 'fixed';
+    textarea.style.left = '-9999px';
+    document.body.appendChild(textarea);
+    textarea.focus();
+    textarea.select();
+    textarea.setSelectionRange(0, textarea.value.length);
+    const copied = document.execCommand('copy');
+    textarea.remove();
+    if (!copied) throw new Error('copy command failed');
+}
+
+window.shareWebsite = async function() {
     if (typeof gtag === 'function') gtag('event', 'share_click');
     const shareData = {
         title: '寧靜音樂節 UNSILENCE FESTIVAL 2026',
         text: '搖滾 × 吉他 × 嘻哈，全程免費入場｜5/30-31 嘉義文化創意產業園區',
-        url: 'https://unsilence-fest.com/'
+        url: SHARE_URL
     };
+
     if (navigator.share) {
-        navigator.share(shareData).catch(() => {});
-    } else {
-        navigator.clipboard.writeText('https://unsilence-fest.com/').then(() => {
-            const btn = document.getElementById('share-btn');
-            const orig = btn.getAttribute('data-tooltip');
-            btn.setAttribute('data-tooltip', '> 已複製連結!');
-            setTimeout(() => btn.setAttribute('data-tooltip', orig), 2000);
-        });
+        try {
+            await navigator.share(shareData);
+            showShareFeedback('> 分享完成');
+            return;
+        } catch (error) {
+            if (error && error.name === 'AbortError') {
+                showShareFeedback('> 分享已取消');
+                return;
+            }
+        }
+    }
+
+    try {
+        await copyShareUrl();
+        showShareFeedback('> 已複製連結!');
+    } catch (error) {
+        console.warn('Share fallback failed:', error);
+        showShareFeedback(`> 請複製：${SHARE_URL}`);
     }
 };
 
@@ -404,13 +474,16 @@ const modeLabels = ['模式切換: 雜訊', '模式切換: 寧靜', '模式切�
 const modeThemeColors = ['#0a0510', '#111111', '#1a1a00'];
 let currentModeIndex = 0;
 const themeColorMeta = document.querySelector('meta[name="theme-color"]');
-document.getElementById('mode-toggle').onclick = (e) => {
-    document.body.classList.remove(`${modes[currentModeIndex]}-mode`);
-    currentModeIndex = (currentModeIndex + 1) % modes.length;
-    document.body.classList.add(`${modes[currentModeIndex]}-mode`);
-    e.target.innerText = modeLabels[currentModeIndex];
-    if (themeColorMeta) themeColorMeta.setAttribute('content', modeThemeColors[currentModeIndex]);
-};
+const modeToggleBtn = document.getElementById('mode-toggle');
+if (modeToggleBtn) {
+    modeToggleBtn.addEventListener('click', (e) => {
+        document.body.classList.remove(`${modes[currentModeIndex]}-mode`);
+        currentModeIndex = (currentModeIndex + 1) % modes.length;
+        document.body.classList.add(`${modes[currentModeIndex]}-mode`);
+        e.currentTarget.textContent = modeLabels[currentModeIndex];
+        if (themeColorMeta) themeColorMeta.setAttribute('content', modeThemeColors[currentModeIndex]);
+    });
+}
 
 // =========================================
 // 矩陣背景（改用 requestAnimationFrame）
