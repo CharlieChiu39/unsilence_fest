@@ -4,3 +4,5 @@ AGENTS.md
 *.log
 .DS_Store
 Thumbs.db
+# 個人工具（含個資，不應公開）
+gen_cv.py
