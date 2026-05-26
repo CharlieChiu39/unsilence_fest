@@ -443,14 +443,49 @@ body.pineapple-mode #main-app-window .window-content { background: #ffffe6; }
         margin: 0; z-index: 10005;
     }
     #main-app-window .window-content, #game-window .window-content { overflow-y: auto; max-height: 65dvh; }
+    #game-window { width: min(92vw, 173dvh) !important; }
     .desktop-icon { bottom: calc(40px + env(safe-area-inset-bottom, 20px)); right: 20px; }
     /* mobile 遊戲視窗：放大顯示比例，火雞才看得清楚 */
-    #game-window .window-content { aspect-ratio: 4/3 !important; min-height: 400px !important; padding: 0 !important; }
+    #game-window .window-content {
+        aspect-ratio: 8 / 3 !important;
+        min-height: 0 !important;
+        padding: 0 !important;
+        overflow: hidden !important;
+    }
     #run-canvas {
         width: 100% !important;
-        height: 100% !important;
-        object-fit: cover !important;
+        height: auto !important;
+        aspect-ratio: 8 / 3;
+        object-fit: contain !important;
         display: block;
+    }
+}
+
+@supports (-webkit-touch-callout: none) {
+    @media (max-width: 800px) {
+        #main-app-window,
+        #gallery-window {
+            top: calc(env(safe-area-inset-top, 0px) + 10px) !important;
+            bottom: calc(env(safe-area-inset-bottom, 0px) + 64px) !important;
+            left: 50% !important;
+            transform: translateX(-50%) !important;
+            width: 92vw !important;
+            height: auto !important;
+            max-height: none !important;
+        }
+
+        #main-app-window .window-content,
+        #gallery-window .window-content {
+            max-height: none !important;
+            min-height: 0;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            touch-action: pan-y;
+        }
+
+        .goods-thumb .gallery-hint {
+            display: none !important;
+        }
     }
 }
 
