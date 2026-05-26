@@ -246,26 +246,23 @@ windows.forEach(win => {
     // 所有視窗的關閉鈕：手機相容性處理
     const closeBtn = win.querySelector('.close-btn');
     if (closeBtn) {
-        let pointerDownPos = null;
-        // pointerdown：記錄位置 + 阻止冒泡到 header（避免被當拖曳）
+        // pointerdown：阻止冒泡（避免被當作拖曳起點）
         closeBtn.addEventListener('pointerdown', (e) => {
             e.stopPropagation();
-            pointerDownPos = { x: e.clientX, y: e.clientY };
         });
-        // teaser-win 用 pointerup 觸發關閉（比 click 在手機上更可靠）
+        // teaser-win：三重保險（pointerup + click + touchend），任一觸發都關閉
         if (win.classList.contains('teaser-win')) {
-            const closeHandler = (e) => {
-                e.stopPropagation();
-                // 確認是「點擊」而非滑動：位移 < 10px 才算
-                if (pointerDownPos) {
-                    const dx = Math.abs(e.clientX - pointerDownPos.x);
-                    const dy = Math.abs(e.clientY - pointerDownPos.y);
-                    if (dx > 10 || dy > 10) { pointerDownPos = null; return; }
-                }
-                pointerDownPos = null;
+            let closing = false;
+            const closeNow = (e) => {
+                if (closing) return;
+                closing = true;
+                if (e) e.stopPropagation();
                 win.style.display = 'none';
+                setTimeout(() => { closing = false; }, 100);
             };
-            closeBtn.addEventListener('pointerup', closeHandler);
+            closeBtn.addEventListener('click', closeNow);
+            closeBtn.addEventListener('pointerup', closeNow);
+            closeBtn.addEventListener('touchend', (e) => { e.preventDefault(); closeNow(e); });
         }
     }
 });
