@@ -651,38 +651,39 @@ body.pineapple-mode #main-app-window .window-content { background: #ffffe6; }
 
 @supports (-webkit-touch-callout: none) {
     @media (max-width: 800px) {
+        /* 注意：所有 top/left/transform 都「不能」用 !important，否則 JS 拖曳設定的
+           inline style 會被 author !important 蓋掉，導致 iOS 上完全無法拖曳。
+           只在實際需要強制覆寫的 width / max-height 用 !important。 */
         #main-app-window,
         #gallery-window {
-            top: calc(env(safe-area-inset-top, 0px) + 10px) !important;
-            bottom: calc(env(safe-area-inset-bottom, 0px) + 64px) !important;
-            left: 50% !important;
-            transform: translateX(-50%) !important;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
             width: 92vw !important;
             height: auto !important;
-            max-height: none !important;
+            max-height: calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 80px) !important;
         }
 
         #game-window {
-            top: calc(env(safe-area-inset-top, 0px) + 12px) !important;
-            bottom: auto !important;
-            left: 50% !important;
-            transform: translateX(-50%) !important;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
             width: min(92vw, calc((100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 96px) * 2.6667)) !important;
             height: auto !important;
-            max-height: none !important;
+            max-height: calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 24px) !important;
         }
 
         .modal-overlay {
             height: 100dvh;
         }
 
+        /* alert-modal 不需要拖曳，可以保持原本撐滿垂直空間的設計 */
         .alert-modal {
-            top: calc(env(safe-area-inset-top, 0px) + 16px) !important;
-            bottom: calc(env(safe-area-inset-bottom, 0px) + 76px) !important;
-            left: 50% !important;
-            transform: translateX(-50%) !important;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) !important;
             width: min(300px, 88vw) !important;
-            max-height: none !important;
+            max-height: calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 80px) !important;
         }
 
         .alert-modal .window-content,
@@ -692,6 +693,7 @@ body.pineapple-mode #main-app-window .window-content { background: #ffffe6; }
             min-height: 0;
             overflow-y: auto;
             -webkit-overflow-scrolling: touch;
+            /* 拖曳期間 main.js 會 preventDefault touchmove，這裡 pan-y 在非拖曳時允許捲動 */
             touch-action: pan-y;
         }
 

@@ -291,8 +291,15 @@ function endDrag() {
     currentDragHeader = null;
     currentDragPointerId = null;
 }
-document.addEventListener('pointerup', endDrag);
-document.addEventListener('pointercancel', endDrag);
+function endPointerDrag(e) {
+    // iOS Safari 在判定 touch 可能為 scroll 時會「立刻」派發 pointercancel
+    // （甚至在使用者真的移動之前），如果直接收 currentDragging = null，後續的
+    // touchmove fallback 就完全失效。touch 一律交給 touchend/touchcancel 收尾。
+    if (e && e.pointerType === 'touch') return;
+    endDrag();
+}
+document.addEventListener('pointerup', endPointerDrag);
+document.addEventListener('pointercancel', endPointerDrag);
 
 // iOS Safari fix：pointermove 是由 touchmove 合成出來的，在合成 event 上 preventDefault
 // 不會阻止底層 touchmove 的默認行為，所以 iOS 仍會把 touch 解釋為 scroll，導致 pointermove
