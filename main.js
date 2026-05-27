@@ -235,7 +235,20 @@ window.addEventListener('load', () => {
         const boot = document.getElementById('crt-boot');
         if (boot) boot.remove();
     }, 2500);
+    // iOS：測量 sidebar 高度並寫入 CSS 變數，讓 main-app-window / gallery-window
+    // 從 sidebar 正下方開始，而非從 viewport 中心算起。
+    updateIosWinTop();
 });
+
+function updateIosWinTop() {
+    const sidebar = document.querySelector('.sidebar');
+    if (!sidebar) return;
+    const h = sidebar.offsetHeight;
+    if (h > 0) {
+        document.documentElement.style.setProperty('--ios-win-top', (h + 6) + 'px');
+    }
+}
+window.addEventListener('resize', updateIosWinTop);
 
 // =========================================
 // 預載系統（含超時與優先級）
