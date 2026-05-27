@@ -258,14 +258,11 @@ windows.forEach(win => {
     }
 });
 
-// 單一全域監聽器（取代每個視窗各綁一組）
-document.addEventListener('pointermove', (e) => {
+// 共用：把當前指標座標套用到正在拖曳的視窗
+function applyDragPosition(clientX, clientY) {
     if (!currentDragging) return;
-    e.preventDefault();
-    // 邊界檢查（允許拖到 sidebar 上方）
-    const newLeft = e.clientX - dragOffsetX - dragParentX;
-    const newTop = e.clientY - dragOffsetY - dragParentY;
-    // 確保視窗至少 100px 在可視範圍內（防止用戶把視窗拖到看不到）
+    const newLeft = clientX - dragOffsetX - dragParentX;
+    const newTop = clientY - dragOffsetY - dragParentY;
     const MIN_VISIBLE = 100;
     const viewport = window.visualViewport;
     const viewportWidth = viewport ? viewport.width : window.innerWidth;
@@ -276,6 +273,13 @@ document.addEventListener('pointermove', (e) => {
     const minLeft = -currentDragging.offsetWidth + MIN_VISIBLE;
     currentDragging.style.left = `${Math.max(minLeft, Math.min(newLeft, maxLeft))}px`;
     currentDragging.style.top = `${Math.max(minTop, Math.min(newTop, maxTop))}px`;
+}
+
+// 單一全域監聽器（取代每個視窗各綁一組）
+document.addEventListener('pointermove', (e) => {
+    if (!currentDragging) return;
+    e.preventDefault();
+    applyDragPosition(e.clientX, e.clientY);
 }, { passive: false });
 
 function endDrag() {
@@ -289,6 +293,20 @@ function endDrag() {
 }
 document.addEventListener('pointerup', endDrag);
 document.addEventListener('pointercancel', endDrag);
+
+// iOS Safari fix：pointermove 是由 touchmove 合成出來的，在合成 event 上 preventDefault
+// 不會阻止底層 touchmove 的默認行為，所以 iOS 仍會把 touch 解釋為 scroll，導致 pointermove
+// 不穩定觸發甚至完全中斷。
+// 解法：拖曳期間用非被動 touchmove 親自擋掉 scroll，同時直接從 touch 座標套用位置
+// （作為 pointermove 沒觸發時的 fallback；如果 pointermove 也觸發了，兩邊算同一個結果，安全。）
+document.addEventListener('touchmove', (e) => {
+    if (!currentDragging) return;
+    e.preventDefault();
+    const t = e.touches[0];
+    if (t) applyDragPosition(t.clientX, t.clientY);
+}, { passive: false });
+document.addEventListener('touchend', endDrag);
+document.addEventListener('touchcancel', endDrag);
 
 // =========================================
 // 智慧排版
