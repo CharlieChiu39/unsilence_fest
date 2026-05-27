@@ -1,94 +1,209 @@
 <h2 class="blink">> 庫存清單: STORE_DATA</h2>
-<div class="goods-grid" style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
 
-    <!-- 吉他壓克力吊飾 -->
-    <div style="border:2px solid #fff; border-right-color:#555; border-bottom-color:#555; padding:10px; text-align:center; background:rgba(10,5,20,0.85);">
+<!-- ============ 預購 BANNER ============ -->
+<div class="preorder-banner">
+    <div class="preorder-status">⚠ 預購進行中　│　截止 2026/05/29 23:59</div>
+    <button class="preorder-cta" onclick="openExternalLink('https://forms.gle/VeUfuVowdTmQ1GFr5')">▶ 立即預購 / PRE_ORDER</button>
+</div>
+
+<!-- ============ 壓克力（先放兩款 + 合購橫幅） ============ -->
+<div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
+
+    <!-- 壓克力・吉他 -->
+    <div class="goods-card">
         <div class="goods-thumb" onclick="openGallery('guitar')" style="height:120px; background:#fff; margin-bottom:8px; display:flex; align-items:center; justify-content:center; border:inset 2px #555; overflow:hidden;">
             <img loading="lazy" decoding="async" src="images/goods/吉他壓克力縮圖.jpg" alt="吉他壓克力吊飾" style="max-height:100%; max-width:100%; object-fit:contain; pointer-events:none;">
             <span class="gallery-hint">▶ 查看形象照</span>
         </div>
-        <strong style="color:#fff;">壓克力吊飾・吉他款</strong><br>
-        <span style="color:#aaa; font-size:11px;">Guitar Acrylic Charm</span><br>
-        <span style="color:var(--highlight-color); font-size:16px;">NT$ 60</span>
+        <strong>壓克力吊飾・吉他款</strong>
+        <span style="color:#aaa; font-size:11px;">Guitar Acrylic Charm</span>
+        <div class="price-block">
+            <span class="price-strike">NT$ 60</span>
+            <span class="price-pre">NT$ 50</span>
+            <span class="badge-pre">PRE_ORDER</span>
+        </div>
+        <button class="goods-preorder-btn" onclick="openExternalLink('https://forms.gle/VeUfuVowdTmQ1GFr5')">▶ 預購</button>
     </div>
 
-    <!-- 貓咪壓克力吊飾 -->
-    <div style="border:2px solid #fff; border-right-color:#555; border-bottom-color:#555; padding:10px; text-align:center; background:rgba(10,5,20,0.85);">
+    <!-- 壓克力・貓咪 -->
+    <div class="goods-card">
         <div class="goods-thumb" onclick="openGallery('cat')" style="height:120px; background:#fff; margin-bottom:8px; display:flex; align-items:center; justify-content:center; border:inset 2px #555; overflow:hidden;">
             <img loading="lazy" decoding="async" src="images/goods/貓咪壓克力縮圖.jpg" alt="貓咪壓克力吊飾" style="max-height:100%; max-width:100%; object-fit:contain; pointer-events:none;">
             <span class="gallery-hint">▶ 查看形象照</span>
         </div>
-        <strong style="color:#fff;">壓克力吊飾・貓咪款</strong><br>
-        <span style="color:#aaa; font-size:11px;">Cat Acrylic Charm</span><br>
-        <span style="color:var(--highlight-color); font-size:16px;">NT$ 60</span>
-    </div>
-
-    <!-- 毛巾 -->
-    <div style="border:2px solid #fff; border-right-color:#555; border-bottom-color:#555; padding:10px; text-align:center; background:rgba(10,5,20,0.85);">
-        <div class="goods-thumb" onclick="openGallery('towel')" style="height:120px; background:#fff; margin-bottom:8px; display:flex; align-items:center; justify-content:center; border:inset 2px #555; overflow:hidden;">
-            <img loading="lazy" decoding="async" src="images/goods/毛巾形象照3.jpg" alt="毛巾" style="max-height:100%; max-width:100%; object-fit:contain; pointer-events:none;">
-            <span class="gallery-hint">▶ 查看形象照</span>
+        <strong>壓克力吊飾・貓咪款</strong>
+        <span style="color:#aaa; font-size:11px;">Cat Acrylic Charm</span>
+        <div class="price-block">
+            <span class="price-strike">NT$ 60</span>
+            <span class="price-pre">NT$ 50</span>
+            <span class="badge-pre">PRE_ORDER</span>
         </div>
-        <strong style="color:#fff;">毛巾</strong><br>
-        <span style="color:#aaa; font-size:11px;">Festival Towel</span><br>
-        <span style="color:var(--highlight-color); font-size:16px;">NT$ 300</span>
-    </div>
-
-    <!-- 杯套 -->
-    <div style="border:2px solid #fff; border-right-color:#555; border-bottom-color:#555; padding:10px; text-align:center; background:rgba(10,5,20,0.85);">
-        <div class="goods-thumb" onclick="openGallery('cupsleeve')" style="height:120px; background:#fff; margin-bottom:8px; display:flex; align-items:center; justify-content:center; border:inset 2px #555; overflow:hidden;">
-            <img loading="lazy" decoding="async" src="images/goods/杯套縮圖.jpg" alt="杯套" style="max-height:100%; max-width:100%; object-fit:contain; pointer-events:none;">
-            <span class="gallery-hint">▶ 查看形象照</span>
-        </div>
-        <strong style="color:#fff;">杯套</strong><br>
-        <span style="color:#aaa; font-size:11px;">Cup Sleeve</span><br>
-        <span style="color:var(--highlight-color); font-size:16px;">NT$ 80</span>
-    </div>
-
-    <!-- 打火機 -->
-    <div style="border:2px solid #fff; border-right-color:#555; border-bottom-color:#555; padding:10px; text-align:center; background:rgba(10,5,20,0.85);">
-        <div class="goods-thumb" onclick="openGallery('lighter')" style="height:120px; background:#fff; margin-bottom:8px; display:flex; align-items:center; justify-content:center; border:inset 2px #555; overflow:hidden;">
-            <img loading="lazy" decoding="async" src="images/goods/打火機縮圖.jpg" alt="打火機" style="max-height:100%; max-width:100%; object-fit:contain; pointer-events:none;">
-            <span class="gallery-hint">▶ 查看形象照</span>
-        </div>
-        <strong style="color:#fff;">打火機</strong><br>
-        <span style="color:#aaa; font-size:11px;">Festival Lighter</span><br>
-        <span style="color:var(--highlight-color); font-size:16px;">NT$ 40</span>
-    </div>
-
-    <!-- 貼紙（全寬） -->
-    <div style="grid-column:1 / -1; border:2px solid #fff; border-right-color:#555; border-bottom-color:#555; padding:10px; background:rgba(10,5,20,0.85);">
-        <div style="text-align:center; margin-bottom:10px;">
-            <strong style="color:#fff;">貼紙 Stickers</strong>
-            <span style="color:var(--highlight-color); margin-left:10px;">NT$ 20 / 款</span>
-        </div>
-        <div class="sticker-grid" style="display:flex; gap:10px;">
-            <div style="flex:1; text-align:center;">
-                <div style="height:120px; background:#fff; display:flex; align-items:center; justify-content:center; border:inset 2px #555; overflow:hidden; margin-bottom:6px;">
-                    <img loading="lazy" decoding="async" src="images/goods/goods-sticker-zh.png" alt="哪會素勢貼紙" style="max-height:100%; max-width:100%; object-fit:contain;">
-                </div>
-                <span style="font-size:11px; color:#aaa;">> 哪會素勢・嘉義限定款</span>
-            </div>
-            <div style="flex:1; text-align:center;">
-                <div style="height:120px; background:#fff; display:flex; align-items:center; justify-content:center; border:inset 2px #555; overflow:hidden; margin-bottom:6px;">
-                    <img loading="lazy" decoding="async" src="images/goods/goods-sticker-en.png" alt="UNILENCE貼紙" style="max-height:100%; max-width:100%; object-fit:contain;">
-                </div>
-                <span style="font-size:11px; color:#aaa;">> UNILENCE・霓虹閃電款</span>
-            </div>
-            <div style="flex:1; text-align:center;">
-                <div style="height:120px; background:#fff; display:flex; align-items:center; justify-content:center; border:inset 2px #555; overflow:hidden; margin-bottom:6px;">
-                    <img loading="lazy" decoding="async" src="images/goods/goods-sticker-char.png" alt="角色版貼紙" style="max-height:100%; max-width:100%; object-fit:contain;">
-                </div>
-                <span style="font-size:11px; color:#aaa;">> 角色版・音樂節吉祥物款</span>
-            </div>
-        </div>
+        <button class="goods-preorder-btn" onclick="openExternalLink('https://forms.gle/VeUfuVowdTmQ1GFr5')">▶ 預購</button>
     </div>
 
 </div>
 
-<!-- 傳輸須知 -->
+<!-- 壓克力合購橫幅 -->
+<div class="combo-banner">
+    > COMBO_DEAL：壓克力兩款合購　<span class="price-strike">NT$ 100</span>　▸　<span class="price-pre">NT$ 90</span>
+</div>
+
+<!-- ============ 其餘單品 ============ -->
+<div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
+
+    <!-- 毛巾 -->
+    <div class="goods-card">
+        <div class="goods-thumb" onclick="openGallery('towel')" style="height:120px; background:#fff; margin-bottom:8px; display:flex; align-items:center; justify-content:center; border:inset 2px #555; overflow:hidden;">
+            <img loading="lazy" decoding="async" src="images/goods/毛巾形象照3.jpg" alt="毛巾" style="max-height:100%; max-width:100%; object-fit:contain; pointer-events:none;">
+            <span class="gallery-hint">▶ 查看形象照</span>
+        </div>
+        <strong>毛巾</strong>
+        <span style="color:#aaa; font-size:11px;">Festival Towel</span>
+        <div class="price-block">
+            <span class="price-strike">NT$ 300</span>
+            <span class="price-pre">NT$ 280</span>
+            <span class="badge-pre">PRE_ORDER</span>
+        </div>
+        <button class="goods-preorder-btn" onclick="openExternalLink('https://forms.gle/VeUfuVowdTmQ1GFr5')">▶ 預購</button>
+    </div>
+
+    <!-- 杯套 -->
+    <div class="goods-card">
+        <div class="goods-thumb" onclick="openGallery('cupsleeve')" style="height:120px; background:#fff; margin-bottom:8px; display:flex; align-items:center; justify-content:center; border:inset 2px #555; overflow:hidden;">
+            <img loading="lazy" decoding="async" src="images/goods/杯套縮圖.jpg" alt="杯套" style="max-height:100%; max-width:100%; object-fit:contain; pointer-events:none;">
+            <span class="gallery-hint">▶ 查看形象照</span>
+        </div>
+        <strong>杯套</strong>
+        <span style="color:#aaa; font-size:11px;">Cup Sleeve</span>
+        <div class="price-block">
+            <span class="price-strike">NT$ 80</span>
+            <span class="price-pre">NT$ 70</span>
+            <span class="badge-pre">PRE_ORDER</span>
+        </div>
+        <button class="goods-preorder-btn" onclick="openExternalLink('https://forms.gle/VeUfuVowdTmQ1GFr5')">▶ 預購</button>
+    </div>
+
+    <!-- 打火機 -->
+    <div class="goods-card">
+        <div class="goods-thumb" onclick="openGallery('lighter')" style="height:120px; background:#fff; margin-bottom:8px; display:flex; align-items:center; justify-content:center; border:inset 2px #555; overflow:hidden;">
+            <img loading="lazy" decoding="async" src="images/goods/打火機縮圖.jpg" alt="打火機（打火雞）" style="max-height:100%; max-width:100%; object-fit:contain; pointer-events:none;">
+            <span class="gallery-hint">▶ 查看形象照</span>
+        </div>
+        <strong>打火機（打火雞）</strong>
+        <span style="color:#aaa; font-size:11px;">Festival Lighter</span>
+        <div class="price-block">
+            <span class="price-strike">NT$ 40</span>
+            <span class="price-pre">NT$ 35</span>
+            <span class="badge-pre">PRE_ORDER</span>
+        </div>
+        <button class="goods-preorder-btn" onclick="openExternalLink('https://forms.gle/VeUfuVowdTmQ1GFr5')">▶ 預購</button>
+    </div>
+
+    <!-- 貼紙・哪會嘉敖 -->
+    <div class="goods-card">
+        <div style="height:120px; background:#fff; margin-bottom:8px; display:flex; align-items:center; justify-content:center; border:inset 2px #555; overflow:hidden;">
+            <img loading="lazy" decoding="async" src="images/goods/goods-sticker-zh.png" alt="貼紙·哪會嘉敖" style="max-height:100%; max-width:100%; object-fit:contain;">
+        </div>
+        <strong>貼紙・哪會嘉敖</strong>
+        <span style="color:#aaa; font-size:11px;">Sticker · Local</span>
+        <div class="price-block">
+            <span class="price-strike">NT$ 20</span>
+            <span class="price-pre">NT$ 15</span>
+            <span class="badge-pre">PRE_ORDER</span>
+        </div>
+        <button class="goods-preorder-btn" onclick="openExternalLink('https://forms.gle/VeUfuVowdTmQ1GFr5')">▶ 預購</button>
+    </div>
+
+    <!-- 貼紙・silence -->
+    <div class="goods-card">
+        <div style="height:120px; background:#fff; margin-bottom:8px; display:flex; align-items:center; justify-content:center; border:inset 2px #555; overflow:hidden;">
+            <img loading="lazy" decoding="async" src="images/goods/goods-sticker-en.png" alt="貼紙·silence" style="max-height:100%; max-width:100%; object-fit:contain;">
+        </div>
+        <strong>貼紙・silence</strong>
+        <span style="color:#aaa; font-size:11px;">Sticker · Silence</span>
+        <div class="price-block">
+            <span class="price-strike">NT$ 20</span>
+            <span class="price-pre">NT$ 15</span>
+            <span class="badge-pre">PRE_ORDER</span>
+        </div>
+        <button class="goods-preorder-btn" onclick="openExternalLink('https://forms.gle/VeUfuVowdTmQ1GFr5')">▶ 預購</button>
+    </div>
+
+    <!-- 貼紙・中正 -->
+    <div class="goods-card">
+        <div style="height:120px; background:#fff; margin-bottom:8px; display:flex; align-items:center; justify-content:center; border:inset 2px #555; overflow:hidden;">
+            <img loading="lazy" decoding="async" src="images/goods/goods-sticker-char.png" alt="貼紙·中正" style="max-height:100%; max-width:100%; object-fit:contain;">
+        </div>
+        <strong>貼紙・中正</strong>
+        <span style="color:#aaa; font-size:11px;">Sticker · CCU</span>
+        <div class="price-block">
+            <span class="price-strike">NT$ 20</span>
+            <span class="price-pre">NT$ 15</span>
+            <span class="badge-pre">PRE_ORDER</span>
+        </div>
+        <button class="goods-preorder-btn" onclick="openExternalLink('https://forms.gle/VeUfuVowdTmQ1GFr5')">▶ 預購</button>
+    </div>
+
+</div>
+
+<!-- 貼紙合購橫幅 -->
+<div class="combo-banner">
+    > COMBO_DEAL：貼紙三款合購　<span class="price-strike">NT$ 45</span>　▸　<span class="price-pre">NT$ 40</span>
+</div>
+
+<!-- ============ 周邊大禮包 ============ -->
+<h2 class="blink" style="margin-top:30px;">> 周邊大禮包: PACKAGES</h2>
+
+<!-- 主推：我全都要 -->
+<div class="package-card package-card--featured">
+    <div class="pkg-header">
+        <span>★ PACKAGE_MAX.zip ／ 我全都要</span>
+        <span>NT$ 430</span>
+    </div>
+    <div class="pkg-body">
+        <ul class="pkg-contents-list">
+            <li>毛巾 × 1</li>
+            <li>杯套 × 1</li>
+            <li>壓克力吊飾 × 2 款（吉他 + 貓咪）</li>
+            <li>打火機 × 1</li>
+            <li>貼紙 × 3 款（哪會嘉敖 + silence + 中正）</li>
+        </ul>
+        <div class="pkg-savings">
+            單買總計 <span class="price-strike">NT$ 530</span>　│　禮包 <span class="price-pre">NT$ 430</span>　│　省 NT$ 100
+        </div>
+        <div class="pkg-actions">
+            <button class="goods-preorder-btn" onclick="openExternalLink('https://forms.gle/VeUfuVowdTmQ1GFr5')">▶ 預購禮包</button>
+        </div>
+    </div>
+</div>
+
+<!-- 緊縮列：其他三款 -->
+<div class="package-card package-card--row">
+    <span class="pkg-name">> SUMMER_PACK</span>
+    <span class="pkg-contents">毛巾 + 杯套</span>
+    <span class="pkg-price">NT$ 330</span>
+    <button class="goods-preorder-btn" onclick="openExternalLink('https://forms.gle/VeUfuVowdTmQ1GFr5')">預購</button>
+</div>
+
+<div class="package-card package-card--row">
+    <span class="pkg-name">> EVERYDAY</span>
+    <span class="pkg-contents">杯套 + 打火機 + 壓克力×1</span>
+    <span class="pkg-price">NT$ 150</span>
+    <button class="goods-preorder-btn" onclick="openExternalLink('https://forms.gle/VeUfuVowdTmQ1GFr5')">預購</button>
+</div>
+
+<div class="package-card package-card--row">
+    <span class="pkg-name">> STARTER</span>
+    <span class="pkg-contents">打火機 + 壓克力×1 + 貼紙×1</span>
+    <span class="pkg-price">NT$ 75</span>
+    <button class="goods-preorder-btn" onclick="openExternalLink('https://forms.gle/VeUfuVowdTmQ1GFr5')">預購</button>
+</div>
+
+<!-- ============ 傳輸須知 ============ -->
 <div style="margin-top:20px; padding:10px; border:1px dashed var(--win-border); font-size:12px;">
     <strong style="color:var(--highlight-color);">> 傳輸須知：</strong><br>
-    > 音樂節當日（5/30–31）至周邊攤位現場購買。<br>
+    > 預購截止：<strong style="color:var(--highlight-color);">2026/05/29 23:59</strong><br>
+    > 現場販售：5/30–31 周邊攤位<br>
+    > 預購表單：<span class="form-link" onclick="openExternalLink('https://forms.gle/VeUfuVowdTmQ1GFr5')">填寫 ▸</span><br>
     > 如有疑問請透過 IG 私訊聯繫。
 </div>

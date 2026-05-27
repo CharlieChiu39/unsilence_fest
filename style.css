@@ -634,6 +634,250 @@ body.pineapple-mode #main-app-window .window-content { background: #ffffe6; }
     opacity: 1;
 }
 
+/* ==========================================================
+   商品卡 / 價格 / 預購相關（goods.html 用）
+   ========================================================== */
+.goods-card {
+    border: 2px solid #fff;
+    border-right-color: #555;
+    border-bottom-color: #555;
+    padding: 10px;
+    text-align: center;
+    background: rgba(10, 5, 20, 0.85);
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+}
+
+.goods-card strong {
+    color: #fff;
+    display: block;
+    margin-top: 2px;
+}
+
+/* 雙行價格 */
+.price-block {
+    margin: 6px 0 2px;
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+.price-strike {
+    text-decoration: line-through;
+    color: #888;
+    font-size: 12px;
+    font-family: 'DotGothic16', monospace;
+}
+.price-pre {
+    color: var(--highlight-color);
+    font-size: 17px;
+    font-weight: bold;
+    font-family: 'DotGothic16', monospace;
+}
+.badge-pre {
+    font-size: 9px;
+    padding: 1px 5px;
+    border: 1px solid var(--highlight-color);
+    color: var(--highlight-color);
+    font-family: 'DotGothic16', monospace;
+    letter-spacing: 0.5px;
+    line-height: 1.4;
+}
+
+/* 商品卡 / 禮包用的「預購」小按鈕 */
+.goods-preorder-btn {
+    background: transparent;
+    border: 1px solid var(--highlight-color);
+    color: var(--highlight-color);
+    padding: 4px 12px;
+    font-size: 11px;
+    font-family: 'DotGothic16', monospace;
+    cursor: pointer;
+    margin-top: 6px;
+    transition: background 0.15s, color 0.15s, transform 0.1s;
+    letter-spacing: 0.5px;
+    align-self: center;
+}
+.goods-preorder-btn:hover {
+    background: var(--highlight-color);
+    color: #000;
+}
+.goods-preorder-btn:active {
+    transform: scale(0.95);
+}
+
+/* 頁面頂部：預購 BANNER */
+.preorder-banner {
+    border: 2px solid var(--highlight-color);
+    background: rgba(255, 0, 255, 0.08);
+    padding: 14px 16px;
+    margin: 12px 0 18px;
+    text-align: center;
+    box-shadow: 0 0 14px rgba(255, 0, 255, 0.28);
+}
+.preorder-banner .preorder-status {
+    color: var(--highlight-color);
+    font-family: 'DotGothic16', monospace;
+    font-size: 13px;
+    margin-bottom: 10px;
+}
+.preorder-banner .preorder-cta {
+    background: var(--highlight-color);
+    color: #000;
+    padding: 8px 20px;
+    border: 2px solid #fff;
+    border-right-color: #555;
+    border-bottom-color: #555;
+    font-family: 'DotGothic16', monospace;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    letter-spacing: 1px;
+    transition: background 0.15s;
+}
+.preorder-banner .preorder-cta:hover {
+    background: #fff;
+    color: var(--highlight-color);
+}
+.preorder-banner .preorder-cta:active {
+    border-color: #555;
+    border-right-color: #fff;
+    border-bottom-color: #fff;
+}
+
+/* 商品中間的合購橫幅 */
+.combo-banner {
+    border: 1px dashed var(--highlight-color);
+    background: rgba(255, 0, 255, 0.05);
+    padding: 8px 12px;
+    margin: 12px 0;
+    color: var(--highlight-color);
+    font-family: 'DotGothic16', monospace;
+    font-size: 13px;
+    text-align: center;
+}
+.combo-banner .price-strike { font-size: 11px; }
+.combo-banner .price-pre { font-size: 14px; }
+
+/* 大禮包：主推大卡 */
+.package-card {
+    margin: 12px 0;
+    background: rgba(10, 5, 20, 0.85);
+}
+.package-card--featured {
+    border: 2px solid var(--highlight-color);
+    border-right-color: #aa00aa;
+    border-bottom-color: #aa00aa;
+    box-shadow: 0 0 12px rgba(255, 0, 255, 0.3);
+}
+.package-card--featured .pkg-header {
+    background: var(--highlight-color);
+    color: #000;
+    padding: 8px 14px;
+    font-family: 'DotGothic16', monospace;
+    font-weight: bold;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 14px;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+.package-card--featured .pkg-body {
+    padding: 12px 16px;
+    color: #fff;
+    font-size: 13px;
+    text-align: left;
+}
+.package-card--featured .pkg-contents-list {
+    margin: 0 0 10px;
+    padding-left: 0;
+    list-style: none;
+}
+.package-card--featured .pkg-contents-list li {
+    padding: 2px 0;
+}
+.package-card--featured .pkg-contents-list li::before {
+    content: "▸ ";
+    color: var(--highlight-color);
+    margin-right: 4px;
+}
+.package-card--featured .pkg-savings {
+    text-align: center;
+    color: #aaa;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px dashed rgba(255, 0, 255, 0.3);
+    font-size: 11px;
+    font-family: 'DotGothic16', monospace;
+}
+.package-card--featured .pkg-actions {
+    text-align: center;
+    margin-top: 10px;
+}
+
+/* 大禮包：緊縮列（其他三款） */
+.package-card--row {
+    border: 2px solid #fff;
+    border-right-color: #555;
+    border-bottom-color: #555;
+    padding: 10px 14px;
+    display: grid;
+    grid-template-columns: auto 1fr auto auto;
+    align-items: center;
+    gap: 10px;
+    font-family: 'DotGothic16', monospace;
+    color: #fff;
+    font-size: 13px;
+}
+.package-card--row .pkg-name {
+    color: var(--highlight-color);
+    font-weight: bold;
+}
+.package-card--row .pkg-contents {
+    color: #aaa;
+    font-size: 12px;
+}
+.package-card--row .pkg-price {
+    color: var(--highlight-color);
+    font-weight: bold;
+    font-size: 14px;
+}
+.package-card--row .goods-preorder-btn {
+    margin-top: 0;
+    padding: 3px 10px;
+    font-size: 10px;
+}
+
+/* 「填寫 ▸」文字連結 */
+.form-link {
+    cursor: pointer;
+    color: #fff;
+    text-decoration: underline;
+}
+.form-link:hover {
+    color: var(--highlight-color);
+}
+
+/* 視窗 / 手機尺寸調整 */
+@media (max-width: 500px) {
+    .package-card--row {
+        grid-template-columns: 1fr auto;
+        grid-template-areas:
+            "name price"
+            "contents contents"
+            "btn btn";
+        gap: 4px 10px;
+    }
+    .package-card--row .pkg-name { grid-area: name; }
+    .package-card--row .pkg-contents { grid-area: contents; text-align: left; }
+    .package-card--row .pkg-price { grid-area: price; text-align: right; }
+    .package-card--row .goods-preorder-btn { grid-area: btn; justify-self: stretch; }
+    .preorder-banner .preorder-cta { font-size: 12px; padding: 7px 14px; }
+}
+
 @media (max-width: 800px) {
     #gallery-window {
         position: absolute;
