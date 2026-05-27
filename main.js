@@ -226,16 +226,9 @@ let topZ = 10010;
 function focusWindow(win) { windows.forEach(w => w.classList.remove('focused')); win.classList.add('focused'); win.style.zIndex = ++topZ; }
 
 let currentDragging = null;
+let currentDragHeader = null;
+let currentDragPointerId = null;
 let dragOffsetX, dragOffsetY, dragParentX, dragParentY;
-
-function isMobileViewport() {
-    return window.matchMedia('(max-width: 800px)').matches;
-}
-
-function isIOSWebKit() {
-    return /iPad|iPhone|iPod/.test(navigator.userAgent) ||
-        (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-}
 
 windows.forEach(win => {
     const header = win.querySelector('.window-header');
@@ -243,12 +236,14 @@ windows.forEach(win => {
     header.addEventListener('pointerdown', (e) => {
         // 用 closest 比 classList.contains 更穩，能涵蓋觸控落在子元素的情況
         if (e.target.closest('.close-btn')) return;
-        if (e.pointerType === 'touch' && isMobileViewport() && isIOSWebKit()) {
-            focusWindow(win);
-            return;
-        }
         currentDragging = win;
+        currentDragHeader = header;
+        currentDragPointerId = e.pointerId;
         focusWindow(win);
+        // iOS Safari：必須 setPointerCapture，否則 touch 拖曳時 pointermove 不穩定觸發
+        try { header.setPointerCapture(e.pointerId); } catch (_) {}
+        // iOS：preventDefault 阻止瀏覽器把此 touch 當作 scroll / text-selection 手勢
+        if (e.pointerType === 'touch') e.preventDefault();
         const rect = win.getBoundingClientRect(); const parentRect = win.offsetParent.getBoundingClientRect();
         dragParentX = parentRect.left; dragParentY = parentRect.top;
         win.style.transform = 'none'; win.style.margin = '0'; win.style.bottom = 'auto'; win.style.right = 'auto';
@@ -257,7 +252,6 @@ windows.forEach(win => {
         if (e.pointerType === 'touch') win.style.touchAction = 'none';
     });
     // 所有視窗的關閉鈕：阻止 pointerdown 冒泡（避免被當作拖曳起點）
-    // teaser-win 的 onclick 直接寫在 HTML 標籤上（更可靠），main-app/game 也是
     const closeBtn = win.querySelector('.close-btn');
     if (closeBtn) {
         closeBtn.addEventListener('pointerdown', (e) => e.stopPropagation());
@@ -284,14 +278,17 @@ document.addEventListener('pointermove', (e) => {
     currentDragging.style.top = `${Math.max(minTop, Math.min(newTop, maxTop))}px`;
 }, { passive: false });
 
-document.addEventListener('pointerup', () => {
+function endDrag() {
     if (currentDragging && currentDragging.style.touchAction === 'none') currentDragging.style.touchAction = '';
+    if (currentDragHeader && currentDragPointerId != null) {
+        try { currentDragHeader.releasePointerCapture(currentDragPointerId); } catch (_) {}
+    }
     currentDragging = null;
-});
-document.addEventListener('pointercancel', () => {
-    if (currentDragging && currentDragging.style.touchAction === 'none') currentDragging.style.touchAction = '';
-    currentDragging = null;
-});
+    currentDragHeader = null;
+    currentDragPointerId = null;
+}
+document.addEventListener('pointerup', endDrag);
+document.addEventListener('pointercancel', endDrag);
 
 // =========================================
 // 智慧排版
