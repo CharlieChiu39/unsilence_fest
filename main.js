@@ -13,7 +13,13 @@ function signalClick(btnElement, windowTitle, fileUrl) {
     if (btnElement.classList.contains('transmitting')) return;
     if (typeof gtag === 'function') gtag('event', 'nav_click', { page_name: fileUrl });
 
-    const originalText = btnElement.innerText;
+    // 已處於持續亂碼狀態：跳過視覺動畫，直接開啟視窗
+    if (btnElement.dataset.glitched === 'true') {
+        openApp(windowTitle, fileUrl);
+        return;
+    }
+
+    const originalText = btnElement.dataset.text || btnElement.innerText;
     const glitchChars = "#$@&%*!";
     btnElement.classList.add('transmitting');
 
@@ -27,7 +33,10 @@ function signalClick(btnElement, windowTitle, fileUrl) {
     setTimeout(() => {
         clearInterval(scrambleInterval);
         if (document.body.contains(btnElement)) {
-            btnElement.innerText = originalText;
+            // 若 0.3s 內使用者已觸發持續亂碼，不還原文字（避免閃爍）
+            if (btnElement.dataset.glitched !== 'true') {
+                btnElement.innerText = originalText;
+            }
             btnElement.classList.remove('transmitting');
         }
         openApp(windowTitle, fileUrl);
@@ -164,14 +173,51 @@ if (logoArea) {
     logoArea.addEventListener('touchstart', logoGlitch, { passive: true });
 }
 
+// =========================================
+// 持久亂碼 toggle（用 WeakMap 記錄 interval）
+// =========================================
+function startPersistentGlitch(el, originalText) {
+    const prev = glitchTimers.get(el);
+    if (prev) { clearInterval(prev); glitchTimers.delete(el); }
+    const id = setInterval(() => {
+        el.textContent = originalText.split('').map((char) => {
+            if (char === ' ' || char === '_') return char;
+            if (Math.random() > 0.35) return letters[Math.floor(Math.random() * letters.length)];
+            return char;
+        }).join('');
+    }, 80);
+    glitchTimers.set(el, id);
+}
+
 // 綁定選單連結特效（含 sidebar-bottom 的 CREDITS 連結）
 document.querySelectorAll('.nav-links a, .sidebar-bottom-link').forEach(link => {
     const linkGlitch = (event) => {
         let el = event.currentTarget;
+        // 持續亂碼狀態下停用 hover 特效
+        if (el.dataset.glitched === 'true') return;
         triggerGlitch(el, el.dataset.text);
     };
     link.addEventListener('mouseover', linkGlitch);
     link.addEventListener('touchstart', linkGlitch, { passive: true });
+
+    // 第一次點擊 → 持久亂碼；第二次點擊 → 還原原文
+    link.addEventListener('click', function() {
+        const el = this;
+        const originalText = el.dataset.text;
+        if (!originalText) return;
+
+        if (el.dataset.glitched === 'true') {
+            // 還原
+            const prev = glitchTimers.get(el);
+            if (prev) { clearInterval(prev); glitchTimers.delete(el); }
+            el.textContent = originalText;
+            el.dataset.glitched = 'false';
+        } else {
+            // 啟動持久亂碼
+            startPersistentGlitch(el, originalText);
+            el.dataset.glitched = 'true';
+        }
+    });
 });
 
 // =========================================

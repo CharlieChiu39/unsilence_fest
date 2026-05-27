@@ -928,6 +928,12 @@ body.pineapple-mode #main-app-window .window-content { background: #ffffe6; }
             height: 100dvh;
         }
 
+        /* iOS：裝飾視窗往上移，避免底部跑馬燈（safe-area-inset-bottom 讓跑馬燈更高）遮住 */
+        #win-5 { top: 18vh; }
+        #win-6 { top: 24vh; }
+        #win-7 { top: 30vh; }
+        #win-8 { top: 35vh; }
+
         /* alert-modal 不可拖曳，這裡可以用 !important 維持固定位置 */
         .alert-modal {
             position: fixed;
