@@ -297,9 +297,15 @@ body, html {
 .sys-btn { background: var(--btn-bg); color: var(--win-text); padding: 4px 12px; display: inline-block; margin-top: 10px; font-size: 14px; border: 2px solid #fff; border-right-color: #555; border-bottom-color: #555; cursor: pointer; text-decoration: none;}
 .sys-btn:active { border: 2px solid #555; border-right-color: #fff; border-bottom-color: #fff; transform: translate(1px, 1px); }
 
-.teaser-win { width: 240px; }
+.teaser-win { width: 240px; z-index: 200; }
+/* teaser 視窗內容區也可拖曳，顯示 grab 游標；互動元素保留 pointer */
+.teaser-win .window-content { cursor: grab; }
+.teaser-win .window-content:active { cursor: grabbing; }
+.teaser-win .window-content button,
+.teaser-win .window-content a,
+.teaser-win .window-content [onclick] { cursor: pointer; }
 #win-1 { top: 8vh; left: 5vw; } #win-2 { top: 12vh; left: 25vw; } #win-3 { top: 35vh; left: 8vw; }
-#win-4 { top: 40vh; left: 30vw; } #win-5 { top: 48vh; left: 12vw; } #win-6 { top: 58vh; left: 55vw; } #win-7 { top: 20vh; left: 68vw; }
+#win-4 { top: 40vh; left: 30vw; } #win-5 { top: 48vh; left: 12vw; } #win-6 { top: 65vh; left: 35vw; } #win-7 { top: 25vh; left: 45vw; }
 
 /* 可變大小裝飾視窗：STORE 大、LIVE 中、次要入口小 */
 #win-2 { width: 275px; }
@@ -307,20 +313,9 @@ body, html {
 #win-4, #win-6, #win-7 { width: 175px; }
 
 /* STORE 預覽視窗 */
-.store-badge {
-    font-size: 11px; color: var(--highlight-color);
-    border: 1px solid var(--highlight-color); padding: 3px 6px;
-    margin-bottom: 8px; text-align: center; letter-spacing: 0.5px;
-}
-.store-grid {
-    display: grid; grid-template-columns: 1fr 1fr; gap: 3px;
-    margin-bottom: 8px; cursor: pointer;
-}
-.store-grid img {
-    width: 100%; height: 72px; object-fit: cover;
-    border: 1px solid #555; display: block; pointer-events: none;
-    transition: filter 0.2s, border-color 0.2s;
-}
+.store-badge { font-size: 11px; color: var(--highlight-color); border: 1px solid var(--highlight-color); padding: 3px 6px; margin-bottom: 8px; text-align: center; letter-spacing: 0.5px; }
+.store-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3px; margin-bottom: 8px; cursor: pointer; }
+.store-grid img { width: 100%; height: 72px; object-fit: cover; border: 1px solid #555; display: block; pointer-events: none; transition: filter 0.2s, border-color 0.2s; }
 .store-grid:hover img { filter: brightness(1.2); border-color: var(--text-color); }
 
 /* LIVE 預覽視窗 */
@@ -430,12 +425,10 @@ body.pineapple-mode #main-app-window .window-content { background: #ffffe6; }
     .layout-container { flex-direction: column; }
     .sidebar { width: 100%; height: auto; border-right: none; border-bottom: 2px solid var(--win-border); padding: 10px 15px; box-sizing: border-box; position: relative; z-index: 100; }
     .main-content {
-        display: flex;
-        flex-wrap: wrap;
-        align-content: flex-start;
-        justify-content: center;
-        gap: 10px;
-        overflow-y: auto;
+        /* teaser-win 全部是 position:absolute，不在正常流裡，overflow-y:auto 會把
+           它們剪裁在 main-content 邊界內，拖曳到上方就消失。改 visible 讓它們可
+           自由超出容器，也解決「卡進上方圖層」問題。 */
+        overflow: visible;
         padding: 12px 8px calc(24px + env(safe-area-inset-bottom, 0px));
     }
 
@@ -464,18 +457,15 @@ body.pineapple-mode #main-app-window .window-content { background: #ffffe6; }
     .nav-links a { font-size: 16px; padding: 10px 12px; min-height: 44px; }
     .mode-toggle { margin-top: 5px; padding: 8px 12px; font-size: 14px; width: auto; display: inline-block; min-height: 44px; }
 
-    /* 手機版入口改為可捲動排列，避免浮動視窗互相覆蓋導致按鈕不可點 */
-    .teaser-win {
-        position: relative;
-        top: auto !important;
-        left: auto !important;
-        flex: 0 0 150px;
-        width: 150px;
-    }
+    /* teaser-win 在手機版改成不同階梯排列，避免完全重疊 */
+    .teaser-win { width: 150px; }
+    #win-1 { top: 2vh; left: 2vw; } #win-2 { top: 7vh; left: 38vw; } #win-3 { top: 13vh; left: 8vw; }
+    #win-4 { top: 20vh; left: 42vw; } #win-5 { top: 27vh; left: 4vw; } #win-6 { top: 34vh; left: 40vw; }
+    #win-7 { top: 41vh; left: 10vw; }
 
-    /* 手機版可變大小：STORE/LIVE 縮小但仍比其他視窗大；避免超出螢幕右邊 */
-    #win-2 { flex-basis: 185px; width: 185px; }
-    #win-5 { flex-basis: min(86vw, 290px); width: min(86vw, 290px); }
+    /* 手機版可變大小 */
+    #win-2 { width: 185px; }
+    #win-5 { width: min(86vw, 290px); }
     #win-4, #win-6, #win-7 { width: 150px; }
     .store-grid img { height: 58px; }
 
@@ -1028,6 +1018,11 @@ body.pineapple-mode #main-app-window .window-content { background: #ffffe6; }
         #share-toast {
             bottom: calc(76px + env(safe-area-inset-bottom, 0px));
         }
+
+        /* iOS：裝飾視窗往上移，避免底部跑馬燈（safe-area-inset-bottom 讓跑馬燈更高）遮住 */
+        #win-5 { top: 14vh; }
+        #win-6 { top: 24vh; }
+        #win-7 { top: 30vh; }
     }
 }
 

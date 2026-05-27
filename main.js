@@ -291,16 +291,18 @@ let dragOffsetX, dragOffsetY, dragParentX, dragParentY;
 
 windows.forEach(win => {
     const header = win.querySelector('.window-header');
-    win.addEventListener('pointerdown', () => focusWindow(win));
-    header.addEventListener('pointerdown', (e) => {
-        // 用 closest 比 classList.contains 更穩，能涵蓋觸控落在子元素的情況
-        if (e.target.closest('.close-btn')) return;
-        currentDragging = win;
-        currentDragHeader = header;
-        currentDragPointerId = e.pointerId;
+    const isTeaser = win.classList.contains('teaser-win');
+    win.addEventListener('pointerdown', (e) => {
         focusWindow(win);
+        // 可互動元素（按鈕、連結、有 onclick 的元素）不觸發拖曳，讓 click 正常發火
+        if (e.target.closest('.close-btn') || e.target.closest('button') || e.target.closest('a') || e.target.closest('[onclick]')) return;
+        // 非 teaser 視窗：只從 header 拖曳（content 區域可捲動，不搶奪 touch）
+        if (!isTeaser && !e.target.closest('.window-header')) return;
+        currentDragging = win;
+        currentDragHeader = win; // setPointerCapture 改在 win 上，endDrag 亦同
+        currentDragPointerId = e.pointerId;
         // iOS Safari：必須 setPointerCapture，否則 touch 拖曳時 pointermove 不穩定觸發
-        try { header.setPointerCapture(e.pointerId); } catch (_) {}
+        try { win.setPointerCapture(e.pointerId); } catch (_) {}
         // iOS：preventDefault 阻止瀏覽器把此 touch 當作 scroll / text-selection 手勢
         if (e.pointerType === 'touch') e.preventDefault();
         const rect = win.getBoundingClientRect();
@@ -347,8 +349,8 @@ document.addEventListener('pointermove', (e) => {
 
 function endDrag() {
     if (currentDragging && currentDragging.style.touchAction === 'none') currentDragging.style.touchAction = '';
-    if (currentDragHeader && currentDragPointerId != null) {
-        try { currentDragHeader.releasePointerCapture(currentDragPointerId); } catch (_) {}
+    if (currentDragging && currentDragPointerId != null) {
+        try { currentDragging.releasePointerCapture(currentDragPointerId); } catch (_) {}
     }
     currentDragging = null;
     currentDragHeader = null;
@@ -1043,12 +1045,17 @@ window.toggleSong = function(row) {
     }
     var song = row.dataset.song;
     if (!song) return;
+    // 支援多首歌，以 ' | ' 分隔，每首獨立一行
+    var songs = song.split(' | ');
     var tr = document.createElement('tr');
     tr.dataset.songRow = '1';
     var td = document.createElement('td');
     td.colSpan = 3;
-    td.style.cssText = 'padding:3px 6px 6px 18px; border:1px solid var(--win-border); border-top:none; color:var(--highlight-color); font-size:11px;';
-    td.textContent = '♪ ' + song; // 用 textContent 避免任何 HTML 注入
+    td.style.cssText = 'padding:3px 6px 6px 18px; border:1px solid var(--win-border); border-top:none; color:var(--highlight-color); font-size:11px; line-height:1.9;';
+    songs.forEach(function(s, i) {
+        if (i > 0) td.appendChild(document.createElement('br'));
+        td.appendChild(document.createTextNode('♪ ' + s.trim()));
+    });
     tr.appendChild(td);
     row.parentNode.insertBefore(tr, row.nextSibling);
     var arrow = row.querySelector('.song-arrow');

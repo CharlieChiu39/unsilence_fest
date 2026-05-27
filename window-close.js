@@ -58,8 +58,10 @@
         }, 40); // 5 × 40ms = 200ms
 
         // 視窗淡出 + 亮閃
+        // 注意：不在 animationend 移除 class——animation forwards 會在 180ms 後保持 opacity:0，
+        // closeWindow() 在 200ms 後呼叫，會在同一同步塊內先 classList.remove 再 display:none，
+        // 不會發生閃爍。若在 animationend(180ms) 就移除，opacity 會先彈回 1 再等 20ms 才隱藏。
         win.classList.add('window-closing');
-        win.addEventListener('animationend', () => win.classList.remove('window-closing'), { once: true });
     }
 
     function handleClose(event) {
