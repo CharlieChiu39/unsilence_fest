@@ -299,8 +299,36 @@ body, html {
 
 .teaser-win { width: 240px; }
 #win-1 { top: 8vh; left: 5vw; } #win-2 { top: 12vh; left: 25vw; } #win-3 { top: 35vh; left: 8vw; }
-#win-4 { top: 40vh; left: 30vw; } #win-5 { top: 60vh; left: 12vw; } #win-6 { top: 65vh; left: 35vw; } #win-7 { top: 25vh; left: 45vw; }
+#win-4 { top: 40vh; left: 30vw; } #win-5 { top: 48vh; left: 12vw; } #win-6 { top: 65vh; left: 35vw; } #win-7 { top: 25vh; left: 45vw; }
 #win-8 { top: 50vh; left: 52vw; }
+
+/* 可變大小裝飾視窗：STORE 大、LIVE 中、次要入口小 */
+#win-2 { width: 275px; }
+#win-5 { width: 340px; }
+#win-4, #win-6, #win-7, #win-8 { width: 175px; }
+
+/* STORE 預覽視窗 */
+.store-badge {
+    font-size: 11px; color: var(--highlight-color);
+    border: 1px solid var(--highlight-color); padding: 3px 6px;
+    margin-bottom: 8px; text-align: center; letter-spacing: 0.5px;
+}
+.store-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 3px;
+    margin-bottom: 8px; cursor: pointer;
+}
+.store-grid img {
+    width: 100%; height: 72px; object-fit: cover;
+    border: 1px solid #555; display: block; pointer-events: none;
+    transition: filter 0.2s, border-color 0.2s;
+}
+.store-grid:hover img { filter: brightness(1.2); border-color: var(--text-color); }
+
+/* LIVE 預覽視窗 */
+.live-count { color: var(--highlight-color); font-size: 12px; margin: 0 0 6px 0; text-align: left; }
+.live-preview-list { list-style: none; padding: 0; margin: 0 0 8px 0; text-align: left; font-size: 12px; }
+.live-preview-list li { padding: 3px 0; border-bottom: 1px dashed rgba(255,255,255,0.15); line-height: 1.4; }
+.live-more { color: #888 !important; font-size: 11px !important; letter-spacing: 2px; }
 
 #main-app-window { width: 600px; height: 400px; display: none; max-width: 90vw; max-height: 80vh; }
 #main-app-window .window-content { background: #f8f2ff; border: inset 2px #a366ff; margin: 10px; padding: 15px; text-align: left; }
@@ -433,6 +461,12 @@ body.pineapple-mode #main-app-window .window-content { background: #ffffe6; }
     #win-1 { top: 2vh; left: 2vw; } #win-2 { top: 7vh; left: 38vw; } #win-3 { top: 13vh; left: 8vw; }
     #win-4 { top: 20vh; left: 42vw; } #win-5 { top: 27vh; left: 4vw; } #win-6 { top: 34vh; left: 40vw; }
     #win-7 { top: 41vh; left: 10vw; } #win-8 { top: 48vh; left: 38vw; }
+
+    /* 手機版可變大小：STORE/LIVE 縮小但仍比其他視窗大；避免超出螢幕右邊 */
+    #win-2 { width: 185px; }
+    #win-5 { width: min(86vw, 290px); }
+    #win-4, #win-6, #win-7, #win-8 { width: 150px; }
+    .store-grid img { height: 58px; }
 
     /* mobile 省電：關閉 backdrop-filter，改為純色背景 */
     .window { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
@@ -929,7 +963,8 @@ body.pineapple-mode #main-app-window .window-content { background: #ffffe6; }
         }
 
         /* iOS：裝飾視窗往上移，避免底部跑馬燈（safe-area-inset-bottom 讓跑馬燈更高）遮住 */
-        #win-5 { top: 18vh; }
+        /* win-5 STORE 視窗因為加了圖片格比較高，需要更往上 */
+        #win-5 { top: 14vh; }
         #win-6 { top: 24vh; }
         #win-7 { top: 30vh; }
         #win-8 { top: 35vh; }
