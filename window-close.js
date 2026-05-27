@@ -1,11 +1,8 @@
 (() => {
     const GLYPHS = ['†', '░', '⊗', '✕', '×', '✗'];
 
-    // iOS Ghost-Click 防護：視窗關閉後 ~300ms 內，iOS 會在相同座標補發
+    // Ghost-Click 防護：視窗關閉後 ~300ms 內，瀏覽器可能在相同座標補發
     // 一個合成 click 事件，可能打到底層的 mode-toggle 等按鈕。
-    // 僅在 iOS 上啟用，用時間戳記攔截這個多餘的 click。
-    const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent) ||
-        (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
     let _ghostGuardUntil = 0;
 
     function closeWindow(win) {
@@ -62,8 +59,8 @@
     }
 
     function handleClose(event) {
-        // iOS Ghost-Click 攔截：若在防護期內收到非 close-btn 的 click，直接吸收
-        if (isIOS && event.type === 'click' && Date.now() < _ghostGuardUntil) {
+        // Ghost-Click 攔截：若在防護期內收到非 close-btn 的 click，直接吸收
+        if (event.type === 'click' && Date.now() < _ghostGuardUntil) {
             if (!(event.target.closest && event.target.closest('.close-btn'))) {
                 event.stopPropagation();
                 event.preventDefault();
@@ -89,8 +86,8 @@
         playCloseEffect(btn, win, () => {
             delete btn.dataset.closing;
             closeWindow(win);
-            // 視窗關閉後設定 ghost-click 防護期（iOS 補發 click 約在 300ms 內）
-            if (isIOS) _ghostGuardUntil = Date.now() + 450;
+            // 視窗關閉後設定 ghost-click 防護期（補發 click 約在 300ms 內）
+            _ghostGuardUntil = Date.now() + 450;
         });
     }
 
