@@ -244,7 +244,11 @@ windows.forEach(win => {
         try { header.setPointerCapture(e.pointerId); } catch (_) {}
         // iOS：preventDefault 阻止瀏覽器把此 touch 當作 scroll / text-selection 手勢
         if (e.pointerType === 'touch') e.preventDefault();
-        const rect = win.getBoundingClientRect(); const parentRect = win.offsetParent.getBoundingClientRect();
+        const rect = win.getBoundingClientRect();
+        // position: fixed 的視窗（iOS Safari 的 main-app / gallery / game）offsetParent 為 null。
+        // 此時 inline left/top 是相對 viewport，等同 parentRect = {0,0}。
+        const offsetParent = win.offsetParent;
+        const parentRect = offsetParent ? offsetParent.getBoundingClientRect() : { left: 0, top: 0 };
         dragParentX = parentRect.left; dragParentY = parentRect.top;
         win.style.transform = 'none'; win.style.margin = '0'; win.style.bottom = 'auto'; win.style.right = 'auto';
         win.style.left = `${rect.left - dragParentX}px`; win.style.top = `${rect.top - dragParentY}px`;

@@ -651,12 +651,18 @@ body.pineapple-mode #main-app-window .window-content { background: #ffffe6; }
 
 @supports (-webkit-touch-callout: none) {
     @media (max-width: 800px) {
-        /* 注意：所有 top/left/transform 都「不能」用 !important，否則 JS 拖曳設定的
-           inline style 會被 author !important 蓋掉，導致 iOS 上完全無法拖曳。
-           只在實際需要強制覆寫的 width / max-height 用 !important。 */
+        /* iOS Safari 重點：
+           1. position: fixed → 相對於 viewport（不是 main-content）。原本 absolute 會
+              讓 top:50% = main-content 50%，而 main-content 在 sidebar 下方，所以視窗
+              中心會落在 viewport 下半部，下緣被裁掉。
+           2. top/left/transform 不能用 !important：JS 拖曳會設 inline style，被
+              author !important 蓋掉就無法拖。
+           3. top:45dvh + translate(-50%, -50%)：用 dvh 取得「可見」viewport，並把
+              中心稍微往上偏，避免 iOS Safari 底部工具列把下緣吃掉。 */
         #main-app-window,
         #gallery-window {
-            top: 50%;
+            position: fixed;
+            top: 45dvh;
             left: 50%;
             transform: translate(-50%, -50%);
             width: 92vw !important;
@@ -665,7 +671,8 @@ body.pineapple-mode #main-app-window .window-content { background: #ffffe6; }
         }
 
         #game-window {
-            top: 50%;
+            position: fixed;
+            top: 45dvh;
             left: 50%;
             transform: translate(-50%, -50%);
             width: min(92vw, calc((100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 96px) * 2.6667)) !important;
@@ -677,10 +684,11 @@ body.pineapple-mode #main-app-window .window-content { background: #ffffe6; }
             height: 100dvh;
         }
 
-        /* alert-modal 不需要拖曳，可以保持原本撐滿垂直空間的設計 */
+        /* alert-modal 不可拖曳，這裡可以用 !important 維持固定位置 */
         .alert-modal {
-            top: 50%;
-            left: 50%;
+            position: fixed;
+            top: 45dvh !important;
+            left: 50% !important;
             transform: translate(-50%, -50%) !important;
             width: min(300px, 88vw) !important;
             max-height: calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 80px) !important;
@@ -695,6 +703,18 @@ body.pineapple-mode #main-app-window .window-content { background: #ffffe6; }
             -webkit-overflow-scrolling: touch;
             /* 拖曳期間 main.js 會 preventDefault touchmove，這裡 pan-y 在非拖曳時允許捲動 */
             touch-action: pan-y;
+        }
+
+        /* 縮小圖片與卡片高度，讓整個 gallery 內容塞得進可見區域 */
+        #gallery-main-img {
+            max-height: 160px !important;
+        }
+        #gallery-fan-wrapper {
+            height: 150px;
+            margin-top: 12px;
+        }
+        #gallery-fan {
+            height: 145px;
         }
 
         .goods-thumb .gallery-hint {
