@@ -9,7 +9,7 @@
     <link rel="prefetch" href="lineup.html">
     <link rel="prefetch" href="timetable.html">
     <link rel="prefetch" href="map.html">
-    <!-- 資安：限制 referrer / Content Security Policy（含 frame-ancestors 防 clickjacking） -->
+    <!-- 資安：限制 referrer / Content Security Policy（clickjacking 防護由 main.js frame-buster 處理，因 GitHub Pages 無法送 HTTP 標頭） -->
     <meta name="referrer" content="strict-origin-when-cross-origin">
     <meta http-equiv="Content-Security-Policy" content="
         default-src 'self';
@@ -18,7 +18,6 @@
         font-src 'self' https://fonts.gstatic.com data:;
         img-src 'self' data: https://www.google-analytics.com https://www.googletagmanager.com;
         connect-src 'self' https://www.google-analytics.com https://www.googletagmanager.com https://stats.g.doubleclick.net;
-        frame-ancestors 'none';
         base-uri 'self';
         form-action 'self';
         object-src 'none';
@@ -54,7 +53,7 @@
     <link rel="icon" type="image/png" sizes="512x512" href="favicon-512.png">
     <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
     <link href="https://fonts.googleapis.com/css2?family=DotGothic16&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=20260527m">
+    <link rel="stylesheet" href="style.css?v=20260527n">
     <!-- SEO Structured Data: MusicEvent (主活動) -->
     <script type="application/ld+json">
     {
@@ -380,7 +379,7 @@
     <div class="marquee-container" aria-hidden="true"><div class="marquee-content">/// 2026.05.30-31 寧靜音樂節 /// 嘉義文化園區 /// 主辦單位：中正大學 /// 全程免費入場 /// 🍍 游標異常干擾中 ///</div></div>
 
     <script src="window-close.js?v=20260527e"></script>
-    <script src="main.js?v=20260527k"></script>
+    <script src="main.js?v=20260527l"></script>
     <script src="game.js?v=20260527a"></script>
 </body>
 </html>
