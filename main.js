@@ -417,6 +417,8 @@ async function openApp(windowTitle, fileUrl) {
                 if (!((m === 5 && d === 30) || (m === 5 && d === 31))) return;
                 const currentTime = now.getHours() + (now.getMinutes() / 60);
                 const dayId = d === 30 ? 'day-530' : 'day-531';
+                // 活動當天自動切到今天的頁籤（5/30 為預設，只需在 5/31 主動切換）
+                if (d === 31 && typeof window.switchDay === 'function') window.switchDay('531');
                 const rows = document.querySelectorAll('#' + dayId + ' tbody tr');
                 rows.forEach(row => {
                     if (row.dataset.songRow) return;
