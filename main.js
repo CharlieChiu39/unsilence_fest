@@ -715,13 +715,21 @@ const canvas = document.getElementById('matrix-bg'); const ctx = canvas.getConte
 let cw, ch; const fontSize = 18; let columns = []; const noiseChars = 'ｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄﾅﾆﾇﾈﾉﾊﾋﾌﾍﾎﾏﾐﾑﾒﾓﾔﾕﾖﾗﾘﾙﾚﾛﾜﾝ0123456789寧靜音樂節'.split(''); const pineappleChars = ['🍍'];
 function initCanvas() {
     const viewport = window.visualViewport;
-    cw = Math.ceil(viewport ? viewport.width : window.innerWidth);
-    ch = Math.ceil(viewport ? viewport.height : window.innerHeight);
+    const newCw = Math.ceil(viewport ? viewport.width : window.innerWidth);
+    const newCh = Math.ceil(viewport ? viewport.height : window.innerHeight);
+    // 尺寸沒變直接略過：iOS/Android 捲動時網址列縮放會狂發 visualViewport resize，
+    // 若每次都重建 columns，雨滴會被重置成從頂端落下而閃爍。
+    if (newCw === cw && newCh === ch) return;
+    cw = newCw;
+    ch = newCh;
     canvas.width = cw;
     canvas.height = ch;
     const colCount = Math.floor(cw / fontSize) + 1;
-    columns = [];
-    for (let i = 0; i < colCount; i++) { columns[i] = Math.random() * -100; }
+    // 只有寬度（欄數）真的改變才重建雨滴；純高度變化（網址列）保留現有雨滴狀態。
+    if (columns.length !== colCount) {
+        columns = [];
+        for (let i = 0; i < colCount; i++) { columns[i] = Math.random() * -100; }
+    }
 }
 window.addEventListener('resize', initCanvas);
 if (window.visualViewport) window.visualViewport.addEventListener('resize', initCanvas);
@@ -729,7 +737,9 @@ initCanvas();
 function drawMatrix() { if (document.body.classList.contains('tranquil-mode')) { ctx.fillStyle = 'rgba(17, 17, 17, 0.15)'; ctx.fillRect(0, 0, cw, ch); return; } ctx.fillStyle = document.body.classList.contains('pineapple-mode') ? 'rgba(26, 26, 0, 0.15)' : 'rgba(10, 5, 16, 0.15)'; ctx.fillRect(0, 0, cw, ch); ctx.font = `${fontSize}px 'DotGothic16', monospace`; ctx.textBaseline = 'top'; ctx.fillStyle = document.body.classList.contains('pineapple-mode') ? '#ffcc00' : '#0f0'; const chars = document.body.classList.contains('pineapple-mode') ? pineappleChars : noiseChars; for (let i = 0; i < columns.length; i++) { const char = chars[Math.floor(Math.random() * chars.length)]; const x = i * fontSize; const y = columns[i] * fontSize; ctx.fillText(char, x, y); if (y > ch && Math.random() > 0.975) { columns[i] = 0; } else { columns[i]++; } } }
 
 // mobile 降頻：手機從 20fps 改為 10fps（省電 + 減少 jank）
-const isMobileDevice = window.matchMedia('(max-width: 800px)').matches || /Android|iPhone|iPad/i.test(navigator.userAgent);
+const isMobileDevice = window.matchMedia('(max-width: 800px)').matches
+    || /Android|iPhone|iPad/i.test(navigator.userAgent)
+    || (navigator.maxTouchPoints > 1 && /Macintosh/.test(navigator.userAgent)); // iPadOS 13+ 偽裝成桌面 UA
 const matrixInterval = isMobileDevice ? 100 : 50;
 let lastMatrixTime = 0;
 function matrixLoop(timestamp) {

@@ -45,8 +45,8 @@ body, html {
     background-color: var(--bg-color); color: var(--text-color);
     font-family: 'DotGothic16', sans-serif; overflow: hidden;
     user-select: none; -webkit-user-select: none;
-    /* touch-action: pan-y 允許垂直 scroll（子頁面內容），但不允許雙指縮放 */
-    touch-action: pan-y;
+    /* touch-action: pan-y 允許垂直 scroll，pinch-zoom 保留雙指縮放（無障礙 WCAG 1.4.4） */
+    touch-action: pan-y pinch-zoom;
     cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" style="font-size:24px"><text y="24">🍍</text></svg>'), auto;
 }
 
