@@ -135,7 +135,13 @@ document.addEventListener('pointermove', (e) => {
 // =========================================
 // 文字亂碼特效
 // =========================================
-const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*寧靜音樂節";
+// 等寬亂碼字元集：半形原字只換半形、全形原字只換全形，避免亂碼撐爆寬度導致折行
+const glitchHalf = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*";
+const glitchFull = "寧靜音樂節雜訊干擾";
+function randGlitch(char) {
+    const pool = char.charCodeAt(0) > 0xff ? glitchFull : glitchHalf;
+    return pool[Math.floor(Math.random() * pool.length)];
+}
 
 const glitchTimers = new WeakMap();
 function triggerGlitch(el, originalText) {
@@ -149,7 +155,7 @@ function triggerGlitch(el, originalText) {
             if (index < iterations || letter === " ") {
                 return originalText[index];
             }
-            return letters[Math.floor(Math.random() * letters.length)];
+            return randGlitch(letter);
         }).join("");
         if (iterations >= originalText.length) {
             clearInterval(id);
@@ -182,7 +188,7 @@ function startPersistentGlitch(el, originalText) {
     const id = setInterval(() => {
         el.textContent = originalText.split('').map((char) => {
             if (char === ' ' || char === '_') return char;
-            if (Math.random() > 0.35) return letters[Math.floor(Math.random() * letters.length)];
+            if (Math.random() > 0.35) return randGlitch(char);
             return char;
         }).join('');
     }, 80);
@@ -212,10 +218,12 @@ document.querySelectorAll('.nav-links a, .sidebar-bottom-link').forEach(link => 
             if (prev) { clearInterval(prev); glitchTimers.delete(el); }
             el.textContent = originalText;
             el.dataset.glitched = 'false';
+            delete el.dataset.tooltip;
         } else {
             // 啟動持久亂碼
             startPersistentGlitch(el, originalText);
             el.dataset.glitched = 'true';
+            el.dataset.tooltip = '> 訊號干擾中 · 再點一下還原';
         }
     });
 });
