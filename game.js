@@ -10,13 +10,24 @@ const scoreBoard = document.getElementById('game-score');
 let gameReq, isPlaying = false, score = 0, speed = 8.5;
 let frames = 0, lastTime = 0, accumulator = 0;
 const step = 1000 / 60;
-const TARGET_SCORE = 150;
+const TARGET_SCORE = 300;
 const INITIAL_SPEED = 8.5;
-const SPEED_UP_SCORE_STEP = 30;
-const SPEED_INCREMENT = 0.6;
+const SPEED_UP_SCORE_STEP = 40;
+const SPEED_INCREMENT = 0.4;
 const SPAWN_RANDOM_RANGE = 35;
 const SPAWN_BASE_FRAMES = 55;
 let hasWon = false;
+let couponClockTimer = null;
+
+// 折價券即時時鐘：每秒更新簽發時間，讓店員辨識為「現場即時通關」而非舊截圖
+function stopCouponClock() {
+    if (couponClockTimer) { clearInterval(couponClockTimer); couponClockTimer = null; }
+}
+function formatCouponNow() {
+    const d = new Date();
+    const p = (n) => String(n).padStart(2, '0');
+    return `${d.getFullYear()}/${p(d.getMonth() + 1)}/${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`;
+}
 
 const HORIZON_Y = 220; const FLOOR_Y = 220; const GRAVITY = 1.0; const JUMP_POWER = -16;
 const turkey = { x: 50, y: FLOOR_Y, size: 65, vy: 0, isJumping: false };
@@ -74,10 +85,11 @@ function openGame() {
     drawStaticScene(); 
 }
 
-function closeGame() { 
-    gameWinUI.style.display = 'none'; 
-    isPlaying = false; 
-    cancelAnimationFrame(gameReq); 
+function closeGame() {
+    gameWinUI.style.display = 'none';
+    isPlaying = false;
+    stopCouponClock();
+    cancelAnimationFrame(gameReq);
     // ✨ 確保手機版拖曳後關閉，下次開啟能回到完美的置中預設位置
     gameWinUI.style.top = ''; 
     gameWinUI.style.left = ''; 
@@ -88,11 +100,18 @@ function closeGame() {
 
 function setMsgStyle() {
     gameMsg.style.position = 'absolute'; gameMsg.style.top = '0'; gameMsg.style.left = '0'; gameMsg.style.width = '100%'; gameMsg.style.height = '100%';
-    gameMsg.style.display = 'flex'; gameMsg.style.flexDirection = 'column'; gameMsg.style.justifyContent = 'center'; gameMsg.style.alignItems = 'center';
+    gameMsg.style.display = 'flex'; gameMsg.style.flexDirection = 'column'; gameMsg.style.alignItems = 'center';
+    // safe center：內容裝得下就置中，超過高度時改從頂端對齊並可捲動，避免標題被裁切
+    gameMsg.style.justifyContent = 'center'; gameMsg.style.justifyContent = 'safe center';
+    gameMsg.style.overflowY = 'auto';
     gameMsg.style.padding = '10px'; gameMsg.style.boxSizing = 'border-box'; gameMsg.style.zIndex = '50';
 }
 
 function resetGame() {
+    stopCouponClock();
+    // 還原遊戲畫布的 8:3 比例（通關畫面會暫時解除以容納折價券）
+    gameContentArea.style.setProperty('aspect-ratio', '8 / 3');
+    gameContentArea.style.removeProperty('min-height');
     isPlaying = false; hasWon = false; score = 0; speed = INITIAL_SPEED; frames = 0; lastTime = 0; accumulator = 0;
     turkey.y = FLOOR_Y; turkey.vy = 0; turkey.isJumping = false; obstacles = [];
     scoreBoard.innerText = `SCORE: ${score}`; scoreBoard.style.display = 'none'; runCanvas.style.display = 'block';
@@ -205,17 +224,32 @@ function gameOver() {
 }
 
 function triggerWin() {
-    isPlaying = false; hasWon = true; cancelAnimationFrame(gameReq); scoreBoard.style.display = 'none'; runCanvas.style.display = 'none'; setMsgStyle(); gameMsg.style.background = 'rgba(0,0,0,0.9)';
+    isPlaying = false; hasWon = true; cancelAnimationFrame(gameReq); scoreBoard.style.display = 'none'; runCanvas.style.display = 'none'; setMsgStyle(); gameMsg.style.background = 'rgba(0,0,0,0.92)';
+    // 通關畫面解除 8:3 比例並給足高度，讓折價券完整顯示（畫布此時已隱藏）
+    // 用 important 覆寫手機 media query 的 aspect-ratio:8/3 !important
+    gameContentArea.style.setProperty('aspect-ratio', 'auto', 'important');
+    gameContentArea.style.setProperty('min-height', '300px', 'important');
     gameMsg.innerHTML = `
-        <h2 class="blink" style="margin:0; color:#00ff00; text-shadow:2px 2px #000; font-size:clamp(1.2rem,5vw,1.8rem);">[ SYSTEM OVERRIDE SUCCESS ]</h2>
-        <p style="margin:6px 0 12px; font-size:clamp(0.8rem,3.5vw,1rem); color:#fff; text-align:center;">火雞成功脫逃！你已入侵寧靜系統</p>
-        <div onclick="event.stopPropagation(); event.preventDefault();" style="display:flex; flex-direction:column; align-items:center; gap:6px;">
-            <button onclick="openExternalLink('https://www.instagram.com/unsilence_fest._')"
-                style="display:flex; align-items:center; gap:8px; padding:8px 20px; border:none; border-radius:6px; background:linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888); color:#fff; font-family:inherit; font-size:clamp(0.9rem,3.5vw,1.1rem); font-weight:bold; cursor:pointer; letter-spacing:1px;">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1.5" fill="#fff" stroke="none"/></svg>
-                追蹤 @unsilence_fest._
-            </button>
-            <p style="margin:0; font-size:clamp(0.65rem,2.5vw,0.8rem); color:#aaa; text-align:center;">掌握最新演出資訊 · 5/30–31 嘉義見</p>
+        <h2 class="blink" style="margin:0; color:#00ff00; text-shadow:2px 2px #000; font-size:clamp(1.1rem,4.5vw,1.6rem);">[ SYSTEM OVERRIDE SUCCESS ]</h2>
+        <p style="margin:4px 0 8px; font-size:clamp(0.75rem,3vw,0.95rem); color:#fff; text-align:center;">火雞成功脫逃！系統掉出一張折價券</p>
+        <div style="position:relative; width:min(86%,320px); padding:10px 16px; background:#0a1f0a; border:2px dashed #00ff00; border-radius:4px; box-shadow:0 0 12px rgba(0,255,0,0.35), inset 0 0 18px rgba(0,255,0,0.12); text-align:center; color:#00ff00; font-family:'DotGothic16',monospace;">
+            <div style="font-size:clamp(0.7rem,2.8vw,0.85rem); letter-spacing:2px;">周邊折價券 · VOUCHER</div>
+            <div style="font-size:clamp(1.8rem,8vw,2.4rem); font-weight:bold; line-height:1.1; margin:2px 0; text-shadow:2px 2px #000;">−$10</div>
+            <div style="font-size:clamp(0.72rem,2.8vw,0.9rem); color:#fff;">周邊購買現折 10 元</div>
+            <div style="margin-top:8px; border-top:1px solid rgba(0,255,0,0.4); padding-top:8px; font-size:clamp(0.6rem,2.3vw,0.72rem); color:#9fd99f; line-height:1.6; text-align:left;">
+                · 購買時出示本通關畫面折抵<br>
+                · 一人限用一次
+            </div>
+            <div style="margin-top:8px; font-size:clamp(0.58rem,2.2vw,0.7rem); color:#7fbf7f;">
+                <span style="color:#ff0000; animation:blinker 1s linear infinite;">●</span> 簽發時間
+                <span id="coupon-clock" style="color:#fff;">${formatCouponNow()}</span>
+            </div>
         </div>
-        <p class="blink" style="margin:14px 0 0; font-size:clamp(0.75rem,2.5vw,0.9rem); color:#555;">> 點擊畫面重新開始挑戰 &lt;</p>`;
+        <p class="blink" style="margin:8px 0 0; font-size:clamp(0.72rem,2.5vw,0.88rem); color:#555;">> 點擊畫面重新開始挑戰 &lt;</p>`;
+    stopCouponClock();
+    couponClockTimer = setInterval(() => {
+        const el = document.getElementById('coupon-clock');
+        if (!el) { stopCouponClock(); return; }
+        el.textContent = formatCouponNow();
+    }, 1000);
 }

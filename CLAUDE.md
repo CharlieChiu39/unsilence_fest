@@ -113,18 +113,21 @@ WEB/
 
 | 參數 | 數值 |
 |------|------|
-| 目標分數 | 100 分 |
-| 初始速度 | 8 px/frame |
+| 目標分數 | 300 分（每過一障礙 +10） |
+| 初始速度 | 8.5 px/frame |
 | 重力加速度 | 1.0 px/frame² |
 | 跳躍力量 | -16 px/frame |
-| 難度遞增 | 每 30 分加速 0.5 px/frame |
+| 難度遞增 | 每 40 分加速 0.4 px/frame |
 | 幀率 | 60 FPS（requestAnimationFrame） |
 
 **障礙物**：隨機生成 📺 電視 或 🍍 鳳梨
 
 **碰撞檢測**：邊距 15px 的 AABB 包圍盒
 
-**獲勝獎勵**：顯示折扣碼 `TURKEY_BREACH_2026`
+**獲勝獎勵**：周邊 10 元折價券（復古票券畫面）
+- 條件：購買時出示通關畫面折抵、一人限用一次
+- 防濫用：通關畫面顯示**即時時鐘**（每秒更新），供現場人員辨識為即時通關而非舊截圖；「一人一次」由現場人工把關
+- 通關畫面會暫時解除遊戲視窗的 8:3 比例（畫布隱藏時）以完整容納折價券，重玩時於 `resetGame()` 還原
 
 ---
 
@@ -145,13 +148,12 @@ background: rgba(230, 204, 255, 0.9);
 box-shadow: 4px 4px 0px #000;
 ```
 
-### 標準 blink 動畫（各頁面標題使用）
+### 標準閃爍動畫（各頁面標題、`.blink` class 使用）
 ```css
-@keyframes blink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0; }
-}
+.blink { animation: blinker 2s linear infinite; }
+@keyframes blinker { 50% { opacity: 0; } }
 ```
+注意：keyframes 名稱是 `blinker`（非 `blink`）；要套用閃爍時用 `class="blink"` 或 `animation: blinker ...`。
 
 ---
 
